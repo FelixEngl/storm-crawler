@@ -51,9 +51,8 @@ public class RobotsFilter implements URLFilter {
     private ProtocolFactory factory;
     private boolean fromCacheOnly = true;
 
-    @Nullable
     @Override
-    public String filter(
+    public @Nullable String filter(
             @Nullable URL sourceUrl,
             @Nullable Metadata sourceMetadata,
             @NotNull String urlToFilter) {

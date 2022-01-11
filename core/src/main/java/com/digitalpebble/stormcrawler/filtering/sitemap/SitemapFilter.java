@@ -41,9 +41,8 @@ import org.jetbrains.annotations.Nullable;
  */
 public class SitemapFilter implements URLFilter {
 
-    @Nullable
     @Override
-    public String filter(
+    public @Nullable String filter(
             @Nullable URL sourceUrl,
             @Nullable Metadata sourceMetadata,
             @NotNull String urlToFilter) {

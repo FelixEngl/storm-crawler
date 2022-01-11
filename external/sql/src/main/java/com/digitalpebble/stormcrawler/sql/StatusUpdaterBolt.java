@@ -41,7 +41,6 @@ import org.slf4j.LoggerFactory;
 /**
  * Status updater for SQL backend. Discovered URLs are sent as a batch, whereas updates are atomic.
  */
-@SuppressWarnings("serial")
 public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt {
 
     public static final Logger LOG = LoggerFactory.getLogger(StatusUpdaterBolt.class);
@@ -75,9 +74,9 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt {
     /** Does not shard based on the total number of queues * */
     public StatusUpdaterBolt() {}
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+    public void prepare(
+            Map<String, Object> stormConf, TopologyContext context, OutputCollector collector) {
         super.prepare(stormConf, context, collector);
 
         partitioner = new URLPartitioner();
@@ -146,13 +145,18 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt {
         StringBuilder mdAsString = new StringBuilder();
         for (String mdKey : metadata.keySet()) {
             String[] vals = metadata.getValues(mdKey);
-            for (String v : vals) {
-                mdAsString.append("\t").append(mdKey).append("=").append(v);
+            if (vals != null) {
+                for (String v : vals) {
+                    mdAsString.append("\t").append(mdKey).append("=").append(v);
+                }
             }
         }
 
         int partition = 0;
         String partitionKey = partitioner.getPartition(url, metadata);
+        if (partitionKey == null) {
+            throw new RuntimeException(String.format("The partitionKey for {} is null!", url));
+        }
         if (maxNumBuckets > 1) {
             // determine which shard to send to based on the host / domain /
             // IP

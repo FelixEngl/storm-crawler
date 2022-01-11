@@ -148,9 +148,9 @@ public class FileSpout extends BaseRichSpout {
         }
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
-    public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
+    public void open(
+            Map<String, Object> conf, TopologyContext context, SpoutOutputCollector collector) {
         _collector = collector;
         try {
             populateBuffer();

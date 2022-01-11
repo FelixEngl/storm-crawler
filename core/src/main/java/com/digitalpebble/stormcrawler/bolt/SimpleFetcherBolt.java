@@ -271,12 +271,14 @@ public class SimpleFetcherBolt extends StatusEmitterBolt {
 
             // check in the metadata if discovery setting has been
             // overridden
-            boolean smautodisco = sitemapsAutoDiscovery;
             String localSitemapDiscoveryVal = metadata.getFirstValue(SITEMAP_DISCOVERY_PARAM_KEY);
-            if ("true".equalsIgnoreCase(localSitemapDiscoveryVal)) {
+            boolean smautodisco;
+            if (Boolean.parseBoolean(localSitemapDiscoveryVal)) {
                 smautodisco = true;
             } else if ("false".equalsIgnoreCase(localSitemapDiscoveryVal)) {
                 smautodisco = false;
+            } else {
+                smautodisco = sitemapsAutoDiscovery;
             }
 
             if (!fromCache && smautodisco) {

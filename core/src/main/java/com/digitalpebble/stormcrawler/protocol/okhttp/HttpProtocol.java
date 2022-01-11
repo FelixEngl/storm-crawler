@@ -341,7 +341,7 @@ public class HttpProtocol extends AbstractHttpProtocol {
             }
 
             String useHead = metadata.getFirstValue("http.method.head");
-            if ("true".equalsIgnoreCase(useHead)) {
+            if (Boolean.parseBoolean(useHead)) {
                 rb.head();
             }
         }
@@ -435,7 +435,7 @@ public class HttpProtocol extends AbstractHttpProtocol {
                 if (partialContentAsTrimmed && source.getBuffer().size() > 0) {
                     // treat already fetched content as trimmed
                     trimmed.setValue(TrimmedContentReason.DISCONNECT);
-                    LOG.debug("Exception while fetching {}", e);
+                    LOG.debug("Exception while fetching", e);
                 } else {
                     throw e;
                 }
@@ -556,7 +556,7 @@ public class HttpProtocol extends AbstractHttpProtocol {
         }
     }
 
-    public static void main(String args[]) throws Exception {
+    public static void main(String[] args) throws Exception {
         HttpProtocol.main(new HttpProtocol(), args);
     }
 }

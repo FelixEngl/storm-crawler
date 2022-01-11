@@ -49,12 +49,12 @@ import org.apache.storm.tuple.Values;
  *         .localOrShuffleGrouping(&quot;shunt&quot;).localOrShuffleGrouping(&quot;tika&quot;);
  * </pre>
  */
-@SuppressWarnings("serial")
 public class RedirectionBolt extends BaseRichBolt {
 
     private OutputCollector collector;
 
-    public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
+    public void prepare(
+            Map<String, Object> conf, TopologyContext context, OutputCollector collector) {
         this.collector = collector;
     }
 

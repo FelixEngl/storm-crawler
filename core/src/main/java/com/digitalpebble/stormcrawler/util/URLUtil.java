@@ -23,7 +23,6 @@ import java.util.regex.Pattern;
 import org.jetbrains.annotations.Nullable;
 
 /** Utility class for URL analysis */
-@SuppressWarnings("unused")
 public final class URLUtil {
 
     private URLUtil() {}

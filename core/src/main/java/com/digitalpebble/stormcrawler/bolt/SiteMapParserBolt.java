@@ -324,7 +324,6 @@ public class SiteMapParserBolt extends StatusEmitterBolt {
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public void prepare(
             Map<String, Object> stormConf, TopologyContext context, OutputCollector collector) {

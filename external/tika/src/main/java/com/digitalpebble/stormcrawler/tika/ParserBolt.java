@@ -68,7 +68,6 @@ import org.w3c.dom.DocumentFragment;
 import org.xml.sax.ContentHandler;
 
 /** Uses Tika to parse the output of a fetch and extract text + metadata */
-@SuppressWarnings("serial")
 public class ParserBolt extends BaseRichBolt {
 
     private Tika tika;

@@ -25,10 +25,9 @@ public class SQLUtil {
 
     private SQLUtil() {}
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
-    public static Connection getConnection(Map stormConf) throws SQLException {
+    public static Connection getConnection(Map<String, Object> stormConf) throws SQLException {
         // SQL connection details
-        Map<String, String> sqlConf = (Map) stormConf.get("sql.connection");
+        Map<String, String> sqlConf = (Map<String, String>) stormConf.get("sql.connection");
 
         if (sqlConf == null) {
             throw new RuntimeException(

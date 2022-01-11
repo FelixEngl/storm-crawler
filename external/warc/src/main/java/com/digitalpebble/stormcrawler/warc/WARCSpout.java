@@ -58,7 +58,6 @@ import org.slf4j.LoggerFactory;
  * Read WARC files from the local files system and emit the WARC captures as tuples into the
  * topology same way as done by {@link com.digitalpebble.stormcrawler.bolt.FetcherBolt}.
  */
-@SuppressWarnings("serial")
 public class WARCSpout extends FileSpout {
 
     private static final Logger LOG = LoggerFactory.getLogger(WARCSpout.class);
@@ -213,8 +212,7 @@ public class WARCSpout extends FileSpout {
     private boolean isHttpResponse(Optional<WarcRecord> record) {
         if (!record.isPresent()) return false;
         if (!(record.get() instanceof WarcResponse)) return false;
-        if (record.get().contentType().equals(MediaType.HTTP_RESPONSE)) return true;
-        return false;
+        return record.get().contentType().equals(MediaType.HTTP_RESPONSE);
     }
 
     private byte[] getContent(WarcResponse record, TruncationStatus isTruncated)
@@ -373,9 +371,9 @@ public class WARCSpout extends FileSpout {
                 httpHeadersVerbatim(http));
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    public void open(Map conf, TopologyContext context, SpoutOutputCollector collector) {
+    public void open(
+            Map<String, Object> conf, TopologyContext context, SpoutOutputCollector collector) {
         _collector = collector;
         record = Optional.empty();
 

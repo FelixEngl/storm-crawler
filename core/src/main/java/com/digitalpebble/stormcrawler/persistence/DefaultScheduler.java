@@ -62,7 +62,7 @@ public class DefaultScheduler extends Scheduler {
         // e.g. fetchInterval.FETCH_ERROR.isFeed=true
         Map<String, CustomInterval> intervals = new HashMap<>();
         Pattern pattern = Pattern.compile("^fetchInterval(\\..+?)?\\.(.+)=(.+)");
-        for (String key : (Iterable<String>) stormConf.keySet()) {
+        for (String key : stormConf.keySet()) {
             Matcher m = pattern.matcher(key);
             if (!m.matches()) {
                 continue;
@@ -165,10 +165,10 @@ public class DefaultScheduler extends Scheduler {
         return Optional.empty();
     }
 
-    private class CustomInterval {
-        private String key;
-        private String value;
-        private Map<Status, Integer> durationPerStatus;
+    private static class CustomInterval {
+        private final String key;
+        private final String value;
+        private final Map<Status, Integer> durationPerStatus;
         private Integer defaultDuration = null;
 
         private CustomInterval(String key, String value, Status status, int minutes) {

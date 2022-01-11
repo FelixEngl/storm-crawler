@@ -26,6 +26,7 @@ import java.net.URL;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.get.GetRequest;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.client.RequestOptions;
@@ -85,7 +86,7 @@ public class JSONURLFilterWrapper implements URLFilter {
             urlfilterclass = node.asText();
         }
 
-        if (urlfilterclass == null) {
+        if (StringUtils.isBlank(urlfilterclass)) {
             throw new RuntimeException("urlfilter.class undefined!");
         }
 
@@ -154,9 +155,8 @@ public class JSONURLFilterWrapper implements URLFilter {
                         refreshRate * 1000L);
     }
 
-    @Nullable
     @Override
-    public String filter(
+    public @Nullable String filter(
             @Nullable URL sourceUrl,
             @Nullable Metadata sourceMetadata,
             @NotNull String urlToFilter) {

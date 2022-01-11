@@ -53,14 +53,13 @@ public class JSoupFilters implements JSoupFilter, JSONResource {
 
     private String configFile;
 
-    private Map stormConf;
+    private Map<String, Object> stormConf;
 
     /**
      * Loads and configure the JSoupFilters based on the storm config if there is one otherwise
      * returns an empty JSoupFilter.
      */
-    @SuppressWarnings("rawtypes")
-    public static JSoupFilters fromConf(Map stormConf) {
+    public static JSoupFilters fromConf(Map<String, Object> stormConf) {
         String parseconfigfile = ConfUtils.getString(stormConf, "jsoup.filters.config.file");
         if (StringUtils.isNotBlank(parseconfigfile)) {
             try {
@@ -81,8 +80,7 @@ public class JSoupFilters implements JSoupFilter, JSONResource {
      *
      * @throws IOException
      */
-    @SuppressWarnings("rawtypes")
-    public JSoupFilters(Map stormConf, String configFile) throws IOException {
+    public JSoupFilters(Map<String, Object> stormConf, String configFile) throws IOException {
         this.configFile = configFile;
         this.stormConf = stormConf;
         try {
@@ -104,7 +102,6 @@ public class JSoupFilters implements JSoupFilter, JSONResource {
         return this.configFile;
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public void configure(@NotNull Map<String, Object> stormConf, @NotNull JsonNode filtersConf) {
         List<JSoupFilter> list =

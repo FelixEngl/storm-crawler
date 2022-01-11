@@ -19,6 +19,7 @@ import com.digitalpebble.stormcrawler.util.InitialisationUtil;
 import crawlercommons.robots.BaseRobotRules;
 import java.util.*;
 import org.apache.storm.Config;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -68,6 +69,7 @@ public class DelegatorProtocol implements Protocol {
         final Protocol protoInstance;
         final List<Filter> filters = new LinkedList<>();
 
+        @NotNull
         Protocol getProtocolInstance() {
             return protoInstance;
         }

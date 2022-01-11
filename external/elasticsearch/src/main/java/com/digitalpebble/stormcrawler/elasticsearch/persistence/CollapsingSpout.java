@@ -63,7 +63,10 @@ public class CollapsingSpout extends AbstractSpout implements ActionListener<Sea
     private int maxStartOffset = -1;
 
     @Override
-    public void open(Map stormConf, TopologyContext context, SpoutOutputCollector collector) {
+    public void open(
+            Map<String, Object> stormConf,
+            TopologyContext context,
+            SpoutOutputCollector collector) {
         maxStartOffset = ConfUtils.getInt(stormConf, ESMaxStartOffsetParamName, -1);
         super.open(stormConf, context, collector);
     }
@@ -205,7 +208,7 @@ public class CollapsingSpout extends AbstractSpout implements ActionListener<Sea
         if (resetFetchDateAfterNSecs != -1) {
             Instant changeNeededOn =
                     Instant.ofEpochMilli(
-                            lastTimeResetToNOW.toEpochMilli() + (resetFetchDateAfterNSecs * 1000));
+                            lastTimeResetToNOW.toEpochMilli() + (resetFetchDateAfterNSecs * 1000L));
             if (Instant.now().isAfter(changeNeededOn)) {
                 LOG.info(
                         "queryDate reset based on resetFetchDateAfterNSecs {}",

@@ -21,40 +21,43 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Rotates a file based on size or optionally time, whichever occurs first * */
-@SuppressWarnings("serial")
 public class FileTimeSizeRotationPolicy implements FileRotationPolicy {
 
     private static final Logger LOG = LoggerFactory.getLogger(FileSizeRotationPolicy.class);
 
-    public static enum Units {
+    public enum Units {
         KB((long) Math.pow(2, 10)),
         MB((long) Math.pow(2, 20)),
         GB((long) Math.pow(2, 30)),
         TB((long) Math.pow(2, 40));
 
-        private long byteCount;
+        public final long byteCount;
 
-        private Units(long byteCount) {
+        Units(long byteCount) {
             this.byteCount = byteCount;
         }
 
+        /** @deprecated use direct field access */
+        @Deprecated
         public long getByteCount() {
             return byteCount;
         }
     }
 
-    public static enum TimeUnit {
-        SECONDS((long) 1000),
+    public enum TimeUnit {
+        SECONDS(1000L),
         MINUTES((long) 1000 * 60),
         HOURS((long) 1000 * 60 * 60),
         DAYS((long) 1000 * 60 * 60 * 24);
 
-        private long milliSeconds;
+        public final long milliSeconds;
 
-        private TimeUnit(long milliSeconds) {
+        TimeUnit(long milliSeconds) {
             this.milliSeconds = milliSeconds;
         }
 
+        /** @deprecated use direct field access */
+        @Deprecated
         public long getMilliSeconds() {
             return milliSeconds;
         }
@@ -69,12 +72,13 @@ public class FileTimeSizeRotationPolicy implements FileRotationPolicy {
 
     private long timeStarted = System.currentTimeMillis();
 
+    // TODO: What is the use of this count?
     public FileTimeSizeRotationPolicy(float count, Units units) {
-        this.maxBytes = (long) (count * units.getByteCount());
+        this.maxBytes = (long) (count * units.byteCount);
     }
 
     public void setTimeRotationInterval(float count, TimeUnit units) {
-        this.interval = (long) (count * units.getMilliSeconds());
+        this.interval = (long) (count * units.milliSeconds);
     }
 
     @Override

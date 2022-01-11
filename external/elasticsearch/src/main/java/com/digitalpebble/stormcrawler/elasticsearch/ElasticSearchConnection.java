@@ -50,11 +50,11 @@ public class ElasticSearchConnection {
 
     private static final Logger LOG = LoggerFactory.getLogger(ElasticSearchConnection.class);
 
-    private RestHighLevelClient client;
+    private final RestHighLevelClient client;
 
-    private BulkProcessor processor;
+    private final BulkProcessor processor;
 
-    private Sniffer sniffer;
+    private final Sniffer sniffer;
 
     private ElasticSearchConnection(RestHighLevelClient c, BulkProcessor p) {
         this(c, p, null);
@@ -74,7 +74,7 @@ public class ElasticSearchConnection {
         return processor;
     }
 
-    public static RestHighLevelClient getClient(Map stormConf, String boltType) {
+    public static RestHighLevelClient getClient(Map<String, Object> stormConf, String boltType) {
 
         List<String> confighosts =
                 ConfUtils.loadListFromConf("es." + boltType + ".addresses", stormConf);
@@ -102,7 +102,7 @@ public class ElasticSearchConnection {
             hosts.add(new HttpHost(uri.getHost(), port, scheme));
         }
 
-        RestClientBuilder builder = RestClient.builder(hosts.toArray(new HttpHost[hosts.size()]));
+        RestClientBuilder builder = RestClient.builder(hosts.toArray(new HttpHost[0]));
 
         // authentication via user / password
         String user = ConfUtils.getString(stormConf, "es." + boltType + ".user");
@@ -197,7 +197,8 @@ public class ElasticSearchConnection {
      * Creates a connection with a default listener. The values for bolt type are
      * [indexer,status,metrics]
      */
-    public static ElasticSearchConnection getConnection(Map stormConf, String boltType) {
+    public static ElasticSearchConnection getConnection(
+            Map<String, Object> stormConf, String boltType) {
         BulkProcessor.Listener listener =
                 new BulkProcessor.Listener() {
                     @Override
@@ -213,7 +214,7 @@ public class ElasticSearchConnection {
     }
 
     public static ElasticSearchConnection getConnection(
-            Map stormConf, String boltType, BulkProcessor.Listener listener) {
+            Map<String, Object> stormConf, String boltType, BulkProcessor.Listener listener) {
 
         String flushIntervalString =
                 ConfUtils.getString(stormConf, "es." + boltType + ".flushInterval", "5s");

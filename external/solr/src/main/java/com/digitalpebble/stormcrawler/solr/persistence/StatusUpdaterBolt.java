@@ -21,7 +21,6 @@ import com.digitalpebble.stormcrawler.solr.SolrConnection;
 import com.digitalpebble.stormcrawler.util.ConfUtils;
 import com.digitalpebble.stormcrawler.util.URLUtil;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import org.apache.solr.common.SolrInputDocument;
@@ -45,7 +44,8 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt {
     private SolrConnection connection;
 
     @Override
-    public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+    public void prepare(
+            Map<String, Object> stormConf, TopologyContext context, OutputCollector collector) {
 
         super.prepare(stormConf, context, collector);
 
@@ -75,9 +75,7 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt {
 
         doc.setField("status", status.name());
 
-        Iterator<String> keyIterator = metadata.keySet().iterator();
-        while (keyIterator.hasNext()) {
-            String key = keyIterator.next();
+        for (String key : metadata.keySet()) {
             String[] values = metadata.getValues(key);
             doc.setField(String.format("%s.%s", mdPrefix, key), values);
         }

@@ -118,7 +118,6 @@ public class JSoupParserBolt extends StatusEmitterBolt {
 
     private boolean ignoreMetaRedirections;
 
-    @SuppressWarnings("deprecation")
     @Override
     public void prepare(
             Map<String, Object> conf, TopologyContext context, OutputCollector collector) {
@@ -300,8 +299,7 @@ public class JSoupParserBolt extends StatusEmitterBolt {
                 }
             }
 
-            Element body = jsoupDoc.body();
-            text = textExtractor.text(body);
+            text = textExtractor.text(jsoupDoc.body());
 
         } catch (Throwable e) {
             String errorMessage = "Exception while parsing " + url + ": " + e;

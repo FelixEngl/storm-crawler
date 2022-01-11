@@ -20,7 +20,6 @@ import com.digitalpebble.stormcrawler.solr.SolrConnection;
 import com.digitalpebble.stormcrawler.util.ConfUtils;
 import java.time.Instant;
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.solr.client.solrj.SolrQuery;
@@ -58,7 +57,10 @@ public class SolrSpout extends AbstractQueryingSpout {
     private String mdPrefix;
 
     @Override
-    public void open(Map stormConf, TopologyContext context, SpoutOutputCollector collector) {
+    public void open(
+            Map<String, Object> stormConf,
+            TopologyContext context,
+            SpoutOutputCollector collector) {
 
         super.open(stormConf, context, collector);
 
@@ -113,7 +115,7 @@ public class SolrSpout extends AbstractQueryingSpout {
         else if (resetFetchDateAfterNSecs != -1) {
             Instant changeNeededOn =
                     Instant.ofEpochMilli(
-                            lastTimeResetToNOW.toEpochMilli() + (resetFetchDateAfterNSecs * 1000));
+                            lastTimeResetToNOW.toEpochMilli() + (resetFetchDateAfterNSecs * 1000L));
             if (Instant.now().isAfter(changeNeededOn)) {
                 LOG.info(
                         "lastDate reset based on resetFetchDateAfterNSecs {}",
@@ -187,17 +189,13 @@ public class SolrSpout extends AbstractQueryingSpout {
 
                 Metadata metadata = new Metadata();
 
-                Iterator<String> keyIterators = doc.getFieldNames().iterator();
-                while (keyIterators.hasNext()) {
-                    String key = keyIterators.next();
-
+                for (String key : doc.getFieldNames()) {
                     if (key.startsWith(prefix)) {
                         Collection<Object> values = doc.getFieldValues(key);
 
                         key = key.substring(prefix.length());
-                        Iterator<Object> valueIterator = values.iterator();
-                        while (valueIterator.hasNext()) {
-                            String value = (String) valueIterator.next();
+                        for (Object o : values) {
+                            String value = (String) o;
                             metadata.addValue(key, value);
                         }
                     }

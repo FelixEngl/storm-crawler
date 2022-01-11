@@ -80,9 +80,7 @@ public class MemorySpout extends BaseRichSpout {
 
     @Override
     public void open(
-            @SuppressWarnings("rawtypes") Map conf,
-            TopologyContext context,
-            SpoutOutputCollector collector) {
+            Map<String, Object> conf, TopologyContext context, SpoutOutputCollector collector) {
         _collector = collector;
 
         // check that there is only one instance of it

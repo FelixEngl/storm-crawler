@@ -37,7 +37,6 @@ import org.slf4j.LoggerFactory;
  * Fetcher, which gets bypassed otherwise. Does not enforce any politeness. The credentials must be
  * stored in ~/.aws/credentials
  */
-@SuppressWarnings("serial")
 public class S3CacheChecker extends AbstractS3CacheBolt {
 
     private static final Logger LOG = LoggerFactory.getLogger(S3CacheChecker.class);
@@ -45,7 +44,8 @@ public class S3CacheChecker extends AbstractS3CacheBolt {
     public static final String CACHE_STREAM = "cached";
 
     @Override
-    public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
+    public void prepare(
+            Map<String, Object> conf, TopologyContext context, OutputCollector collector) {
         super.prepare(conf, context, collector);
         bucketName = ConfUtils.getString(conf, BUCKET);
 

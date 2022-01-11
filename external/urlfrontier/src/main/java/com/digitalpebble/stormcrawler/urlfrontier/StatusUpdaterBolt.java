@@ -50,7 +50,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-@SuppressWarnings("serial")
 public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
         implements RemovalListener<String, List<Tuple>>,
                 StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String> {
@@ -73,9 +72,9 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
                         .build();
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+    public void prepare(
+            Map<String, Object> stormConf, TopologyContext context, OutputCollector collector) {
         super.prepare(stormConf, context, collector);
         String host = ConfUtils.getString(stormConf, "urlfrontier.host", "localhost");
         int port = ConfUtils.getInt(stormConf, "urlfrontier.port", 7071);
@@ -137,7 +136,7 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
             // could be the same URL discovered from different pages
             // at the same time
             // or a page fetched linking to itself
-            List<Tuple> tt = waitAck.get(url, k -> new LinkedList<Tuple>());
+            List<Tuple> tt = waitAck.get(url, k -> new LinkedList<>());
 
             // check that the same URL is not being sent to the frontier
             if (status.equals(Status.DISCOVERED) && !tt.isEmpty()) {
@@ -157,9 +156,11 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
             final Map<String, StringList> mdCopy = new HashMap<>(metadata.size());
             for (String k : metadata.keySet()) {
                 String[] vals = metadata.getValues(k);
-                Builder builder = StringList.newBuilder();
-                for (String v : vals) builder.addValues(v);
-                mdCopy.put(k, builder.build());
+                if (vals != null) {
+                    Builder builder = StringList.newBuilder();
+                    for (String v : vals) builder.addValues(v);
+                    mdCopy.put(k, builder.build());
+                }
             }
 
             URLInfo info =
@@ -196,19 +197,18 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
 
     @Override
     public void onRemoval(@Nullable String key, @Nullable List<Tuple> values, RemovalCause cause) {
-        final String url = key;
 
         // explicit removal
         if (!cause.wasEvicted()) {
-            LOG.debug("Acked {} tuple(s) for ID {}", values.size(), url);
+            LOG.debug("Acked {} tuple(s) for ID {}", values.size(), key);
             for (Tuple x : values) {
                 messagesinFlight.decrementAndGet();
-                super.ack(x, url);
+                super.ack(x, key);
             }
             return;
         }
 
-        LOG.error("Evicted {} from waitAck with {} values", url, values.size());
+        LOG.error("Evicted {} from waitAck with {} values", key, values.size());
 
         for (Tuple t : values) {
             messagesinFlight.decrementAndGet();

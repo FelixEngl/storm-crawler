@@ -47,13 +47,13 @@ public class URLFilters implements URLFilter, JSONResource {
 
     private String configFile = "urlfilters.config.file";
 
-    private Map stormConf;
+    private Map<String, Object> stormConf;
 
     /**
      * Loads and configure the URLFilters based on the storm config if there is one otherwise
      * returns an empty URLFilter.
      */
-    public static URLFilters fromConf(Map stormConf) {
+    public static URLFilters fromConf(Map<String, Object> stormConf) {
 
         String configFile = ConfUtils.getString(stormConf, "urlfilters.config.file");
         if (StringUtils.isNotBlank(configFile)) {
@@ -69,8 +69,12 @@ public class URLFilters implements URLFilter, JSONResource {
         return URLFilters.emptyURLFilters;
     }
 
-    /** Loads the filters from a JSON configuration file */
-    public URLFilters(Map stormConf, String configFile) throws IOException {
+    /**
+     * Loads the filters from a JSON configuration file
+     *
+     * @throws IOException
+     */
+    public URLFilters(Map<String, Object> stormConf, String configFile) throws IOException {
         this.configFile = configFile;
         this.stormConf = stormConf;
         try {
@@ -88,9 +92,8 @@ public class URLFilters implements URLFilter, JSONResource {
         configure(stormConf, confNode);
     }
 
-    @Nullable
     @Override
-    public String filter(
+    public @Nullable String filter(
             @Nullable URL sourceUrl,
             @Nullable Metadata sourceMetadata,
             @NotNull String urlToFilter) {

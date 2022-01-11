@@ -38,7 +38,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Unlike the standard HdfsBolt this one writes to a gzipped stream with per-record compression. */
-@SuppressWarnings("serial")
 public class GzipHdfsBolt extends AbstractHdfsBolt {
 
     private static final Logger LOG = LoggerFactory.getLogger(GzipHdfsBolt.class);
@@ -166,7 +165,8 @@ public class GzipHdfsBolt extends AbstractHdfsBolt {
     }
 
     @Override
-    public void doPrepare(Map conf, TopologyContext topologyContext, OutputCollector collector)
+    public void doPrepare(
+            Map<String, Object> conf, TopologyContext topologyContext, OutputCollector collector)
             throws IOException {
         LOG.info("Preparing HDFS Bolt...");
         this.fs = FileSystem.get(URI.create(this.fsUrl), hdfsConfig);

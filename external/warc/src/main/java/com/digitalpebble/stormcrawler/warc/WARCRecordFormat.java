@@ -30,7 +30,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Generate a byte representation of a WARC entry from a tuple * */
-@SuppressWarnings("serial")
 public class WARCRecordFormat implements RecordFormat {
 
     // WARC record types, cf.
@@ -86,7 +85,7 @@ public class WARCRecordFormat implements RecordFormat {
 
     /** Generates a WARC info entry which can be stored at the beginning of each WARC file. */
     public static byte[] generateWARCInfo(Map<String, String> fields) {
-        StringBuffer buffer = new StringBuffer();
+        StringBuilder buffer = new StringBuilder();
         buffer.append(WARC_VERSION);
         buffer.append(CRLF);
 
@@ -243,7 +242,7 @@ public class WARCRecordFormat implements RecordFormat {
 
     /**
      * Get the actual fetch time from metadata and format it as required by the WARC-Date field. If
-     * no fetch time is found in metadata (key {@link REQUEST_TIME_KEY}), the current time is taken.
+     * no fetch time is found in metadata (key {@code REQUEST_TIME_KEY}), the current time is taken.
      */
     protected String getCaptureTime(Metadata metadata) {
         String captureTimeMillis = metadata.getFirstValue(REQUEST_TIME_KEY, this.protocolMDprefix);

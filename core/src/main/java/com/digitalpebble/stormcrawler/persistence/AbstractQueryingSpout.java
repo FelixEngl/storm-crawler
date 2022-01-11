@@ -90,7 +90,10 @@ public abstract class AbstractQueryingSpout extends BaseRichSpout {
     protected CollectionMetric queryTimes;
 
     @Override
-    public void open(Map stormConf, TopologyContext context, SpoutOutputCollector collector) {
+    public void open(
+            Map<String, Object> stormConf,
+            TopologyContext context,
+            SpoutOutputCollector collector) {
 
         int ttlPurgatory = ConfUtils.getInt(stormConf, StatusTTLPurgatory, 30);
 
@@ -137,7 +140,7 @@ public abstract class AbstractQueryingSpout extends BaseRichSpout {
     private boolean active;
 
     /** Map which holds elements some additional time after the removal. */
-    public class InProcessMap<K, V> extends HashMap<K, V> {
+    public static class InProcessMap<K, V> extends HashMap<K, V> {
 
         private final Cache<K, Optional<V>> deletionCache;
 
@@ -149,7 +152,7 @@ public abstract class AbstractQueryingSpout extends BaseRichSpout {
         public boolean containsKey(Object key) {
             boolean incache = super.containsKey(key);
             if (!incache) {
-                incache = deletionCache.getIfPresent(key) != null;
+                incache = deletionCache.getIfPresent(key).isPresent();
             }
             return incache;
         }

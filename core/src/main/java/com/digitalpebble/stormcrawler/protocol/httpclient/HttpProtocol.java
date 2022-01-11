@@ -195,7 +195,7 @@ public class HttpProtocol extends AbstractHttpProtocol
 
         if (md != null) {
             String useHead = md.getFirstValue("http.method.head");
-            if ("true".equalsIgnoreCase(useHead)) {
+            if (Boolean.parseBoolean(useHead)) {
                 request = new HttpHead(url);
             }
 
@@ -345,7 +345,7 @@ public class HttpProtocol extends AbstractHttpProtocol
         return buffer.toByteArray();
     }
 
-    public static void main(String args[]) throws Exception {
+    public static void main(String[] args) throws Exception {
         HttpProtocol.main(new HttpProtocol(), args);
     }
 }

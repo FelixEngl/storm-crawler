@@ -150,9 +150,8 @@ public abstract class RegexURLFilterBase implements URLFilter {
      * --------------------------
      */
 
-    @Nullable
     @Override
-    public String filter(
+    public @Nullable String filter(
             @Nullable URL pageUrl, @Nullable Metadata sourceMetadata, @NotNull String url) {
         for (RegexRule rule : rules) {
             if (rule.match(url)) {

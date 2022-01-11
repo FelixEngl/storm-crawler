@@ -16,7 +16,6 @@ import org.apache.storm.task.TopologyContext;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.utils.Utils;
 
-@SuppressWarnings("serial")
 public class WARCHdfsBolt extends GzipHdfsBolt {
 
     private Map<String, String> header_fields = new HashMap<>();
@@ -47,7 +46,8 @@ public class WARCHdfsBolt extends GzipHdfsBolt {
     }
 
     @Override
-    public void doPrepare(Map conf, TopologyContext topologyContext, OutputCollector collector)
+    public void doPrepare(
+            Map<String, Object> conf, TopologyContext topologyContext, OutputCollector collector)
             throws IOException {
         super.doPrepare(conf, topologyContext, collector);
         protocolMDprefix = ConfUtils.getString(conf, ProtocolResponse.PROTOCOL_MD_PREFIX_PARAM, "");
@@ -70,7 +70,7 @@ public class WARCHdfsBolt extends GzipHdfsBolt {
         byte[] header = WARCRecordFormat.generateWARCInfo(header_fields);
 
         // write the header at the beginning of the file
-        if (header != null && header.length > 0) {
+        if (header.length > 0) {
             super.out.write(Utils.gzip(header));
         }
 

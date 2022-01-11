@@ -58,7 +58,6 @@ import org.slf4j.LoggerFactory;
  * Sends documents to ElasticSearch. Indexes all the fields from the tuples or a Map
  * &lt;String,Object&gt; from a named field.
  */
-@SuppressWarnings("serial")
 public class IndexerBolt extends AbstractIndexerBolt
         implements RemovalListener<String, List<Tuple>>, BulkProcessor.Listener {
 
@@ -95,9 +94,9 @@ public class IndexerBolt extends AbstractIndexerBolt
         this.indexName = indexName;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
+    public void prepare(
+            Map<String, Object> conf, TopologyContext context, OutputCollector collector) {
         super.prepare(conf, context, collector);
         _collector = collector;
         if (indexName == null) {
@@ -189,9 +188,7 @@ public class IndexerBolt extends AbstractIndexerBolt
             // which metadata to display?
             Map<String, String[]> keyVals = filterMetadata(metadata);
 
-            Iterator<String> iterator = keyVals.keySet().iterator();
-            while (iterator.hasNext()) {
-                String fieldName = iterator.next();
+            for (String fieldName : keyVals.keySet()) {
                 String[] values = keyVals.get(fieldName);
                 if (values.length == 1) {
                     builder.field(fieldName, values[0]);
@@ -236,10 +233,8 @@ public class IndexerBolt extends AbstractIndexerBolt
             LOG.error("Error building document for ES", e);
             // do not send to status stream so that it gets replayed
             _collector.fail(tuple);
-            if (docID != null) {
-                synchronized (waitAck) {
-                    waitAck.invalidate(docID);
-                }
+            synchronized (waitAck) {
+                waitAck.invalidate(docID);
             }
         }
     }
@@ -362,9 +357,8 @@ public class IndexerBolt extends AbstractIndexerBolt
         synchronized (waitAck) {
             // WHOLE BULK FAILED
             // mark all the docs as fail
-            Iterator<DocWriteRequest<?>> itreq = request.requests().iterator();
-            while (itreq.hasNext()) {
-                String id = itreq.next().id();
+            for (DocWriteRequest<?> docWriteRequest : request.requests()) {
+                String id = docWriteRequest.id();
 
                 List<Tuple> xx = waitAck.getIfPresent(id);
                 if (xx != null) {

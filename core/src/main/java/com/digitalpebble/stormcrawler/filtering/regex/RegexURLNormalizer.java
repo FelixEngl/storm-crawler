@@ -88,9 +88,8 @@ public class RegexURLNormalizer implements URLFilter {
      * string url as input and returns the altered string. If the normalized url is an empty string,
      * the function will return null.
      */
-    @Nullable
     @Override
-    public String filter(
+    public @Nullable String filter(
             @Nullable URL sourceUrl, @Nullable Metadata sourceMetadata, @NotNull String urlString) {
 
         for (Rule r : rules) {
@@ -226,7 +225,7 @@ public class RegexURLNormalizer implements URLFilter {
      * Utility method to test rules against an input. the first arg is the absolute path of the
      * rules file, the second is the URL to be normalised
      */
-    public static void main(String args[]) throws FileNotFoundException {
+    public static void main(String[] args) throws FileNotFoundException {
         RegexURLNormalizer normalizer = new RegexURLNormalizer();
         normalizer.rules = normalizer.readConfiguration(new FileReader(args[0]));
 

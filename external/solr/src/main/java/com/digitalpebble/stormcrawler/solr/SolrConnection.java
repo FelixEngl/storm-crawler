@@ -25,7 +25,6 @@ import org.apache.solr.client.solrj.impl.HttpSolrClient;
 import org.apache.solr.client.solrj.request.UpdateRequest;
 import org.apache.storm.shade.org.apache.commons.lang.StringUtils;
 
-@SuppressWarnings("serial")
 public class SolrConnection {
 
     private SolrClient client;
@@ -44,7 +43,7 @@ public class SolrConnection {
         return request;
     }
 
-    public static SolrClient getClient(Map stormConf, String boltType) {
+    public static SolrClient getClient(Map<String, Object> stormConf, String boltType) {
         String zkHost = ConfUtils.getString(stormConf, "solr." + boltType + ".zkhost", null);
         String solrUrl = ConfUtils.getString(stormConf, "solr." + boltType + ".url", null);
         String collection =
@@ -74,7 +73,7 @@ public class SolrConnection {
         return client;
     }
 
-    public static UpdateRequest getRequest(Map stormConf, String boltType) {
+    public static UpdateRequest getRequest(Map<String, Object> stormConf, String boltType) {
         int commitWithin = ConfUtils.getInt(stormConf, "solr." + boltType + ".commit.within", -1);
 
         UpdateRequest request = new UpdateRequest();
@@ -86,7 +85,7 @@ public class SolrConnection {
         return request;
     }
 
-    public static SolrConnection getConnection(Map stormConf, String boltType) {
+    public static SolrConnection getConnection(Map<String, Object> stormConf, String boltType) {
         SolrClient client = getClient(stormConf, boltType);
         UpdateRequest request = getRequest(stormConf, boltType);
 

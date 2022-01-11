@@ -59,7 +59,7 @@ public class ConfUtils {
         if (ret == null) {
             ret = defaultValue;
         }
-        return ((Boolean) ret).booleanValue();
+        return (Boolean) ret;
     }
 
     public static String getString(Map<String, Object> conf, String key) {

@@ -193,11 +193,12 @@ public abstract class AbstractHttpProtocol implements Protocol {
     }
 
     /** Called by extensions of this class * */
-    protected static void main(AbstractHttpProtocol protocol, String args[]) throws Exception {
+    protected static void main(AbstractHttpProtocol protocol, String[] args) throws Exception {
         Config conf = new Config();
 
         // loads the default configuration file
-        Map defaultSCConfig = Utils.findAndReadConfigFile("crawler-default.yaml", false);
+        Map<String, Object> defaultSCConfig =
+                Utils.findAndReadConfigFile("crawler-default.yaml", false);
         conf.putAll(ConfUtils.extractConfigElement(defaultSCConfig));
 
         Options options = new Options();

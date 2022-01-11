@@ -73,6 +73,7 @@ public class Metadata {
     }
 
     /** @return the first value for the key or null if it does not exist * */
+    @Nullable
     public String getFirstValue(@NotNull String key) {
         String[] values = md.get(key);
         if (values == null) return null;

@@ -19,7 +19,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /** Caches byte[] content into S3 */
-@SuppressWarnings("serial")
 public class S3ContentCacher extends S3Cacher {
     private static final Logger LOG = LoggerFactory.getLogger(S3Cacher.class);
 

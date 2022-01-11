@@ -17,7 +17,6 @@ package com.digitalpebble.stormcrawler.indexer;
 import com.digitalpebble.stormcrawler.Metadata;
 import com.digitalpebble.stormcrawler.indexing.AbstractIndexerBolt;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.apache.storm.task.OutputCollector;
@@ -28,9 +27,9 @@ public class DummyIndexer extends AbstractIndexerBolt {
     OutputCollector _collector;
     Map<String, String> fields;
 
-    @SuppressWarnings("rawtypes")
     @Override
-    public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
+    public void prepare(
+            Map<String, Object> conf, TopologyContext context, OutputCollector collector) {
         super.prepare(conf, context, collector);
         _collector = collector;
         fields = new HashMap<>();
@@ -64,9 +63,7 @@ public class DummyIndexer extends AbstractIndexerBolt {
         // which metadata to display?
         Map<String, String[]> keyVals = filterMetadata(metadata);
 
-        Iterator<String> iterator = keyVals.keySet().iterator();
-        while (iterator.hasNext()) {
-            String fieldName = iterator.next();
+        for (String fieldName : keyVals.keySet()) {
             String[] values = keyVals.get(fieldName);
             for (String value : values) {
                 fields.put(fieldName, value);

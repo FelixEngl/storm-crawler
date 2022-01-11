@@ -48,9 +48,8 @@ public class MaxDepthFilter implements URLFilter {
         LOG.info("maxDepth set to {}", maxDepth);
     }
 
-    @Nullable
     @Override
-    public String filter(
+    public @Nullable String filter(
             @Nullable URL pageUrl, @Nullable Metadata sourceMetadata, @NotNull String url) {
         int depth = getDepth(sourceMetadata, MetadataTransfer.depthKeyName);
         // is there a custom value set for this particular URL?

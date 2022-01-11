@@ -88,9 +88,7 @@ public final class CharsetIdentification {
         String htmlCharset = getCharsetFromMeta(content, maxLengthCharsetDetection);
 
         // both exist and agree
-        if (httpCharset != null
-                && htmlCharset != null
-                && httpCharset.equalsIgnoreCase(htmlCharset)) {
+        if (httpCharset != null && httpCharset.equalsIgnoreCase(htmlCharset)) {
             return httpCharset;
         }
 
@@ -157,7 +155,7 @@ public final class CharsetIdentification {
      * Attempt to find a META tag in the HTML that hints at the character set used to write the
      * document.
      */
-    private static String getCharsetFromMeta(byte buffer[], int maxlength) {
+    private static String getCharsetFromMeta(byte[] buffer, int maxlength) {
         // convert to UTF-8 String -- which hopefully will not mess up the
         // characters we're interested in...
         int len = buffer.length;
@@ -184,8 +182,6 @@ public final class CharsetIdentification {
             return validateCharset(html.substring(start + 15, end));
         }
 
-        String foundCharset = null;
-
         try {
             Document doc = Parser.htmlParser().parseInput(html, "dummy");
 
@@ -194,17 +190,18 @@ public final class CharsetIdentification {
             // charset="gb2312">
             Elements metaElements = doc.select("meta[http-equiv=content-type], meta[charset]");
             for (Element meta : metaElements) {
+                String foundCharset = null;
                 if (meta.hasAttr("http-equiv"))
                     foundCharset = getCharsetFromContentType(meta.attr("content"));
-                if (foundCharset == null && meta.hasAttr("charset"))
-                    foundCharset = meta.attr("charset");
+                else if (meta.hasAttr("charset")) foundCharset = meta.attr("charset");
+
                 if (foundCharset != null) return foundCharset;
             }
         } catch (Exception e) {
-            foundCharset = null;
+
         }
 
-        return foundCharset;
+        return null;
     }
 
     /**

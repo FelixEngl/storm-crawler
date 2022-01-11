@@ -33,6 +33,8 @@ public interface URLFilter extends Configurable {
      * @param sourceUrl the URL of the page where the URL was found. Can be null.
      * @param sourceMetadata the metadata collected for the page
      * @param urlToFilter the URL to be filtered
+     * @return null if the url is to be removed or a normalised representation which can correspond
+     *     to the input URL
      */
     @Nullable
     String filter(

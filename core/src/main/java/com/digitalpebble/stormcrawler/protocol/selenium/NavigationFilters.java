@@ -57,8 +57,7 @@ public class NavigationFilters extends NavigationFilter {
      * Loads and configure the NavigationFilters based on the storm config if there is one otherwise
      * returns an emptyNavigationFilters.
      */
-    @SuppressWarnings("rawtypes")
-    public static NavigationFilters fromConf(Map stormConf) {
+    public static NavigationFilters fromConf(Map<String, Object> stormConf) {
         String configfile = ConfUtils.getString(stormConf, "navigationfilters.config.file");
         if (StringUtils.isNotBlank(configfile)) {
             try {
@@ -74,12 +73,15 @@ public class NavigationFilters extends NavigationFilter {
         return NavigationFilters.emptyNavigationFilters;
     }
 
-    /** loads the filters from a JSON configuration file */
-    @SuppressWarnings("rawtypes")
-    public NavigationFilters(Map stormConf, String configFile) throws IOException {
+    /**
+     * loads the filters from a JSON configuration file
+     *
+     * @throws IOException
+     */
+    public NavigationFilters(Map<String, Object> stormConf, String configFile) throws IOException {
         // load the JSON configFile
         // build a JSON object out of it
-        JsonNode confNode = null;
+        JsonNode confNode;
         try (InputStream confStream = getClass().getClassLoader().getResourceAsStream(configFile)) {
             ObjectMapper mapper = new ObjectMapper();
             confNode = mapper.readValue(confStream, JsonNode.class);
@@ -90,9 +92,8 @@ public class NavigationFilters extends NavigationFilter {
         configure(stormConf, confNode);
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
-    public void configure(Map stormConf, JsonNode filtersConf) {
+    public void configure(Map<String, Object> stormConf, JsonNode filtersConf) {
         // initialises the filters
         List<NavigationFilter> filterLists = new ArrayList<>();
 

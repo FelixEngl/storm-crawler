@@ -44,9 +44,8 @@ public class MetadataFilter implements URLFilter {
         }
     }
 
-    @Nullable
     @Override
-    public String filter(
+    public @Nullable String filter(
             @Nullable URL pageUrl, @Nullable Metadata sourceMetadata, @NotNull String urlToFilter) {
         if (sourceMetadata == null) {
             return urlToFilter;

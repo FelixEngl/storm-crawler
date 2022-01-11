@@ -43,7 +43,6 @@ import org.elasticsearch.search.aggregations.BucketOrder;
 import org.elasticsearch.search.aggregations.bucket.SingleBucketAggregation;
 import org.elasticsearch.search.aggregations.bucket.sampler.DiversifiedAggregationBuilder;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
-import org.elasticsearch.search.aggregations.bucket.terms.Terms.Bucket;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.aggregations.metrics.TopHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
@@ -60,7 +59,6 @@ import org.slf4j.LoggerFactory;
  * instances as ES shards. Guarantees a good mix of URLs by aggregating them by an arbitrary field
  * e.g. key.
  */
-@SuppressWarnings("serial")
 public class AggregationSpout extends AbstractSpout implements ActionListener<SearchResponse> {
 
     private static final Logger LOG = LoggerFactory.getLogger(AggregationSpout.class);
@@ -77,7 +75,10 @@ public class AggregationSpout extends AbstractSpout implements ActionListener<Se
     protected Set<String> currentBuckets;
 
     @Override
-    public void open(Map stormConf, TopologyContext context, SpoutOutputCollector collector) {
+    public void open(
+            Map<String, Object> stormConf,
+            TopologyContext context,
+            SpoutOutputCollector collector) {
         sample = ConfUtils.getBoolean(stormConf, ESStatusSampleParamName, sample);
         recentDateIncrease =
                 ConfUtils.getInt(stormConf, ESMostRecentDateIncreaseParamName, recentDateIncrease);
@@ -203,7 +204,7 @@ public class AggregationSpout extends AbstractSpout implements ActionListener<Se
         currentBuckets.clear();
 
         // For each entry
-        Iterator<Terms.Bucket> iterator = (Iterator<Bucket>) agg.getBuckets().iterator();
+        Iterator<? extends Terms.Bucket> iterator = agg.getBuckets().iterator();
         while (iterator.hasNext()) {
             Terms.Bucket entry = iterator.next();
             String key = (String) entry.getKey(); // bucket key
@@ -334,7 +335,7 @@ public class AggregationSpout extends AbstractSpout implements ActionListener<Se
         if (resetFetchDateAfterNSecs != -1) {
             Instant changeNeededOn =
                     Instant.ofEpochMilli(
-                            lastTimeResetToNOW.toEpochMilli() + (resetFetchDateAfterNSecs * 1000));
+                            lastTimeResetToNOW.toEpochMilli() + (resetFetchDateAfterNSecs * 1000L));
             if (Instant.now().isAfter(changeNeededOn)) {
                 LOG.info(
                         "{} queryDate set to null based on resetFetchDateAfterNSecs {}",

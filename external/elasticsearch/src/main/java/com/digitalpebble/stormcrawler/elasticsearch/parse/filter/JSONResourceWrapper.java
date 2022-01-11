@@ -145,7 +145,7 @@ public class JSONResourceWrapper extends ParseFilter {
                             }
                         },
                         0,
-                        refreshRate * 1000);
+                        refreshRate * 1000L);
     }
 
     @Override

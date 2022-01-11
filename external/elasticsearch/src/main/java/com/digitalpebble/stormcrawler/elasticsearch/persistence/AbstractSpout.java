@@ -20,7 +20,6 @@ import com.digitalpebble.stormcrawler.persistence.AbstractQueryingSpout;
 import com.digitalpebble.stormcrawler.util.ConfUtils;
 import java.io.IOException;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -87,7 +86,10 @@ public abstract class AbstractSpout extends AbstractQueryingSpout {
     protected int queryTimeout = -1;
 
     @Override
-    public void open(Map stormConf, TopologyContext context, SpoutOutputCollector collector) {
+    public void open(
+            Map<String, Object> stormConf,
+            TopologyContext context,
+            SpoutOutputCollector collector) {
 
         super.open(stormConf, context, collector);
 
@@ -172,9 +174,7 @@ public abstract class AbstractSpout extends AbstractQueryingSpout {
         Map<String, List<String>> mdAsMap = (Map<String, List<String>>) keyValues.get("metadata");
         Metadata metadata = new Metadata();
         if (mdAsMap != null) {
-            Iterator<Entry<String, List<String>>> mdIter = mdAsMap.entrySet().iterator();
-            while (mdIter.hasNext()) {
-                Entry<String, List<String>> mdEntry = mdIter.next();
+            for (Entry<String, List<String>> mdEntry : mdAsMap.entrySet()) {
                 String key = mdEntry.getKey();
                 // periods are not allowed in ES2 - replace with %2E
                 key = key.replaceAll("%2E", "\\.");

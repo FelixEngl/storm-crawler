@@ -117,10 +117,9 @@ public class LinkParseFilter extends XPathFilter {
             }
         }
 
-        parse.setOutlinks(new ArrayList(dedup.values()));
+        parse.setOutlinks(new ArrayList<>(dedup.values()));
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public void configure(@NotNull Map<String, Object> stormConf, @NotNull JsonNode filterParams) {
         super.configure(stormConf, filterParams);

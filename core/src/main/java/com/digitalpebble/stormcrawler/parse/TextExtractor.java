@@ -18,6 +18,7 @@ import com.digitalpebble.stormcrawler.util.ConfUtils;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import org.jetbrains.annotations.Contract;
 import org.jsoup.internal.StringUtil;
 import org.jsoup.nodes.CDataNode;
 import org.jsoup.nodes.Element;
@@ -149,10 +150,12 @@ public class TextExtractor {
         else StringUtil.appendNormalisedWhitespace(accum, text, lastCharIsWhitespace(accum));
     }
 
+    @Contract("null -> false")
     static boolean preserveWhitespace(Node node) {
+        if (node == null) return false;
         // looks only at this element and five levels up, to prevent recursion &
         // needless stack searches
-        if (node != null && node instanceof Element) {
+        if (node instanceof Element) {
             Element el = (Element) node;
             int i = 0;
             do {

@@ -24,7 +24,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Map;
-import org.apache.commons.lang.StringUtils;
 import org.apache.storm.metric.api.MultiCountMetric;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
@@ -50,9 +49,9 @@ public class IndexerBolt extends AbstractIndexerBolt {
 
     private Map conf;
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public void prepare(Map conf, TopologyContext context, OutputCollector collector) {
+    public void prepare(
+            Map<String, Object> conf, TopologyContext context, OutputCollector collector) {
         super.prepare(conf, context, collector);
         _collector = collector;
 
@@ -97,8 +96,8 @@ public class IndexerBolt extends AbstractIndexerBolt {
 
             Object[] keys = keyVals.keySet().toArray();
 
-            for (int i = 0; i < keys.length; i++) {
-                query.append(", ").append((String) keys[i]);
+            for (Object o : keys) {
+                query.append(", ").append((String) o);
             }
 
             query.append(") values(?");
@@ -133,9 +132,9 @@ public class IndexerBolt extends AbstractIndexerBolt {
             PreparedStatement preparedStmt = connection.prepareStatement(query.toString());
 
             // TODO store the text of the document?
-            if (StringUtils.isNotBlank(fieldNameForText())) {
-                // builder.field(fieldNameForText(), trimText(text));
-            }
+            //            if (StringUtils.isNotBlank(fieldNameForText())) {
+            // builder.field(fieldNameForText(), trimText(text));
+            //            }
 
             // send URL as field?
             if (fieldNameForURL() != null) {

@@ -80,12 +80,12 @@ public class BasicURLNormalizer implements URLFilter {
     private boolean hostIDNtoASCII = false;
     final Set<String> queryElementsToRemove = new TreeSet<>();
 
-    @Nullable
     @Override
-    public String filter(
+    public @Nullable String filter(
             @Nullable URL sourceUrl,
             @Nullable Metadata sourceMetadata,
             @NotNull String urlToFilter) {
+
         urlToFilter = urlToFilter.trim();
 
         final String originalURL = urlToFilter;
@@ -285,13 +285,7 @@ public class BasicURLNormalizer implements URLFilter {
         }
     }
 
-    Comparator<NameValuePair> comp =
-            new Comparator<NameValuePair>() {
-                @Override
-                public int compare(NameValuePair p1, NameValuePair p2) {
-                    return p1.getName().compareTo(p2.getName());
-                }
-            };
+    Comparator<NameValuePair> comp = Comparator.comparing(NameValuePair::getName);
 
     /**
      * A common error to find is a query string that starts with an & instead of a ? This will fix

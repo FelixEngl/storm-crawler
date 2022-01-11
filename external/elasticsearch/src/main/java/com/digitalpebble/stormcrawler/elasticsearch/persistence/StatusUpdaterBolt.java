@@ -55,7 +55,6 @@ import org.slf4j.LoggerFactory;
  * Simple bolt which stores the status of URLs into ElasticSearch. Takes the tuples coming from the
  * 'status' stream. To be used in combination with a Spout to read from the index.
  */
-@SuppressWarnings("serial")
 public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
         implements RemovalListener<String, List<Tuple>>, BulkProcessor.Listener {
 
@@ -99,7 +98,8 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
     }
 
     @Override
-    public void prepare(Map stormConf, TopologyContext context, OutputCollector collector) {
+    public void prepare(
+            Map<String, Object> stormConf, TopologyContext context, OutputCollector collector) {
 
         super.prepare(stormConf, context, collector);
 
@@ -196,9 +196,7 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
         boolean create = status.equals(Status.DISCOVERED);
 
         builder.startObject("metadata");
-        Iterator<String> mdKeys = metadata.keySet().iterator();
-        while (mdKeys.hasNext()) {
-            String mdKey = mdKeys.next();
+        for (String mdKey : metadata.keySet()) {
             String[] values = metadata.getValues(mdKey);
             // periods are not allowed in ES2 - replace with %2E
             mdKey = mdKey.replaceAll("\\.", "%2E");
@@ -332,9 +330,7 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
         synchronized (waitAck) {
             // WHOLE BULK FAILED
             // mark all the docs as fail
-            Iterator<DocWriteRequest<?>> itreq = request.requests().iterator();
-            while (itreq.hasNext()) {
-                DocWriteRequest bir = itreq.next();
+            for (DocWriteRequest bir : request.requests()) {
                 String id = bir.id();
                 List<Tuple> xx = waitAck.getIfPresent(id);
                 if (xx != null) {
