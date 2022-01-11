@@ -42,6 +42,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.storm.metric.api.MultiCountMetric;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.tuple.Tuple;
@@ -62,7 +63,11 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
     private Cache<String, List<Tuple>> waitAck;
 
     private int maxMessagesinFlight = 100000;
+    private int throttleTime = 10;
+
     private AtomicInteger messagesinFlight = new AtomicInteger();
+
+    private MultiCountMetric eventCounter;
 
     public StatusUpdaterBolt() {
         waitAck =
@@ -78,6 +83,15 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
         super.prepare(stormConf, context, collector);
         String host = ConfUtils.getString(stormConf, "urlfrontier.host", "localhost");
         int port = ConfUtils.getInt(stormConf, "urlfrontier.port", 7071);
+
+        maxMessagesinFlight =
+                ConfUtils.getInt(
+                        stormConf, "urlfrontier.max.messages.in.flight", maxMessagesinFlight);
+        throttleTime =
+                ConfUtils.getInt(stormConf, "urlfrontier.throttling.time.msec", throttleTime);
+
+        this.eventCounter =
+                context.registerMetric(this.getClass().getSimpleName(), new MultiCountMetric(), 30);
 
         maxMessagesinFlight =
                 ConfUtils.getInt(
@@ -125,7 +139,8 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
 
         while (messagesinFlight.get() >= this.maxMessagesinFlight) {
             LOG.debug("{} messages in flight - waiting a bit...", messagesinFlight.get());
-            Utils.sleep(100);
+            eventCounter.scope("timeSpentThrottling").incrBy(throttleTime);
+            Utils.sleep(throttleTime);
         }
 
         // only 1 thread at a time will access the store method
@@ -144,6 +159,7 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
                 // won't make any difference
                 LOG.debug("Already being sent to urlfrontier {} with status {}", url, status);
                 // ack straight away!
+                eventCounter.scope("acked").incrBy(1);
                 super.ack(t, url);
                 return;
             }
@@ -203,6 +219,7 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
             LOG.debug("Acked {} tuple(s) for ID {}", values.size(), key);
             for (Tuple x : values) {
                 messagesinFlight.decrementAndGet();
+                eventCounter.scope("acked").incrBy(1);
                 super.ack(x, key);
             }
             return;
@@ -212,6 +229,7 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
 
         for (Tuple t : values) {
             messagesinFlight.decrementAndGet();
+            eventCounter.scope("failed").incrBy(1);
             _collector.fail(t);
         }
     }
