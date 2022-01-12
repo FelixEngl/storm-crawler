@@ -21,6 +21,7 @@ import com.digitalpebble.stormcrawler.util.ConfUtils;
 import com.digitalpebble.stormcrawler.util.InitialisationUtil;
 import crawlercommons.robots.BaseRobotRules;
 import org.apache.storm.Config;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Alternative implementation of RemoteDriverProtocol which delegates the calls to a different
@@ -40,7 +41,7 @@ public class DelegatorRemoteDriverProtocol extends RemoteDriverProtocol {
     public static final String PROTOCOL_IMPL_CONFIG = "selenium.delegated.protocol";
 
     @Override
-    public void configure(Config conf) {
+    public void configure(@NotNull Config conf) {
         super.configure(conf);
         String protocolimplementation = ConfUtils.getString(conf, PROTOCOL_IMPL_CONFIG);
         try {

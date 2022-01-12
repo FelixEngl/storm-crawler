@@ -117,7 +117,7 @@ public class HttpProtocol extends AbstractHttpProtocol {
             trustAllSslContext.getSocketFactory();
 
     @Override
-    public void configure(Config conf) {
+    public void configure(@NotNull Config conf) {
         super.configure(conf);
 
         globalMaxContent = ConfUtils.getInt(conf, "http.content.limit", -1);

@@ -143,7 +143,7 @@ public class DelegatorProtocol implements Protocol {
     private final LinkedList<FilteredProtocol> protocols = new LinkedList<>();
 
     @Override
-    public void configure(Config conf) {
+    public void configure(@NotNull Config conf) {
         Object obj = conf.get(DELEGATOR_CONFIG_KEY);
 
         if (obj == null)

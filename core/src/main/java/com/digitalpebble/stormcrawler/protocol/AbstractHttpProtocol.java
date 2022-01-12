@@ -34,6 +34,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.lang.StringUtils;
 import org.apache.storm.Config;
 import org.apache.storm.utils.Utils;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 
 public abstract class AbstractHttpProtocol implements Protocol {
@@ -85,7 +86,7 @@ public abstract class AbstractHttpProtocol implements Protocol {
     }
 
     @Override
-    public void configure(Config conf) {
+    public void configure(@NotNull Config conf) {
         this.skipRobots = ConfUtils.getBoolean(conf, "http.robots.file.skip", false);
 
         this.storeHTTPHeaders = ConfUtils.getBoolean(conf, "http.store.headers", false);

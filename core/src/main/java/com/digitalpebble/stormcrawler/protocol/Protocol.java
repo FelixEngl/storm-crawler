@@ -17,10 +17,12 @@ package com.digitalpebble.stormcrawler.protocol;
 import com.digitalpebble.stormcrawler.Metadata;
 import crawlercommons.robots.BaseRobotRules;
 import org.apache.storm.Config;
+import org.jetbrains.annotations.NotNull;
 
 public interface Protocol {
 
-    void configure(Config conf);
+    /** Configures the protocol with the given config */
+    void configure(@NotNull Config conf);
 
     /**
      * Fetches the content and additional metadata

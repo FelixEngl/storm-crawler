@@ -60,6 +60,7 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.util.Args;
 import org.apache.http.util.ByteArrayBuffer;
 import org.apache.storm.Config;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 
@@ -80,7 +81,7 @@ public class HttpProtocol extends AbstractHttpProtocol
     private RequestConfig.Builder requestConfigBuilder;
 
     @Override
-    public void configure(final Config conf) {
+    public void configure(final @NotNull Config conf) {
 
         super.configure(conf);
 

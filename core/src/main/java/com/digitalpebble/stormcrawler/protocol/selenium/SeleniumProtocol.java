@@ -20,6 +20,7 @@ import com.digitalpebble.stormcrawler.protocol.HttpHeaders;
 import com.digitalpebble.stormcrawler.protocol.ProtocolResponse;
 import java.util.concurrent.LinkedBlockingQueue;
 import org.apache.storm.Config;
+import org.jetbrains.annotations.NotNull;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +35,7 @@ public abstract class SeleniumProtocol extends AbstractHttpProtocol {
     private final Object lock = new Object();
 
     @Override
-    public void configure(Config conf) {
+    public void configure(@NotNull Config conf) {
         super.configure(conf);
         drivers = new LinkedBlockingQueue<>();
         filters = NavigationFilters.fromConf(conf);

@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.storm.Config;
+import org.jetbrains.annotations.NotNull;
 import org.openqa.selenium.WebDriver.Timeouts;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -32,7 +33,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 public class RemoteDriverProtocol extends SeleniumProtocol {
 
     @Override
-    public void configure(Config conf) {
+    public void configure(@NotNull Config conf) {
         super.configure(conf);
 
         // see https://github.com/SeleniumHQ/selenium/wiki/DesiredCapabilities

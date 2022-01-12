@@ -21,13 +21,14 @@ import com.digitalpebble.stormcrawler.protocol.RobotRulesParser;
 import com.digitalpebble.stormcrawler.util.ConfUtils;
 import crawlercommons.robots.BaseRobotRules;
 import org.apache.storm.Config;
+import org.jetbrains.annotations.NotNull;
 
 public class FileProtocol implements Protocol {
 
     private String encoding;
 
     @Override
-    public void configure(Config conf) {
+    public void configure(@NotNull Config conf) {
         encoding = ConfUtils.getString(conf, "file.encoding", "UTF-8");
     }
 

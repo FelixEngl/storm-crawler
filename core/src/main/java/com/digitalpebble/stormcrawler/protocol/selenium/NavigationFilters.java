@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.LoggerFactory;
 
@@ -57,7 +58,7 @@ public class NavigationFilters extends NavigationFilter {
      * Loads and configure the NavigationFilters based on the storm config if there is one otherwise
      * returns an emptyNavigationFilters.
      */
-    public static NavigationFilters fromConf(Map<String, Object> stormConf) {
+    public static NavigationFilters fromConf(@NotNull Map<String, Object> stormConf) {
         String configfile = ConfUtils.getString(stormConf, "navigationfilters.config.file");
         if (StringUtils.isNotBlank(configfile)) {
             try {
@@ -78,7 +79,8 @@ public class NavigationFilters extends NavigationFilter {
      *
      * @throws IOException
      */
-    public NavigationFilters(Map<String, Object> stormConf, String configFile) throws IOException {
+    public NavigationFilters(@NotNull Map<String, Object> stormConf, String configFile)
+            throws IOException {
         // load the JSON configFile
         // build a JSON object out of it
         JsonNode confNode;
@@ -93,7 +95,7 @@ public class NavigationFilters extends NavigationFilter {
     }
 
     @Override
-    public void configure(Map<String, Object> stormConf, JsonNode filtersConf) {
+    public void configure(@NotNull Map<String, Object> stormConf, @NotNull JsonNode filtersConf) {
         // initialises the filters
         List<NavigationFilter> filterLists = new ArrayList<>();
 
