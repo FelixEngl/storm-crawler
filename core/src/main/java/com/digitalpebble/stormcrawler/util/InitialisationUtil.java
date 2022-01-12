@@ -13,16 +13,33 @@ public final class InitialisationUtil {
     /**
      * Initializes a class from {@code qualifiedClassName} as type {@code superClass}. Further
      * constrains for implemented classes and interfaces are possible via {@code
-     * furtherSuperClasses}. Requirements: {@code qualifiedClassName}: 1. Has an accessible empty
-     * constructor. 2. Points to a class extending/implementing {@code superClass}. 3. Points to a
-     * class extending/implementing all {@code furtherSuperClasses}. 4. Points to a class that is
-     * not primitive, abstract or an interface. 5. Points to an existing class. 6. Is not blank.
+     * furtherSuperClasses}.
      *
-     * <p>{@code superClass}: 1. Does not point to a primitive 2. Points to a class
-     * extending/implemented by the class of {@code qualifiedClassName}.
+     * <p>Requirements:
      *
-     * <p>{@code furtherSuperClasses} 1. Points to classes extending/implemented by the class of
-     * {@code qualifiedClassName}.
+     * <p>{@code qualifiedClassName}:
+     *
+     * <ol>
+     *   <li>Has an accessible empty constructor.
+     *   <li>Points to a class extending/implementing {@code superClass}.
+     *   <li>Points to a class extending/implementing all {@code furtherSuperClasses}.
+     *   <li>Points to a class that is not primitive, abstract or an interface.
+     *   <li>Points to an existing class.
+     *   <li>Is not blank.
+     * </ol>
+     *
+     * <p>{@code superClass}:
+     *
+     * <ol>
+     *   <li>Does not point to a primitive.
+     *   <li>Points to a class extending/implemented by the class of {@code qualifiedClassName}.
+     * </ol>
+     *
+     * <p>{@code furtherSuperClasses}
+     *
+     * <ol>
+     *   <li>Points to classes extending/implemented by the class of {@code qualifiedClassName}.
+     * </ol>
      *
      * @param qualifiedClassName the qualified name for the class to be initialized.
      * @param superClass defines the type to be instantiated
@@ -58,16 +75,32 @@ public final class InitialisationUtil {
      * Retrieves a class-instance for {@code qualifiedClassName} extending {@code T}. {@code T} is
      * supplied by contraining the type of {@code qualifiedClassName} to {@code superClass}. Further
      * constrains for implemented classes and interfaces are possible via {@code
-     * furtherSuperClasses}. Requirements: {@code clazz}: 1. Points to a class
-     * extending/implementing {@code superClass}. 2. Points to a class extending/implementing all
-     * {@code furtherSuperClasses}. 3. Points to a class that is not primitive, abstract or an
-     * interface. 4. Points to an existing class. 5. Is not blank.
+     * furtherSuperClasses}.
      *
-     * <p>{@code superClass}: 1. Does not point to a primitive 2. Points to a class
-     * extending/implemented by the class of {@code clazz}.
+     * <p>Requirements:
      *
-     * <p>{@code furtherSuperClasses} 1. Points to classes extending/implemented by the class of
-     * {@code clazz}.
+     * <p>{@code clazz}:
+     *
+     * <ol>
+     *   <li>Points to a class extending/implementing {@code superClass}.
+     *   <li>Points to a class extending/implementing all {@code furtherSuperClasses}.
+     *   <li>Points to a class that is not primitive, abstract or an interface.
+     *   <li>Points to an existing class.
+     *   <li>Is not blank.
+     * </ol>
+     *
+     * <p>{@code superClass}:
+     *
+     * <ol>
+     *   <li>Does not point to a primitive.
+     *   <li>Points to a class extending/implemented by the class of {@code clazz}.
+     * </ol>
+     *
+     * <p>{@code furtherSuperClasses}
+     *
+     * <ol>
+     *   <li>Points to classes extending/implemented by the class of {@code clazz}.
+     * </ol>
      *
      * @param qualifiedClassName the qualified name for the class to be retrieved.
      * @param superClass defines the type to be instantiated
@@ -108,16 +141,32 @@ public final class InitialisationUtil {
     /**
      * Initializes a class from {@code clazz} as type {@code superClass}. Further constrains for
      * implemented classes and interfaces are possible via {@code furtherSuperClasses}.
-     * Requirements: {@code clazz}: 1. Has an accessible empty constructor. 2. Points to a class
-     * extending/implementing {@code superClass}. 3. Points to a class extending/implementing all
-     * {@code furtherSuperClasses}. 4. Points to a class that is not primitive, abstract or an
-     * interface. 5. Points to an existing class. 6. Is not blank.
      *
-     * <p>{@code superClass}: 1. Does not point to a primitive 2. Points to a class
-     * extending/implemented by the class of {@code clazz}.
+     * <p>Requirements:
      *
-     * <p>{@code furtherSuperClasses} 1. Points to classes extending/implemented by the class of
-     * {@code clazz}.
+     * <p>{@code clazz}:
+     *
+     * <ol>
+     *   <li>Has an accessible empty constructor.
+     *   <li>Points to a class extending/implementing {@code superClass}.
+     *   <li>Points to a class extending/implementing all {@code furtherSuperClasses}.
+     *   <li>Points to a class that is not primitive, abstract or an interface.
+     *   <li>Points to an existing class.
+     *   <li>Is not blank.
+     * </ol>
+     *
+     * <p>{@code superClass}:
+     *
+     * <ol>
+     *   <li>Does not point to a primitive.
+     *   <li>Points to a class extending/implemented by the class of {@code clazz}.
+     * </ol>
+     *
+     * <p>{@code furtherSuperClasses}
+     *
+     * <ol>
+     *   <li>Points to classes extending/implemented by the class of {@code clazz}.
+     * </ol>
      *
      * @param clazz the class to be initialized.
      * @param superClass defines the type to be instantiated
@@ -149,6 +198,14 @@ public final class InitialisationUtil {
     /**
      * Initializes a class from {@code clazz} of type {@code T}.
      *
+     * <p>Requirements:
+     *
+     * <p>{@code clazz}:
+     *
+     * <ol>
+     *   <li>Points to a class that is not primitive, abstract or an interface.
+     * </ol>
+     *
      * @param clazz the class to be initialized.
      * @param <T> the type of the returned class.
      * @return an instance of {@code clazz}.
@@ -166,7 +223,7 @@ public final class InitialisationUtil {
     }
 
     /*
-     * The unchecked method to initialize
+     * The unchecked method to initialize a clazz
      */
     @NotNull
     @Contract(pure = true)
@@ -189,15 +246,28 @@ public final class InitialisationUtil {
     }
 
     /**
-     * Asserts the following: {@code clazz}: 1. Points to a class extending/implementing {@code
-     * superClass}. 2. Points to a class extending/implementing all {@code furtherSuperClasses}. 3.
-     * Points to a class that is not primitive, abstract or an interface.
+     * Asserts the following:
      *
-     * <p>{@code superClass}: 1. Does not point to a primitive 2. Points to a class
-     * extending/implemented by the class of {@code clazz}.
+     * <p>{@code clazz}:
      *
-     * <p>{@code furtherSuperClasses} 1. Points to classes extending/implemented by the class of
-     * {@code clazz}.
+     * <ol>
+     *   <li>Points to a class extending/implementing {@code superClass}.
+     *   <li>Points to a class extending/implementing all {@code furtherSuperClasses}.
+     *   <li>Points to a class that is not primitive, abstract or an interface.
+     * </ol>
+     *
+     * <p>{@code superClass}:
+     *
+     * <ol>
+     *   <li>Does not point to a primitive.
+     *   <li>Points to a class extending/implemented by the class of {@code clazz}.
+     * </ol>
+     *
+     * <p>{@code furtherSuperClasses}
+     *
+     * <ol>
+     *   <li>Points to classes extending/implemented by the class of {@code clazz}.
+     * </ol>
      *
      * @return Either fails or returns {@code clazz} cast to Class&lt;? extends T&gt;
      * @throws NotInitializeableException if the {@code clazz} points to a interface, abstract class
@@ -232,7 +302,13 @@ public final class InitialisationUtil {
     }
 
     /**
-     * Asserts the following: {@code superClass}: 1. Does not point to a primitive
+     * Asserts the following:
+     *
+     * <p>{@code superClass}:
+     *
+     * <ol>
+     *   <li>Does not point to a primitive.
+     * </ol>
      *
      * @throws SuperclassIsPrimitiveException if the {@code superClass} is a primitive
      */
@@ -244,8 +320,13 @@ public final class InitialisationUtil {
     }
 
     /**
-     * Asserts the following: {@code clazz}: 1. Points to a class that is not primitive, abstract or
-     * an interface.
+     * Asserts the following:
+     *
+     * <p>{@code clazz}:
+     *
+     * <ol>
+     *   <li>Points to a class that is not primitive, abstract or an interface.
+     * </ol>
      *
      * @throws NotInitializeableException if the {@code clazz} points to a interface, abstract class
      *     or primitive.
