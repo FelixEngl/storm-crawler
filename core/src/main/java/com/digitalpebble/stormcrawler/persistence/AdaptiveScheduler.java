@@ -46,7 +46,6 @@ import org.slf4j.LoggerFactory;
  *   <dd>(temporary) copy of the previous signature, optionally copied by {@link
  *       MD5SignatureParseFilter}
  *   <dt>fetch.statusCode
- *   <dt>
  *   <dd>HTTP response status code, required to handle &quot;HTTP 304 Not Modified&quot; responses
  * </dl>
  *
@@ -69,13 +68,13 @@ import org.slf4j.LoggerFactory;
  *       file (crawler-conf.yaml):
  *       <pre>
  * scheduler.class: "com.digitalpebble.stormcrawler.persistence.AdaptiveScheduler"
- * # set last-modified time ({@link HttpHeaders.LAST_MODIFIED}) used in HTTP If-Modified-Since request header field
+ * # set last-modified time ({@value HttpHeaders#LAST_MODIFIED}) used in HTTP If-Modified-Since request header field
  * scheduler.adaptive.setLastModified: true
  * # min. interval in minutes (default: 1h)
  * scheduler.adaptive.fetchInterval.min: 60
  * # max. interval in minutes (default: 2 weeks)
  * scheduler.adaptive.fetchInterval.max: 20160
- * # increment and decrement rates (0.0 < rate <= 1.0)
+ * # increment and decrement rates (0.0 &lt; rate &lt;= 1.0)
  * scheduler.adaptive.fetchInterval.rate.incr: .5
  * scheduler.adaptive.fetchInterval.rate.decr: .5
  *

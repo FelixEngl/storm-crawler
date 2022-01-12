@@ -173,9 +173,8 @@ The WARCSpout is configured similar as FileSpout:
 To use the WARCSpout reading `*.paths` or `*.txt` files from the folder `input/`, you simply start to build your topology as
 
 ```java
-        TopologyBuilder builder = new TopologyBuilder();
-
-        builder.setSpout("spout", new WARCSpout("input/", "*.{paths,txt}"));
+TopologyBuilder builder = new TopologyBuilder();
+builder.setSpout("spout", new WARCSpout("input/", "*.{paths,txt}"));
 ```
 
 Or, if Flux is used:
