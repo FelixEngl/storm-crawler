@@ -51,18 +51,18 @@ public abstract class SeleniumProtocol extends AbstractHttpProtocol {
 
             String u = driver.getCurrentUrl();
 
-            // call the filters
-            ProtocolResponse response = filters.filter(driver, metadata);
-            if (response != null) {
-                return response;
-            }
-
-            // if the URL is different then we must have hit a redirection
+            // if the URL is different we must have hit a redirection
             if (!u.equalsIgnoreCase(url)) {
                 byte[] content = new byte[] {};
                 Metadata m = new Metadata();
                 m.addValue(HttpHeaders.LOCATION, u);
                 return new ProtocolResponse(content, 307, m);
+            }
+
+            // call the filters
+            ProtocolResponse response = filters.filter(driver, metadata);
+            if (response != null) {
+                return response;
             }
 
             // if no filters got triggered
