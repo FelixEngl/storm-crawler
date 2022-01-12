@@ -20,6 +20,8 @@ import com.digitalpebble.stormcrawler.util.Configurable;
  * Implementations of ParseFilter are responsible for extracting custom data from the crawled
  * content. They are used exclusively by {@link
  * com.digitalpebble.stormcrawler.bolt.JSoupParserBolt}.
+ *
+ * @see JSoupFilters for more information.
  */
 public interface JSoupFilter extends Configurable {
 

@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
 
+/** @see ConfigurableUtil for more information */
 public interface Configurable {
     /**
      * Called when this filter is being initialized

@@ -17,26 +17,24 @@ package com.digitalpebble.stormcrawler.protocol.selenium;
 import com.digitalpebble.stormcrawler.Metadata;
 import com.digitalpebble.stormcrawler.protocol.ProtocolResponse;
 import com.digitalpebble.stormcrawler.util.Configurable;
-import com.fasterxml.jackson.databind.JsonNode;
-import java.util.Map;
 import org.apache.storm.thrift.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-public abstract class NavigationFilter implements Configurable {
-    /**
-     * Called when this filter is being initialised
-     *
-     * @param stormConf The Storm configuration used for the parsing bolt
-     * @param filterParams the filter specific configuration. Never null
-     */
-    public void configure(@NotNull Map<String, Object> stormConf, @NotNull JsonNode filterParams) {}
+/**
+ * Implementations of NavigationFilter are responsible for extracting the page content and
+ * additional metadata via the provided {@link RemoteWebDriver}. They are used exclusively by {@link
+ * NavigationFilters}.
+ *
+ * @see NavigationFilters for more information.
+ */
+public interface NavigationFilter extends Configurable {
 
     /**
      * The end result comes from the first filter to return non-null.
      *
      * @return null if the filter does not fit
      */
-    public abstract @Nullable ProtocolResponse filter(
-            @NotNull RemoteWebDriver driver, @NotNull Metadata metadata);
+    @Nullable
+    ProtocolResponse filter(@NotNull RemoteWebDriver driver, @NotNull Metadata metadata);
 }

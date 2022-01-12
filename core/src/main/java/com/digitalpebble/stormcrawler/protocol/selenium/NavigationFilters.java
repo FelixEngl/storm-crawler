@@ -35,7 +35,7 @@ import org.slf4j.LoggerFactory;
  *
  * @see ConfigurableUtil#configure(Class, Class, Map, JsonNode) for more information.
  */
-public class NavigationFilters extends NavigationFilter {
+public class NavigationFilters implements NavigationFilter {
 
     public static final NavigationFilters emptyNavigationFilters = new NavigationFilters();
 
