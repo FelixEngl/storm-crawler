@@ -18,6 +18,7 @@ import com.digitalpebble.stormcrawler.Metadata;
 import com.digitalpebble.stormcrawler.protocol.ProtocolResponse;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Map;
+import org.apache.storm.thrift.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
@@ -30,6 +31,11 @@ public abstract class NavigationFilter {
      */
     public void configure(@NotNull Map<String, Object> stormConf, @NotNull JsonNode filterParams) {}
 
-    /** The end result comes from the first filter to return non-null * */
-    public abstract ProtocolResponse filter(RemoteWebDriver driver, Metadata metadata);
+    /**
+     * The end result comes from the first filter to return non-null.
+     *
+     * @return null if the filter does not fit
+     */
+    public abstract @Nullable ProtocolResponse filter(
+            @NotNull RemoteWebDriver driver, @NotNull Metadata metadata);
 }

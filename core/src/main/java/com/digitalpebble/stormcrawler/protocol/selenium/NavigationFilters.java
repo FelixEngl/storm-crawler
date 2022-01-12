@@ -29,6 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
+import org.apache.storm.thrift.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.LoggerFactory;
@@ -46,7 +47,8 @@ public class NavigationFilters extends NavigationFilter {
         filters = new NavigationFilter[0];
     }
 
-    public ProtocolResponse filter(RemoteWebDriver driver, Metadata metadata) {
+    public @Nullable ProtocolResponse filter(
+            @NotNull RemoteWebDriver driver, @NotNull Metadata metadata) {
         for (NavigationFilter filter : filters) {
             ProtocolResponse response = filter.filter(driver, metadata);
             if (response != null) return response;
@@ -79,7 +81,7 @@ public class NavigationFilters extends NavigationFilter {
      *
      * @throws IOException
      */
-    public NavigationFilters(@NotNull Map<String, Object> stormConf, String configFile)
+    public NavigationFilters(@NotNull Map<String, Object> stormConf, @NotNull String configFile)
             throws IOException {
         // load the JSON configFile
         // build a JSON object out of it
