@@ -16,13 +16,14 @@ package com.digitalpebble.stormcrawler.protocol.selenium;
 
 import com.digitalpebble.stormcrawler.Metadata;
 import com.digitalpebble.stormcrawler.protocol.ProtocolResponse;
+import com.digitalpebble.stormcrawler.util.Configurable;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.util.Map;
 import org.apache.storm.thrift.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-public abstract class NavigationFilter {
+public abstract class NavigationFilter implements Configurable {
     /**
      * Called when this filter is being initialised
      *

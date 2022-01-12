@@ -14,22 +14,74 @@ public final class ConfigurableUtil {
     private ConfigurableUtil() {}
 
     /**
-     * Used by classes URLFilters and ParseFilters classes to load the configuration of filters from
-     * JSON
+     * Calls {@link ConfigurableUtil#configure(String, Class, Map, JsonNode)} with {@code
+     * caller.getName()} for {@code configName}.
+     *
+     * @see ConfigurableUtil#configure(String, Class, Map, JsonNode) for more information.
      */
     public static <T extends Configurable> List<T> configure(
-            Map<String, Object> stormConf,
-            JsonNode filtersConf,
+            Class<?> caller,
             Class<T> filterClass,
-            String callingClass) {
+            Map<String, Object> stormConf,
+            JsonNode filtersConf) {
+        return configure(caller.getName(), filterClass, stormConf, filtersConf);
+    }
+
+    /**
+     * Used by classes like URLFilters and ParseFilters to load the configuration of utilized
+     * filters from the provided JSON config.
+     *
+     * <p>The functions searches for a childNode in {@code filtersConf} with the given {@code
+     * configName}. If the childNode is found it initializes all elements in the list provided by
+     * the {@code filtersConf} and initialized them as {@code filterClass}.
+     *
+     * <p>The following snippet shows the JSON-Schema for a config file, if the config file does not
+     * meet the schema, the function fails.
+     *
+     * <pre>{@code
+     * {
+     *   "$id": "https://stormcrawler.net/schemas/configurable/config",
+     *   "$schema": "https://json-schema.org/draft/2020-12/schema",
+     *   "type": "object",
+     *   "properties": {
+     *     <configName>: {
+     *       "type": "array",
+     *       "contains": {
+     *         "type": "object",
+     *         "properties": {
+     *           "name": {
+     *             "type": "string",
+     *             "default": "<unnamed>"
+     *           },
+     *           "class": {
+     *             "type": "string"
+     *           },
+     *           "properties": {
+     *             "type": "array",
+     *             "default": null
+     *           }
+     *         },
+     *         "required": [
+     *           "class"
+     *         ]
+     *       }
+     *     }
+     *   }
+     * }
+     * }</pre>
+     */
+    public static <T extends Configurable> List<T> configure(
+            String configName,
+            Class<T> filterClass,
+            Map<String, Object> stormConf,
+            JsonNode filtersConf) {
         // initialises the filters
         List<T> filterLists = new ArrayList<>();
 
         // get the filters part
-        filtersConf = filtersConf.get(callingClass);
-
+        filtersConf = filtersConf.get(configName);
         if (filtersConf == null) {
-            LOG.info("No field {} in JSON config. Skipping", callingClass);
+            LOG.info("No field {} in JSON config. Skipping...", configName);
             return filterLists;
         }
 

@@ -38,7 +38,11 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.LoggerFactory;
 
-/** Wrapper for the JSoupFilters defined in a JSON configuration */
+/**
+ * Wrapper for the JSoupFilters defined in a JSON configuration
+ *
+ * @see ConfigurableUtil#configure(Class, Class, Map, JsonNode) for more information.
+ */
 public class JSoupFilters implements JSoupFilter, JSONResource {
 
     public static final JSoupFilters emptyParseFilter = new JSoupFilters();
@@ -106,7 +110,7 @@ public class JSoupFilters implements JSoupFilter, JSONResource {
     public void configure(@NotNull Map<String, Object> stormConf, @NotNull JsonNode filtersConf) {
         List<JSoupFilter> list =
                 ConfigurableUtil.configure(
-                        stormConf, filtersConf, JSoupFilter.class, this.getClass().getName());
+                        this.getClass(), JSoupFilter.class, stormConf, filtersConf);
         filters = list.toArray(new JSoupFilter[0]);
     }
 

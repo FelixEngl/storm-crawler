@@ -41,7 +41,11 @@ import org.jsoup.nodes.Document;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DocumentFragment;
 
-/** Wrapper for the ParseFilters defined in a JSON configuration */
+/**
+ * Wrapper for the ParseFilters defined in a JSON configuration
+ *
+ * @see ConfigurableUtil#configure(Class, Class, Map, JsonNode) for more information.
+ */
 public class ParseFilters extends ParseFilter implements JSONResource {
 
     public static final ParseFilters emptyParseFilter = new ParseFilters();
@@ -106,7 +110,7 @@ public class ParseFilters extends ParseFilter implements JSONResource {
     public void configure(@NotNull Map<String, Object> stormConf, @NotNull JsonNode filtersConf) {
         List<ParseFilter> list =
                 ConfigurableUtil.configure(
-                        stormConf, filtersConf, ParseFilter.class, this.getClass().getName());
+                        this.getClass(), ParseFilter.class, stormConf, filtersConf);
         filters = list.toArray(new ParseFilter[0]);
     }
 

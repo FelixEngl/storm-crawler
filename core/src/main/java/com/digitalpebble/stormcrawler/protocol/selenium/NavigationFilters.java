@@ -17,15 +17,11 @@ package com.digitalpebble.stormcrawler.protocol.selenium;
 import com.digitalpebble.stormcrawler.Metadata;
 import com.digitalpebble.stormcrawler.protocol.ProtocolResponse;
 import com.digitalpebble.stormcrawler.util.ConfUtils;
-import com.digitalpebble.stormcrawler.util.InitialisationUtil;
-import com.digitalpebble.stormcrawler.util.exceptions.initialisation.SuperclassNotAssignableException;
+import com.digitalpebble.stormcrawler.util.ConfigurableUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.NullNode;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
@@ -34,7 +30,11 @@ import org.jetbrains.annotations.NotNull;
 import org.openqa.selenium.remote.RemoteWebDriver;
 import org.slf4j.LoggerFactory;
 
-/** Wrapper for the NavigationFilter defined in a JSON configuration */
+/**
+ * Wrapper for the NavigationFilter defined in a JSON configuration
+ *
+ * @see ConfigurableUtil#configure(Class, Class, Map, JsonNode) for more information.
+ */
 public class NavigationFilters extends NavigationFilter {
 
     public static final NavigationFilters emptyNavigationFilters = new NavigationFilters();
@@ -98,59 +98,9 @@ public class NavigationFilters extends NavigationFilter {
 
     @Override
     public void configure(@NotNull Map<String, Object> stormConf, @NotNull JsonNode filtersConf) {
-        // initialises the filters
-        List<NavigationFilter> filterLists = new ArrayList<>();
-
-        // get the filters part
-        String name = getClass().getCanonicalName();
-        filtersConf = filtersConf.get(name);
-
-        if (filtersConf == null) {
-            LOG.info("No field {} in JSON config. Skipping", name);
-            filters = new NavigationFilter[0];
-            return;
-        }
-
-        // conf node contains a list of objects
-        Iterator<JsonNode> filterIter = filtersConf.elements();
-        while (filterIter.hasNext()) {
-            JsonNode afilterConf = filterIter.next();
-            String filterName = "<unnamed>";
-            JsonNode nameNode = afilterConf.get("name");
-            if (nameNode != null) {
-                filterName = nameNode.textValue();
-            }
-            JsonNode classNode = afilterConf.get("class");
-            if (classNode == null) {
-                LOG.error("Filter {} doesn't specified a 'class' attribute", filterName);
-                continue;
-            }
-            String className = classNode.textValue().trim();
-            filterName += '[' + className + ']';
-            // check that it is available and implements the interface
-            // NavigationFilter
-            try {
-                NavigationFilter filterInstance =
-                        InitialisationUtil.initializeFromQualifiedName(
-                                className, NavigationFilter.class);
-
-                JsonNode paramNode = afilterConf.get("params");
-                if (paramNode != null) {
-                    filterInstance.configure(stormConf, paramNode);
-                } else {
-                    // Pass in a nullNode if missing
-                    filterInstance.configure(stormConf, NullNode.getInstance());
-                }
-
-                filterLists.add(filterInstance);
-                LOG.info("Setup {}", filterName);
-            } catch (SuperclassNotAssignableException e) {
-                LOG.error("Filter {} does not extend NavigationFilter", filterName);
-            } catch (Exception e) {
-                LOG.error("Can't setup {}: {}", filterName, e);
-                throw new RuntimeException("Can't setup " + filterName, e);
-            }
-        }
+        List<NavigationFilter> filterLists =
+                ConfigurableUtil.configure(
+                        this.getClass(), NavigationFilter.class, stormConf, filtersConf);
 
         filters = filterLists.toArray(new NavigationFilter[0]);
     }

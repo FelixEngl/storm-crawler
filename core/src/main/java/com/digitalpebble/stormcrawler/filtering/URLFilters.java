@@ -32,7 +32,11 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 
-/** Wrapper for the URLFilters defined in a JSON configuration */
+/**
+ * Wrapper for the URLFilters defined in a JSON configuration.
+ *
+ * @see ConfigurableUtil#configure(Class, Class, Map, JsonNode) for more information.
+ */
 public class URLFilters implements URLFilter, JSONResource {
 
     public static final URLFilters emptyURLFilters = new URLFilters();
@@ -121,7 +125,7 @@ public class URLFilters implements URLFilter, JSONResource {
     public void configure(@NotNull Map<String, Object> stormConf, @NotNull JsonNode filtersConf) {
         List<URLFilter> list =
                 ConfigurableUtil.configure(
-                        stormConf, filtersConf, URLFilter.class, this.getClass().getName());
+                        this.getClass(), URLFilter.class, stormConf, filtersConf);
         filters = list.toArray(new URLFilter[0]);
     }
 }
