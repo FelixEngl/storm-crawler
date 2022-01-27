@@ -26,6 +26,7 @@ import com.digitalpebble.stormcrawler.solr.persistence.SolrSpout;
 import com.digitalpebble.stormcrawler.solr.persistence.StatusUpdaterBolt;
 import org.apache.storm.topology.TopologyBuilder;
 import org.apache.storm.tuple.Fields;
+import org.jetbrains.annotations.NotNull;
 
 /** Dummy topology to play with the spouts and bolts on Solr */
 public class SolrCrawlTopology extends ConfigurableTopology {
@@ -35,7 +36,7 @@ public class SolrCrawlTopology extends ConfigurableTopology {
     }
 
     @Override
-    protected int run(String[] args) {
+    protected int run(@NotNull String[] args) {
         TopologyBuilder builder = new TopologyBuilder();
 
         builder.setSpout("spout", new SolrSpout());

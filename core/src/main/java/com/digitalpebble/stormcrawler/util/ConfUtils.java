@@ -19,11 +19,11 @@ import java.io.FileNotFoundException;
 import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.apache.storm.Config;
+import org.jetbrains.annotations.NotNull;
 import org.yaml.snakeyaml.Yaml;
 
 public class ConfUtils {
@@ -92,21 +92,26 @@ public class ConfUtils {
         return list;
     }
 
-    public static Config loadConf(String resource, Config conf) throws FileNotFoundException {
+    /**
+     * Loads the resource at {@code pathToResource} into the given {@code targetConfig}.
+     *
+     * @throws FileNotFoundException Thrown when {@code pathToResource} does not point to a file.
+     */
+    public static void loadConfInto(@NotNull String pathToResource, @NotNull Config targetConfig)
+            throws FileNotFoundException {
         Yaml yaml = new Yaml();
         Map<String, Object> ret =
                 yaml.load(
                         new InputStreamReader(
-                                new FileInputStream(resource), Charset.defaultCharset()));
+                                new FileInputStream(pathToResource), Charset.defaultCharset()));
+
         if (ret == null) {
-            ret = new HashMap<>();
+            return;
         }
+
         // contains a single config element ?
-        else {
-            ret = extractConfigElement(ret);
-        }
-        conf.putAll(ret);
-        return conf;
+        ret = extractConfigElement(ret);
+        targetConfig.putAll(ret);
     }
 
     /** If the config consists of a single key 'config', its values are used instead */

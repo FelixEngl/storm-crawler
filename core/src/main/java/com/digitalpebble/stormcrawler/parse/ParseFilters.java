@@ -165,7 +165,7 @@ public class ParseFilters extends ParseFilter implements JSONResource {
 
         if (cmd.hasOption("c")) {
             String confFile = cmd.getOptionValue("c");
-            ConfUtils.loadConf(confFile, conf);
+            ConfUtils.loadConfInto(confFile, conf);
         }
 
         ParseFilters filters = ParseFilters.fromConf(conf);

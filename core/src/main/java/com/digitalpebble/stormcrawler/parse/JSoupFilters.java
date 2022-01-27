@@ -142,7 +142,7 @@ public class JSoupFilters implements JSoupFilter, JSONResource {
 
         if (cmd.hasOption("c")) {
             String confFile = cmd.getOptionValue("c");
-            ConfUtils.loadConf(confFile, conf);
+            ConfUtils.loadConfInto(confFile, conf);
         }
 
         JSoupFilters filters = JSoupFilters.fromConf(conf);
