@@ -117,6 +117,8 @@ public abstract class ConfigurableTopology {
         final Pair<List<String>, String[]> result = extractConfFromArgs(args);
         final List<String> paths = result.value1;
         if (paths != null) {
+
+            // Check and warn for overrides.
             HashSet<String> distinctPaths = new HashSet<>(paths);
             if (distinctPaths.size() != paths.size()) {
                 for (String entry : distinctPaths) {
@@ -126,6 +128,7 @@ public abstract class ConfigurableTopology {
                     }
                 }
             }
+
             for (String path : paths) {
                 try {
                     ConfUtils.loadConfInto(path, conf);

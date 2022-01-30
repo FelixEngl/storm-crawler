@@ -14,17 +14,15 @@
  */
 package com.digitalpebble.stormcrawler.util;
 
-import java.io.FileInputStream;
+import static org.apache.storm.utils.Utils.findAndReadConfigFile;
+
 import java.io.FileNotFoundException;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.apache.storm.Config;
 import org.jetbrains.annotations.NotNull;
-import org.yaml.snakeyaml.Yaml;
 
 public class ConfUtils {
 
@@ -92,20 +90,12 @@ public class ConfUtils {
         return list;
     }
 
-    /**
-     * Loads the resource at {@code pathToResource} into the given {@code targetConfig}.
-     *
-     * @throws FileNotFoundException Thrown when {@code pathToResource} does not point to a file.
-     */
+    /** Loads the resource at {@code pathToResource} into the given {@code targetConfig}. */
     public static void loadConfInto(@NotNull String pathToResource, @NotNull Config targetConfig)
             throws FileNotFoundException {
-        Yaml yaml = new Yaml();
-        Map<String, Object> ret =
-                yaml.load(
-                        new InputStreamReader(
-                                new FileInputStream(pathToResource), Charset.defaultCharset()));
+        Map<String, Object> ret = findAndReadConfigFile(pathToResource);
 
-        if (ret == null) {
+        if (ret.isEmpty()) {
             return;
         }
 
