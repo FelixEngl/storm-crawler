@@ -20,6 +20,7 @@ import crawlercommons.robots.BaseRobotRules;
 import java.util.*;
 import org.apache.storm.Config;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -74,29 +75,30 @@ public class DelegatorProtocol implements Protocol {
             return protoInstance;
         }
 
-        public FilteredProtocol(String protocolimplementation, Object f, Config config) {
+        public FilteredProtocol(@NotNull String protocolImpl, @NotNull Config config) {
+            this(protocolImpl, config, null);
+        }
+
+        public FilteredProtocol(
+                @NotNull String protocolImpl,
+                @NotNull Config config,
+                @Nullable Map<String, String> filterImpls) {
 
             protoInstance =
-                    InitialisationUtil.initializeFromQualifiedName(
-                            protocolimplementation, Protocol.class);
+                    InitialisationUtil.initializeFromQualifiedName(protocolImpl, Protocol.class);
 
             protoInstance.configure(config);
 
             // instantiate filters
-            if (f != null) {
-                if (f instanceof Map) {
-                    ((Map<String, String>) f)
-                            .forEach(
-                                    (k, v) -> {
-                                        filters.add(new Filter(k, v));
-                                    });
-                } else {
-                    throw new RuntimeException("Can't instanciate filter " + f);
-                }
+            if (filterImpls != null) {
+                filterImpls.forEach(
+                        (k, v) -> {
+                            filters.add(new Filter(k, v));
+                        });
             }
 
             // log filters found
-            LOG.info("Loaded {} filters for {}", filters.size(), protocolimplementation);
+            LOG.info("Loaded {} filters for {}", filters.size(), protocolImpl);
         }
 
         public ProtocolResponse getProtocolOutput(String url, Metadata metadata) throws Exception {
@@ -151,11 +153,19 @@ public class DelegatorProtocol implements Protocol {
 
         // should contain a list of maps
         // each map having a className and optionally a number of filters
-        if (obj instanceof Collection) {
-            for (Map subConf : (Collection<Map>) obj) {
+        if (obj instanceof Iterable) {
+            //noinspection unchecked
+            for (Map<String, Object> subConf : (Iterable<? extends Map<String, Object>>) obj) {
                 String className = (String) subConf.get("className");
                 Object filters = subConf.get("filters");
-                protocols.add(new FilteredProtocol(className, filters, conf));
+                FilteredProtocol protocol;
+                if (filters == null) {
+                    protocol = new FilteredProtocol(className, conf);
+                } else {
+                    //noinspection unchecked
+                    protocol = new FilteredProtocol(className, conf, (Map<String, String>) filters);
+                }
+                protocols.add(protocol);
             }
         } else { // single value?
             throw new RuntimeException(
