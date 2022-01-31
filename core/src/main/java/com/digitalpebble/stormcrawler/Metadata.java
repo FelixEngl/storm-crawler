@@ -81,8 +81,8 @@ public class Metadata {
         return values[0];
     }
 
-    @Nullable
     /** @return the first value for the key or null if it does not exist, given a prefix */
+    @Nullable
     public String getFirstValue(@NotNull String key, @Nullable String prefix) {
         if (prefix == null || prefix.length() == 0) return getFirstValue(key);
         return getFirstValue(prefix + key);

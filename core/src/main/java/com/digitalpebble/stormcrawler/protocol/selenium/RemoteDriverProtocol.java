@@ -79,6 +79,6 @@ public class RemoteDriverProtocol extends SeleniumProtocol {
     }
 
     public static void main(String[] args) throws Exception {
-        RemoteDriverProtocol.main(new RemoteDriverProtocol(), args);
+        RemoteDriverProtocol.mainForTest(new RemoteDriverProtocol(), args);
     }
 }

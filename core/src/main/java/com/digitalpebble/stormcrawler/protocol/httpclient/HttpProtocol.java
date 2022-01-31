@@ -283,16 +283,27 @@ public class HttpProtocol extends AbstractHttpProtocol
             metadata.addValue(header.getName().toLowerCase(Locale.ROOT), header.getValue());
         }
 
-        MutableBoolean trimmed = new MutableBoolean();
-
-        byte[] bytes = new byte[] {};
+        byte[] bytes;
 
         if (!Status.REDIRECTION.equals(Status.fromHTTPCode(status))) {
-            bytes = HttpProtocol.toByteArray(response.getEntity(), maxContent, trimmed);
-            if (trimmed.booleanValue()) {
-                metadata.setValue(ProtocolResponse.TRIMMED_RESPONSE_KEY, "true");
-                LOG.warn("HTTP content trimmed to {}", bytes.length);
+            final HttpEntity responseEntity = response.getEntity();
+
+            // Check if we have response entity
+            if (responseEntity != null) {
+                MutableBoolean trimmed = new MutableBoolean(false);
+                bytes = HttpProtocol.toByteArray(responseEntity, maxContent, trimmed);
+                if (bytes == null) {
+                    bytes = new byte[0];
+                }
+                if (trimmed.booleanValue()) {
+                    metadata.setValue(ProtocolResponse.TRIMMED_RESPONSE_KEY, "true");
+                    LOG.warn("HTTP content trimmed to {}", bytes.length);
+                }
+            } else {
+                bytes = new byte[0];
             }
+        } else {
+            bytes = new byte[0];
         }
 
         if (storeHTTPHeaders) {
@@ -310,10 +321,8 @@ public class HttpProtocol extends AbstractHttpProtocol
 
     @Nullable
     private static byte[] toByteArray(
-            final HttpEntity entity, int maxContent, MutableBoolean trimmed) throws IOException {
-
-        if (entity == null) return new byte[] {};
-
+            @NotNull final HttpEntity entity, int maxContent, @NotNull MutableBoolean trimmed)
+            throws IOException {
         final InputStream instream = entity.getContent();
         if (instream == null) {
             return null;
@@ -347,6 +356,6 @@ public class HttpProtocol extends AbstractHttpProtocol
     }
 
     public static void main(String[] args) throws Exception {
-        HttpProtocol.main(new HttpProtocol(), args);
+        HttpProtocol.mainForTest(new HttpProtocol(), args);
     }
 }

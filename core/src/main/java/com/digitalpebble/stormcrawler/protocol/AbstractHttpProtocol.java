@@ -193,8 +193,9 @@ public abstract class AbstractHttpProtocol implements Protocol {
         return buf.toString();
     }
 
-    /** Called by extensions of this class * */
-    protected static void main(AbstractHttpProtocol protocol, String[] args) throws Exception {
+    /** Called by extensions of this class for testing */
+    protected static void mainForTest(AbstractHttpProtocol protocol, String[] args)
+            throws Exception {
         Config conf = new Config();
 
         // loads the default configuration file
@@ -218,8 +219,8 @@ public abstract class AbstractHttpProtocol implements Protocol {
         Set<Runnable> threads = new HashSet<>();
 
         class Fetchable implements Runnable {
-            String url;
-            Metadata md;
+            final String url;
+            final Metadata md;
 
             Fetchable(String line) {
                 StringTabScheme scheme = new StringTabScheme();

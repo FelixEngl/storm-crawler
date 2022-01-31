@@ -557,6 +557,6 @@ public class HttpProtocol extends AbstractHttpProtocol {
     }
 
     public static void main(String[] args) throws Exception {
-        HttpProtocol.main(new HttpProtocol(), args);
+        HttpProtocol.mainForTest(new HttpProtocol(), args);
     }
 }
