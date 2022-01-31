@@ -15,6 +15,8 @@
 package com.digitalpebble.stormcrawler.protocol;
 
 import com.digitalpebble.stormcrawler.Metadata;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ProtocolResponse {
 
@@ -44,6 +46,8 @@ public class ProtocolResponse {
     public static final String TRIMMED_RESPONSE_REASON_KEY = "http.trimmed.reason";
 
     /**
+     * The prefix must incluse
+     *
      * @since 1.17
      * @see <a href="https://github.com/DigitalPebble/storm-crawler/issues/776">Issue 776</a>
      */
@@ -68,13 +72,13 @@ public class ProtocolResponse {
     private final int statusCode;
     private final Metadata metadata;
 
-    public ProtocolResponse(byte[] c, int s, Metadata md) {
+    public ProtocolResponse(@NotNull byte[] c, int s, @Nullable Metadata md) {
         content = c;
         statusCode = s;
         metadata = md == null ? new Metadata() : md;
     }
 
-    public byte[] getContent() {
+    public @NotNull byte[] getContent() {
         return content;
     }
 
@@ -82,7 +86,7 @@ public class ProtocolResponse {
         return statusCode;
     }
 
-    public Metadata getMetadata() {
+    public @NotNull Metadata getMetadata() {
         return metadata;
     }
 }
