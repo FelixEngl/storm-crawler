@@ -38,13 +38,7 @@ import crawlercommons.sitemaps.extension.Extension;
 import crawlercommons.sitemaps.extension.ExtensionMetadata;
 import java.io.IOException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.storm.metric.api.MeanReducer;
 import org.apache.storm.metric.api.ReducedMetric;
@@ -83,7 +77,7 @@ public class SiteMapParserBolt extends StatusEmitterBolt {
     /** Delay in minutes used for scheduling sub-sitemaps * */
     private int scheduleSitemapsWithDelay = -1;
 
-    private List<Extension> extensionsToParse;
+    private EnumSet<Extension> extensionsToParse;
 
     @Override
     public void execute(Tuple tuple) {
@@ -342,7 +336,8 @@ public class SiteMapParserBolt extends StatusEmitterBolt {
                 ConfUtils.getInt(stormConf, "sitemap.schedule.delay", scheduleSitemapsWithDelay);
         List<String> extensionsStrings =
                 ConfUtils.loadListFromConf("sitemap.extensions", stormConf);
-        extensionsToParse = new ArrayList<>(extensionsStrings.size());
+
+        extensionsToParse = EnumSet.noneOf(Extension.class);
 
         for (String type : extensionsStrings) {
             Extension extension = Extension.valueOf(type);

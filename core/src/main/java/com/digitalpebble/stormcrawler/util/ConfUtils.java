@@ -122,7 +122,8 @@ public class ConfUtils {
      * Return one or more Strings regardless of whether they are represented as a single String or a
      * list in the config or an empty List if no value could be found for that key.
      */
-    public static List<String> loadListFromConf(String paramKey, Map<String, Object> stormConf) {
+    public static @NotNull List<String> loadListFromConf(
+            @NotNull String paramKey, @NotNull Map<String, Object> stormConf) {
         Object obj = stormConf.get(paramKey);
         List<String> list = new LinkedList<>();
 
