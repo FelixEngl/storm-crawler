@@ -40,14 +40,21 @@ public final class PartitionUtil {
             @NotNull Map<String, Object> stormConf,
             @NotNull String partitionModeKey,
             @NotNull PartitionMode fallback) {
-        String partitionModeStringValue = ConfUtils.getString(stormConf, partitionModeKey);
+        Object partitionModeValue = stormConf.get(partitionModeKey);
 
-        PartitionMode partitionMode = PartitionMode.parseQueueModeLabel(partitionModeStringValue);
+        PartitionMode partitionMode;
+
+        // In some cases the partitionmode is set as enum value
+        if (partitionModeValue instanceof PartitionMode) {
+            partitionMode = (PartitionMode) partitionModeValue;
+        } else {
+            partitionMode = PartitionMode.parseQueueModeLabel((String) partitionModeValue);
+        }
 
         if (partitionMode == null) {
             LOG.error(
                     "Unknown partition mode : {} - forcing to {}",
-                    partitionModeStringValue,
+                    partitionModeValue,
                     fallback.label);
             partitionMode = fallback;
         }

@@ -17,12 +17,11 @@ package com.digitalpebble.stormcrawler.util;
 import static org.apache.storm.utils.Utils.findAndReadConfigFile;
 
 import java.io.FileNotFoundException;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import org.apache.storm.Config;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ConfUtils {
 
@@ -70,6 +69,53 @@ public class ConfUtils {
             ret = defaultValue;
         }
         return (String) ret;
+    }
+
+    @Contract(value = "_, null -> null", pure = true)
+    private static <T extends Enum<T>> T convertToEnumOrNull(
+            @NotNull Class<T> enumClass, @Nullable Object toConvert) {
+
+        if (toConvert == null) return null;
+
+        if (toConvert instanceof String) {
+            return Enum.valueOf(enumClass, (String) toConvert);
+        } else if (enumClass.isInstance(toConvert)) {
+            //noinspection unchecked
+            return (T) toConvert;
+        } else {
+            return null;
+        }
+    }
+
+    private static <T extends Enum<T>> T convertToEnum(
+            @NotNull Class<T> enumClass, @NotNull Object toConvert) {
+        T retVal = convertToEnumOrNull(enumClass, toConvert);
+        if (retVal == null) {
+            throw new RuntimeException(
+                    String.format("Can not convert %s to %s", toConvert, enumClass.getName()));
+        }
+        return retVal;
+    }
+
+    @Contract(pure = true)
+    public static <T extends Enum<T>> T getEnum(
+            @NotNull Class<T> enumClass, @NotNull Map<String, Object> conf, @NotNull String key) {
+        Object value = Objects.requireNonNull(conf.get(key));
+        return convertToEnum(enumClass, value);
+    }
+
+    @Contract(pure = true)
+    public static <T extends Enum<T>> T getEnumOrNull(
+            @NotNull Class<T> enumClass,
+            @NotNull Map<String, Object> conf,
+            @NotNull String key,
+            @Nullable T defaultValue) {
+        Object value = conf.get(key);
+        if (value == null) {
+            return defaultValue;
+        } else {
+            return convertToEnumOrNull(enumClass, value);
+        }
     }
 
     /**
