@@ -16,14 +16,19 @@ public enum URLResolver {
     NOTHING {
         @NotNull
         @Override
-        public URL resolve(@NotNull URL url) {
+        public URL resolveDirect(@NotNull URL url) {
             return url;
+        }
+
+        @Override
+        public ResolvedUrl resolve(@NotNull URL url) {
+            return ResolvedUrl.of(url);
         }
 
         @Contract("_ -> fail")
         @NotNull
         @Override
-        protected String getNewAddressName(@NotNull URL url) throws UnsupportedOperationException {
+        protected String resolveHostAddress(@NotNull URL url) throws UnsupportedOperationException {
             throw new UnsupportedOperationException(
                     "Nothing does literally nothing else than returning the same value.");
         }
@@ -31,7 +36,7 @@ public enum URLResolver {
     IP {
         @NotNull
         @Override
-        protected String getNewAddressName(@NotNull URL url) throws UnknownHostException {
+        protected String resolveHostAddress(@NotNull URL url) throws UnknownHostException {
             final InetAddress byName = InetAddress.getByName(url.getHost());
             return byName.getHostAddress();
         }
@@ -39,7 +44,7 @@ public enum URLResolver {
     IPv4 {
         @NotNull
         @Override
-        protected String getNewAddressName(@NotNull URL url) throws UnknownHostException {
+        protected String resolveHostAddress(@NotNull URL url) throws UnknownHostException {
             final InetAddress byName = Inet4Address.getByName(url.getHost());
             return byName.getHostAddress();
         }
@@ -48,7 +53,7 @@ public enum URLResolver {
     IPv6 {
         @NotNull
         @Override
-        protected String getNewAddressName(@NotNull URL url) throws UnknownHostException {
+        protected String resolveHostAddress(@NotNull URL url) throws UnknownHostException {
             final InetAddress byName = Inet6Address.getByName(url.getHost());
             return byName.getHostAddress();
         }
@@ -56,7 +61,7 @@ public enum URLResolver {
     HOSTNAME {
         @NotNull
         @Override
-        protected String getNewAddressName(@NotNull URL url) throws UnknownHostException {
+        protected String resolveHostAddress(@NotNull URL url) throws UnknownHostException {
             final InetAddress byName = InetAddress.getByName(url.getHost());
             return byName.getHostName();
         }
@@ -64,7 +69,7 @@ public enum URLResolver {
     CANONICAL_HOSTNAME {
         @NotNull
         @Override
-        protected String getNewAddressName(@NotNull URL url) throws UnknownHostException {
+        protected String resolveHostAddress(@NotNull URL url) throws UnknownHostException {
             final InetAddress byName = InetAddress.getByName(url.getHost());
             return byName.getCanonicalHostName();
         }
@@ -72,15 +77,78 @@ public enum URLResolver {
 
     protected static final org.slf4j.Logger LOG = LoggerFactory.getLogger(URLResolver.class);
 
+    /** A simple pair of original and resolved url. */
+    public static final class ResolvedUrl {
+        private final @NotNull URL origin;
+        private final @Nullable URL resolved;
+
+        public ResolvedUrl(@NotNull URL origin, @Nullable URL resolved) {
+            this.origin = origin;
+            this.resolved = resolved;
+        }
+
+        /**
+         * Creates a {@code URLTuple} with the given {@code origin} as {@code origin} and {@code
+         * resolved}.
+         */
+        @NotNull
+        public static ResolvedUrl of(@NotNull URL origin) {
+            return new ResolvedUrl(origin, origin);
+        }
+
+        /** Creates a {@code URLTuple} with the given {@code origin} and {@code resolved} URL. */
+        @NotNull
+        public static ResolvedUrl of(@NotNull URL origin, @Nullable URL resolved) {
+            return new ResolvedUrl(origin, resolved);
+        }
+
+        @NotNull
+        public URL getOrigin() {
+            return origin;
+        }
+
+        @Nullable
+        public URL getResolved() {
+            return resolved;
+        }
+
+        /**
+         * Returns either the {@link ResolvedUrl#resolved} url or the {@link ResolvedUrl#origin} if
+         * the resolving failed.
+         */
+        @NotNull
+        public URL getResolvedOrOrigin() {
+            if (resolved != null) return resolved;
+            return origin;
+        }
+
+        /** Returns true, if resolved is not null. */
+        @Contract(pure = true)
+        public boolean wasSuccessfullyResolved() {
+            return resolved != null;
+        }
+
+        /** Returns true, if resolved is null due to failed resolving. */
+        @Contract(pure = true)
+        public boolean wasNotSuccessfullyResolved() {
+            return resolved == null;
+        }
+
+        @Override
+        public String toString() {
+            return "ResolvedUrl{" + "origin=" + origin + ", resolved=" + resolved + '}';
+        }
+    }
+
     /**
      * Tries to resolve the given {@code url} to a specific target. Returns {@code null} if it can
      * not resolve the {@code url}.
      */
     @Nullable
-    public URL resolve(@NotNull URL url) {
+    public URL resolveDirect(@NotNull URL url) {
         String replacement = null;
         try {
-            replacement = getNewAddressName(url);
+            replacement = resolveHostAddress(url);
             return new URL(url.getProtocol(), replacement, url.getPort(), url.getFile());
         } catch (UnknownHostException e) {
             LOG.warn("Was not able to resolve the address {} to {}.", url.toExternalForm(), name());
@@ -95,6 +163,15 @@ public enum URLResolver {
         }
     }
 
+    /**
+     * Tries to resolve the given {@code url} to a specific target. Always returns a {@link
+     * ResolvedUrl} instance.
+     */
+    public ResolvedUrl resolve(@NotNull URL url) {
+        return ResolvedUrl.of(url, resolveDirect(url));
+    }
+
+    /** Returns a string used as host-part in the new url. */
     @NotNull
-    protected abstract String getNewAddressName(@NotNull URL url) throws UnknownHostException;
+    protected abstract String resolveHostAddress(@NotNull URL url) throws UnknownHostException;
 }

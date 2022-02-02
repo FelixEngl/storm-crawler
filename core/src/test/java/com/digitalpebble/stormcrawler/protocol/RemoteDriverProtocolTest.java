@@ -4,6 +4,7 @@ import static org.junit.Assert.fail;
 
 import com.digitalpebble.stormcrawler.protocol.selenium.RemoteDriverProtocol;
 import com.digitalpebble.stormcrawler.util.ConfUtils;
+import com.digitalpebble.stormcrawler.util.URLResolver;
 import java.io.FileNotFoundException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -17,11 +18,6 @@ import org.junit.runners.Parameterized;
 
 @RunWith(Parameterized.class)
 public class RemoteDriverProtocolTest {
-
-    @Parameterized.Parameter public String pathToConfig;
-
-    @Parameterized.Parameter(1)
-    public Object[] expected;
 
     @Parameterized.Parameters(name = "{index}: {0}")
     public static List<Object> parametersForTesting() {
@@ -76,6 +72,11 @@ public class RemoteDriverProtocolTest {
         }
     }
 
+    @Parameterized.Parameter public String pathToConfig;
+
+    @Parameterized.Parameter(1)
+    public Object[] expected;
+
     @Test
     public void test_configs() {
         Config config = new Config();
@@ -85,7 +86,7 @@ public class RemoteDriverProtocolTest {
             fail("File was not found!");
             throw new RuntimeException(e);
         }
-        List<URL> urls;
+        List<URLResolver.ResolvedUrl> urls;
         try {
             urls = RemoteDriverProtocol.loadURLsFromConfig(config);
         } catch (MalformedURLException e) {
@@ -95,6 +96,7 @@ public class RemoteDriverProtocolTest {
 
         Assert.assertNotNull(urls);
 
-        Assert.assertArrayEquals(expected, urls.toArray());
+        Assert.assertArrayEquals(
+                expected, urls.stream().map(URLResolver.ResolvedUrl::getResolved).toArray());
     }
 }

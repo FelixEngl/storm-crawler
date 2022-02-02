@@ -16,6 +16,7 @@ package com.digitalpebble.stormcrawler.protocol.selenium;
 
 import com.digitalpebble.stormcrawler.util.ConfUtils;
 import com.digitalpebble.stormcrawler.util.URLResolver;
+import com.digitalpebble.stormcrawler.util.URLResolver.ResolvedUrl;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
@@ -75,14 +76,15 @@ public class RemoteDriverProtocol extends SeleniumProtocol {
     public static final String SELENIUM_SCRIPT_TIMEOUT = "selenium.scriptTimeout";
 
     @Nullable
-    public static List<URL> loadURLsFromConfig(@NotNull Config conf) throws MalformedURLException {
+    public static List<ResolvedUrl> loadURLsFromConfig(@NotNull Config conf)
+            throws MalformedURLException {
         Collection<Object> collection = ConfUtils.loadCollectionOrNull(conf, SELENIUM_ADDRESSES);
         if (collection == null) return null;
-        ArrayList<URL> retVal = new ArrayList<>(collection.size());
+        ArrayList<ResolvedUrl> retVal = new ArrayList<>(collection.size());
         for (Object entry : collection) {
-            URL url;
+            ResolvedUrl urlTuple;
             if (entry instanceof String) {
-                url = new URL((String) entry);
+                urlTuple = ResolvedUrl.of(new URL((String) entry));
             } else if (entry instanceof Map<?, ?>) {
                 //noinspection unchecked
                 Map<String, Object> subConfig = (Map<String, Object>) entry;
@@ -94,23 +96,21 @@ public class RemoteDriverProtocol extends SeleniumProtocol {
                                     SELENIUM_ADDRESSES));
                 }
 
-                url = new URL(address);
+                URL origin = new URL(address);
 
                 URLResolver strategy =
                         ConfUtils.getEnumOrDefault(subConfig, "resolve", null, URLResolver.class);
 
                 if (strategy != null) {
-                    URL resolved = strategy.resolve(url);
-                    if (resolved != null) {
-                        url = resolved;
-                    }
+                    urlTuple = strategy.resolve(origin);
+                } else {
+                    urlTuple = ResolvedUrl.of(origin);
                 }
-
             } else {
                 throw new RuntimeException(
                         String.format("Unsupported entry at %s", SELENIUM_ADDRESSES));
             }
-            retVal.add(url);
+            retVal.add(urlTuple);
         }
         return retVal;
     }
@@ -138,7 +138,7 @@ public class RemoteDriverProtocol extends SeleniumProtocol {
             }
         }
 
-        List<URL> urls;
+        List<ResolvedUrl> urls;
         try {
             urls = loadURLsFromConfig(conf);
         } catch (MalformedURLException e) {
@@ -150,8 +150,13 @@ public class RemoteDriverProtocol extends SeleniumProtocol {
             throw new RuntimeException(String.format("No value found for %s", SELENIUM_ADDRESSES));
         }
 
-        for (URL url : urls) {
-            RemoteWebDriver driver = new RemoteWebDriver(url, capabilities);
+        for (ResolvedUrl resolvedUrl : urls) {
+            if (resolvedUrl.wasNotSuccessfullyResolved()) {
+                LOG.warn("The url {} was not successfully resolved.", resolvedUrl.getOrigin());
+            }
+            LOG.info("Create RemoteWebDriver for: {}", resolvedUrl);
+            RemoteWebDriver driver =
+                    new RemoteWebDriver(resolvedUrl.getResolvedOrOrigin(), capabilities);
             Timeouts touts = driver.manage().timeouts();
             int implicitWait = ConfUtils.getInt(conf, SELENIUM_IMPLICIT_WAIT, 0);
             int pageLoadTimeout = ConfUtils.getInt(conf, SELENIUM_PAYLOAD_TIMEOUT, 0);
