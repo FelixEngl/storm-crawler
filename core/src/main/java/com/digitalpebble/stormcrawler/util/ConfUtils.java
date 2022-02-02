@@ -59,11 +59,14 @@ public class ConfUtils {
         return (Boolean) ret;
     }
 
-    public static String getString(Map<String, Object> conf, String key) {
+    @Nullable
+    public static String getString(@NotNull Map<String, Object> conf, @NotNull String key) {
         return (String) conf.get(key);
     }
 
-    public static String getString(Map<String, Object> conf, String key, String defaultValue) {
+    @Nullable
+    public static String getString(
+            @NotNull Map<String, Object> conf, @NotNull String key, @Nullable String defaultValue) {
         Object ret = conf.get(key);
         if (ret == null) {
             ret = defaultValue;
@@ -71,7 +74,8 @@ public class ConfUtils {
         return (String) ret;
     }
 
-    @Contract(value = "_, null -> null", pure = true)
+    @Nullable
+    @Contract(value = "_, null -> null")
     private static <T extends Enum<T>> T convertToEnumOrNull(
             @NotNull Class<T> enumClass, @Nullable Object toConvert) {
 
@@ -87,6 +91,7 @@ public class ConfUtils {
         }
     }
 
+    @NotNull
     private static <T extends Enum<T>> T convertToEnum(
             @NotNull Class<T> enumClass, @NotNull Object toConvert) {
         T retVal = convertToEnumOrNull(enumClass, toConvert);
@@ -97,19 +102,19 @@ public class ConfUtils {
         return retVal;
     }
 
-    @Contract(pure = true)
+    @NotNull
     public static <T extends Enum<T>> T getEnum(
-            @NotNull Class<T> enumClass, @NotNull Map<String, Object> conf, @NotNull String key) {
+            @NotNull Map<String, Object> conf, @NotNull String key, @NotNull Class<T> enumClass) {
         Object value = Objects.requireNonNull(conf.get(key));
         return convertToEnum(enumClass, value);
     }
 
-    @Contract(pure = true)
-    public static <T extends Enum<T>> T getEnumOrNull(
-            @NotNull Class<T> enumClass,
+    @Nullable
+    public static <T extends Enum<T>> T getEnumOrDefault(
             @NotNull Map<String, Object> conf,
             @NotNull String key,
-            @Nullable T defaultValue) {
+            @Nullable T defaultValue,
+            @NotNull Class<T> enumClass) {
         Object value = conf.get(key);
         if (value == null) {
             return defaultValue;
@@ -119,12 +124,127 @@ public class ConfUtils {
     }
 
     /**
+     * Returns either a collection of objects or throws a RuntimeException. If there is only one
+     * value it <b>throws a RuntimeException</b>.
+     *
+     * @see ConfUtils {@link ConfUtils#loadCollection(Map, String)} for a single friendly
+     *     alternative.
+     */
+    @NotNull
+    public static Collection<Object> getCollection(
+            @NotNull Map<String, Object> conf, @NotNull String key) {
+        Collection<Object> obj = getCollectionOrNull(conf, key);
+        if (obj == null) {
+            throw new RuntimeException(
+                    String.format("There is no Collection value for the key '%s'.", key));
+        }
+        return obj;
+    }
+
+    /**
+     * Returns either a collection of objects or null. If there is only one value it also returns
+     * null.
+     *
+     * @see ConfUtils {@link ConfUtils#loadCollectionOrNull(Map, String)} for a single friendly
+     *     alternative.
+     */
+    @Nullable
+    public static Collection<Object> getCollectionOrNull(
+            @NotNull Map<String, Object> conf, @NotNull String key) {
+        Object obj = conf.get(key);
+        if (obj == null) {
+            return null;
+        }
+        //noinspection unchecked
+        return (Collection<Object>) obj;
+    }
+
+    /**
+     * Returns either a collection of objects or throws a RuntimeException. If there is only one
+     * value, it will return a SingletonList.
+     */
+    @NotNull
+    public static Collection<Object> loadCollection(
+            @NotNull Map<String, Object> conf, @NotNull String key) {
+        Collection<Object> collection = loadCollectionOrNull(conf, key);
+        if (collection == null) {
+            throw new RuntimeException(
+                    String.format("There is no Collection value for the key '%s'.", key));
+        }
+        return collection;
+    }
+
+    /**
+     * Returns either a collection ob objects or null. If there is only one value, it will return a
+     * SingletonList.
+     */
+    @Nullable
+    public static Collection<Object> loadCollectionOrNull(
+            @NotNull Map<String, Object> conf, @NotNull String key) {
+        Object obj = conf.get(key);
+        if (obj == null) {
+            return null;
+        }
+        if (obj instanceof Collection) {
+            //noinspection unchecked
+            return (Collection<Object>) obj;
+        } else {
+            return Collections.singletonList(obj);
+        }
+    }
+
+    @Nullable
+    public static Map<String, Object> getSubConfig(
+            @NotNull Map<String, Object> conf, @NotNull String key) {
+        Object obj = conf.get(key);
+        if (obj == null) {
+            return null;
+        }
+        //noinspection unchecked
+        return (Map<String, Object>) obj;
+    }
+
+    /**
+     * Returns either a Map or a reference to {@link Collections#EMPTY_MAP}. If {@code key} is not
+     * in {@code conf} it returns null.
+     */
+    @Nullable
+    public static Map<String, Object> loadSubConfigOrNull(
+            @NotNull Map<String, Object> conf, @NotNull String key) {
+        Object obj = conf.get(key);
+        if (obj == null) {
+            return null;
+        }
+        if (obj instanceof Map) {
+            //noinspection unchecked
+            return (Map<String, Object>) obj;
+        } else {
+            return Collections.emptyMap();
+        }
+    }
+
+    /**
+     * Returns either a Map or a reference to {@link Collections#EMPTY_MAP}. If {@code key} is not
+     * in {@code conf} it trows a RuntimeCollection.
+     */
+    @NotNull
+    public static Map<String, Object> loadSubConfig(
+            @NotNull Map<String, Object> conf, @NotNull String key) {
+        Map<String, Object> subConfig = loadSubConfigOrNull(conf, key);
+        if (subConfig == null) {
+            throw new RuntimeException(String.format("There is no SubConfig at key '%s'.", key));
+        }
+        return subConfig;
+    }
+
+    /**
      * Return one or more Strings regardless of whether they are represented as a single String or a
      * list in the config or an empty List if no value could be found for that key.
      */
-    public static @NotNull List<String> loadListFromConf(
-            @NotNull String paramKey, @NotNull Map<String, Object> stormConf) {
-        Object obj = stormConf.get(paramKey);
+    @NotNull
+    public static List<String> loadListFromConf(
+            @NotNull Map<String, Object> stormConf, @NotNull String key) {
+        Object obj = stormConf.get(key);
         List<String> list = new LinkedList<>();
 
         if (obj == null) return list;
@@ -137,8 +257,8 @@ public class ConfUtils {
         return list;
     }
 
-    /** Loads the resource at {@code pathToResource} into the given {@code targetConfig}. */
-    public static void loadConfInto(@NotNull String pathToResource, @NotNull Config targetConfig)
+    /** Loads the resource at {@code pathToResource} into the given {@code target}. */
+    public static void loadConfigIntoTarget(@NotNull String pathToResource, @NotNull Config target)
             throws FileNotFoundException {
         Map<String, Object> ret = findAndReadConfigFile(pathToResource);
 
@@ -148,7 +268,7 @@ public class ConfUtils {
 
         // contains a single config element ?
         ret = extractConfigElement(ret);
-        targetConfig.putAll(ret);
+        target.putAll(ret);
     }
 
     /** If the config consists of a single key 'config', its values are used instead */

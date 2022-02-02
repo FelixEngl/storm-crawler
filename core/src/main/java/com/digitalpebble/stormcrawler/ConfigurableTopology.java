@@ -131,7 +131,7 @@ public abstract class ConfigurableTopology {
 
             for (String path : paths) {
                 try {
-                    ConfUtils.loadConfInto(path, conf);
+                    ConfUtils.loadConfigIntoTarget(path, conf);
                 } catch (FileNotFoundException e) {
                     throw new RuntimeException("File not found : " + path, e);
                 }

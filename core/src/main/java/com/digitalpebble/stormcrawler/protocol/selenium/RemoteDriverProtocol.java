@@ -15,13 +15,18 @@
 package com.digitalpebble.stormcrawler.protocol.selenium;
 
 import com.digitalpebble.stormcrawler.util.ConfUtils;
+import com.digitalpebble.stormcrawler.util.URLResolver;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.time.Duration;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import org.apache.storm.Config;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.openqa.selenium.WebDriver.Timeouts;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -29,8 +34,86 @@ import org.openqa.selenium.remote.RemoteWebDriver;
 /**
  * Delegates the requests to one or more remote selenium servers. The processes must be started /
  * stopped separately. The URLs to connect to are specified with the config 'selenium.addresses'.
+ *
+ * <p>Is configured like this:
+ *
+ * <pre>
+ *   selenium.addresses:
+ *     # Similar to the second address
+ *     - http://first-address:4444
+ *     - address: http://second-address:4444
+ *     - address: http://second-address:4444
+ *       resolveTo: NOTHING
+ *     - address: http://third-address:4444
+ *       resolveTo: IP
+ *     - address: http://fourth-address:4444
+ *       resolveTo: IPv4
+ *     - address: http://fifth-address:4444
+ *       resolveTo: IPv6
+ *     - address: http://first-IP-address:4444
+ *       resolveTo: HOSTNAME
+ *     - address: http://second-IP-address:4444
+ *       resolveTo: CANONICAL_HOSTNAME
+ *   selenium.implicitlyWait: 1000000
+ *   selenium.pageLoadTimeout: 1000000
+ *   selenium.scriptTimeout: 1000000
+ *   selenium.capabilities:
+ *     takesScreenshot: true
+ *     loadImages: true
+ *     javascriptEnabled: true
+ *     browserName: chrome
+ * </pre>
+ *
+ * @see URLResolver for possible resolveTo targets.
  */
 public class RemoteDriverProtocol extends SeleniumProtocol {
+
+    public static final String SELENIUM_CAPABILITIES = "selenium.capabilities";
+    public static final String SELENIUM_ADDRESSES = "selenium.addresses";
+    public static final String SELENIUM_IMPLICIT_WAIT = "selenium.implicitlyWait";
+    public static final String SELENIUM_PAYLOAD_TIMEOUT = "selenium.pageLoadTimeout";
+    public static final String SELENIUM_SCRIPT_TIMEOUT = "selenium.scriptTimeout";
+
+    @Nullable
+    public static List<URL> loadURLsFromConfig(@NotNull Config conf) throws MalformedURLException {
+        Collection<Object> collection = ConfUtils.loadCollectionOrNull(conf, SELENIUM_ADDRESSES);
+        if (collection == null) return null;
+        ArrayList<URL> retVal = new ArrayList<>(collection.size());
+        for (Object entry : collection) {
+            URL url;
+            if (entry instanceof String) {
+                url = new URL((String) entry);
+            } else if (entry instanceof Map<?, ?>) {
+                //noinspection unchecked
+                Map<String, Object> subConfig = (Map<String, Object>) entry;
+                String address = ConfUtils.getString(subConfig, "address");
+                if (address == null) {
+                    throw new RuntimeException(
+                            String.format(
+                                    "The config for a %s entry is missing an 'address' field.",
+                                    SELENIUM_ADDRESSES));
+                }
+
+                url = new URL(address);
+
+                URLResolver strategy =
+                        ConfUtils.getEnumOrDefault(subConfig, "resolveTo", null, URLResolver.class);
+
+                if (strategy != null) {
+                    URL resolved = strategy.resolve(url);
+                    if (resolved != null) {
+                        url = resolved;
+                    }
+                }
+
+            } else {
+                throw new RuntimeException(
+                        String.format("Unsupported entry at %s", SELENIUM_ADDRESSES));
+            }
+            retVal.add(url);
+        }
+        return retVal;
+    }
 
     @Override
     public void configure(@NotNull Config conf) {
@@ -43,8 +126,7 @@ public class RemoteDriverProtocol extends SeleniumProtocol {
         String userAgentString = getAgentString(conf);
 
         // custom capabilities
-        Map<String, Object> confCapabilities =
-                (Map<String, Object>) conf.get("selenium.capabilities");
+        Map<String, Object> confCapabilities = ConfUtils.getSubConfig(conf, SELENIUM_CAPABILITIES);
         if (confCapabilities != null) {
             for (Entry<String, Object> entry : confCapabilities.entrySet()) {
                 Object val = entry.getValue();
@@ -56,25 +138,28 @@ public class RemoteDriverProtocol extends SeleniumProtocol {
             }
         }
 
-        // load adresses from config
-        List<String> addresses = ConfUtils.loadListFromConf("selenium.addresses", conf);
-        if (addresses.isEmpty()) {
-            throw new RuntimeException("No value found for selenium.addresses");
-        }
+        List<URL> urls;
         try {
-            for (String cdaddress : addresses) {
-                RemoteWebDriver driver = new RemoteWebDriver(new URL(cdaddress), capabilities);
-                Timeouts touts = driver.manage().timeouts();
-                int implicitWait = ConfUtils.getInt(conf, "selenium.implicitlyWait", 0);
-                int pageLoadTimeout = ConfUtils.getInt(conf, "selenium.pageLoadTimeout", 0);
-                int scriptTimeout = ConfUtils.getInt(conf, "selenium.scriptTimeout", 0);
-                touts.implicitlyWait(Duration.ofMillis(implicitWait));
-                touts.pageLoadTimeout(Duration.ofMillis(pageLoadTimeout));
-                touts.scriptTimeout(Duration.ofMillis(scriptTimeout));
-                drivers.add(driver);
-            }
-        } catch (Exception e) {
+            urls = loadURLsFromConfig(conf);
+        } catch (MalformedURLException e) {
             throw new RuntimeException(e);
+        }
+
+        // load adresses from config
+        if (urls == null) {
+            throw new RuntimeException(String.format("No value found for %s", SELENIUM_ADDRESSES));
+        }
+
+        for (URL url : urls) {
+            RemoteWebDriver driver = new RemoteWebDriver(url, capabilities);
+            Timeouts touts = driver.manage().timeouts();
+            int implicitWait = ConfUtils.getInt(conf, SELENIUM_IMPLICIT_WAIT, 0);
+            int pageLoadTimeout = ConfUtils.getInt(conf, SELENIUM_PAYLOAD_TIMEOUT, 0);
+            int scriptTimeout = ConfUtils.getInt(conf, SELENIUM_SCRIPT_TIMEOUT, 0);
+            touts.implicitlyWait(Duration.ofMillis(implicitWait));
+            touts.pageLoadTimeout(Duration.ofMillis(pageLoadTimeout));
+            touts.scriptTimeout(Duration.ofMillis(scriptTimeout));
+            drivers.add(driver);
         }
     }
 

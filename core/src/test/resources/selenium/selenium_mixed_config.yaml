@@ -1,0 +1,16 @@
+selenium.addresses:
+  # Similar to the second address
+  - http://stormcrawler.net/
+  - address: http://stormcrawler.net/
+  - address: http://stormcrawler.net/
+    resolveTo: NOTHING
+  - address: http://localhost:4444/
+    resolveTo: IP
+  - address: http://localhost:4444/
+    resolveTo: IPv4
+  - address: http://localhost:4444/
+    resolveTo: IPv6
+  - address: http://127.0.0.1:4444
+    resolveTo: HOSTNAME
+  - address: http://localhost:4444/
+    resolveTo: CANONICAL_HOSTNAME

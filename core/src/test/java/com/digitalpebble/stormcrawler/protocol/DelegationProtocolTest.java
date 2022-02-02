@@ -33,7 +33,7 @@ public class DelegationProtocolTest {
 
     @BeforeClass
     public static void beforeClass() throws Exception {
-        ConfUtils.loadConfInto("src/test/resources/delegator-conf.yaml", conf);
+        ConfUtils.loadConfigIntoTarget("src/test/resources/delegator-conf.yaml", conf);
         conf.put("http.agent.name", "this.is.only.a.test");
     }
 

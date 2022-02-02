@@ -335,7 +335,7 @@ public class SiteMapParserBolt extends StatusEmitterBolt {
         scheduleSitemapsWithDelay =
                 ConfUtils.getInt(stormConf, "sitemap.schedule.delay", scheduleSitemapsWithDelay);
         List<String> extensionsStrings =
-                ConfUtils.loadListFromConf("sitemap.extensions", stormConf);
+                ConfUtils.loadListFromConf(stormConf, "sitemap.extensions");
 
         extensionsToParse = EnumSet.noneOf(Extension.class);
 

@@ -32,13 +32,13 @@ import org.slf4j.LoggerFactory;
  * <pre>
  * protocol.delegator.config:
  * - className: "com.digitalpebble.stormcrawler.protocol.httpclient.HttpProtocol"
- * filters:
- * domain: "example.com"
- * depth: "3"
- * test: "true"
+ *   filters:
+ *     domain: "example.com"
+ *     depth: "3"
+ *     test: "true"
  * - className: "com.digitalpebble.stormcrawler.protocol.okhttp.HttpProtocol"
- * filters:
- * js: "true"
+ *   filters:
+ *     js: "true"
  * - className: "com.digitalpebble.stormcrawler.protocol.okhttp.HttpProtocol"
  * </pre>
  *
