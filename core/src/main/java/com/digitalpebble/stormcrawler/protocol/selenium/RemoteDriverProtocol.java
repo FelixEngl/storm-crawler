@@ -43,7 +43,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
  *     - http://first-address:4444
  *     - address: http://second-address:4444
  *     - address: http://second-address:4444
- *       resolveTo: NOTHING
+ *       resolve: NOTHING
  *     - address: http://third-address:4444
  *       resolve: IP
  *     - address: http://fourth-address:4444
