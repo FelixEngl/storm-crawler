@@ -45,15 +45,15 @@ import org.openqa.selenium.remote.RemoteWebDriver;
  *     - address: http://second-address:4444
  *       resolveTo: NOTHING
  *     - address: http://third-address:4444
- *       resolveTo: IP
+ *       resolve: IP
  *     - address: http://fourth-address:4444
- *       resolveTo: IPv4
+ *       resolve: IPv4
  *     - address: http://fifth-address:4444
- *       resolveTo: IPv6
+ *       resolve: IPv6
  *     - address: http://first-IP-address:4444
- *       resolveTo: HOSTNAME
+ *       resolve: HOSTNAME
  *     - address: http://second-IP-address:4444
- *       resolveTo: CANONICAL_HOSTNAME
+ *       resolve: CANONICAL_HOSTNAME
  *   selenium.implicitlyWait: 1000000
  *   selenium.pageLoadTimeout: 1000000
  *   selenium.scriptTimeout: 1000000
@@ -97,7 +97,7 @@ public class RemoteDriverProtocol extends SeleniumProtocol {
                 url = new URL(address);
 
                 URLResolver strategy =
-                        ConfUtils.getEnumOrDefault(subConfig, "resolveTo", null, URLResolver.class);
+                        ConfUtils.getEnumOrDefault(subConfig, "resolve", null, URLResolver.class);
 
                 if (strategy != null) {
                     URL resolved = strategy.resolve(url);
