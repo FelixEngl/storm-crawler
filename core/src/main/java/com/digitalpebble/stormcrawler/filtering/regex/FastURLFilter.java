@@ -18,8 +18,6 @@ import com.digitalpebble.stormcrawler.JSONResource;
 import com.digitalpebble.stormcrawler.Metadata;
 import com.digitalpebble.stormcrawler.filtering.URLFilter;
 import com.digitalpebble.stormcrawler.util.ConfUtils;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -78,11 +76,9 @@ public class FastURLFilter implements URLFilter, JSONResource {
 
     public void configure(@NotNull Map<String, Object> stormConf, @NotNull JsonNode filterParams) {
 
-        if (filterParams != null) {
-            JsonNode node = filterParams.get("file");
-            if (node != null && node.isTextual()) {
-                this.resourceFile = node.asText("fast.urlfilter.json");
-            }
+        JsonNode node = filterParams.get("file");
+        if (node != null && node.isTextual()) {
+            this.resourceFile = node.asText("fast.urlfilter.json");
         }
 
         // config via json failed - trying from global config
@@ -105,8 +101,7 @@ public class FastURLFilter implements URLFilter, JSONResource {
     }
 
     @Override
-    public void loadJSONResources(InputStream inputStream)
-            throws JsonParseException, JsonMappingException, IOException {
+    public void loadJSONResources(InputStream inputStream) throws IOException {
 
         JsonNode rootNode = objectMapper.readTree(inputStream);
         Rules rules = new Rules();
@@ -194,7 +189,7 @@ class Rules {
      * Returns true if the URL should be removed, false otherwise. The value returns the value of
      * the first matching rule, be it positive or negative.
      */
-    public boolean filter(@NotNull String url, @NotNull Metadata metadata)
+    public boolean filter(@NotNull String url, @Nullable Metadata metadata)
             throws MalformedURLException {
         URL u = new URL(url);
 
@@ -214,21 +209,23 @@ class Rules {
             }
         }
 
-        // check on parent's URL metadata
-        for (MDScope scope : metadataRules) {
-            String[] vals = metadata.getValues(scope.getKey());
-            if (vals == null) {
-                continue;
-            }
-            for (String v : vals) {
-                if (v.equalsIgnoreCase(scope.getValue())) {
-                    FastURLFilter.LOG.debug(
-                            "Filtering {} matching metadata {}:{}",
-                            url,
-                            scope.getKey(),
-                            scope.getValue());
-                    if (checkScope(scope, u)) {
-                        return true;
+        if (metadata != null) {
+            // check on parent's URL metadata
+            for (MDScope scope : metadataRules) {
+                String[] vals = metadata.getValues(scope.getKey());
+                if (vals == null) {
+                    continue;
+                }
+                for (String v : vals) {
+                    if (v.equalsIgnoreCase(scope.getValue())) {
+                        FastURLFilter.LOG.debug(
+                                "Filtering {} matching metadata {}:{}",
+                                url,
+                                scope.getKey(),
+                                scope.getValue());
+                        if (checkScope(scope, u)) {
+                            return true;
+                        }
                     }
                 }
             }
