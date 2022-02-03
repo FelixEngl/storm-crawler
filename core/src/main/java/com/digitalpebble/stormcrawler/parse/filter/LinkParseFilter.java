@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DocumentFragment;
@@ -57,12 +58,16 @@ public class LinkParseFilter extends XPathFilter {
     private URLFilters urlFilters;
 
     @Override
-    public void filter(String URL, byte[] content, DocumentFragment doc, ParseResult parse) {
+    public void filter(
+            @NotNull String URL,
+            @Nullable byte[] content,
+            @Nullable DocumentFragment doc,
+            @NotNull ParseResult parse) {
 
         ParseData parseData = parse.get(URL);
         Metadata metadata = parseData.getMetadata();
 
-        Map<String, Outlink> dedup = new HashMap<String, Outlink>();
+        Map<String, Outlink> dedup = new HashMap<>();
 
         for (Outlink o : parse.getOutlinks()) {
             dedup.put(o.getTargetURL(), o);

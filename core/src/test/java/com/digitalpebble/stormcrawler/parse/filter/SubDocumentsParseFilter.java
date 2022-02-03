@@ -24,6 +24,8 @@ import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.DocumentFragment;
@@ -31,12 +33,16 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class SubDocumentsParseFilter extends ParseFilter {
+public class SubDocumentsParseFilter implements ParseFilter {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(SubDocumentsParseFilter.class);
 
     @Override
-    public void filter(String URL, byte[] content, DocumentFragment doc, ParseResult parse) {
+    public void filter(
+            @NotNull String URL,
+            @Nullable byte[] content,
+            @Nullable DocumentFragment doc,
+            @NotNull ParseResult parse) {
 
         InputStream stream = new ByteArrayInputStream(content);
 

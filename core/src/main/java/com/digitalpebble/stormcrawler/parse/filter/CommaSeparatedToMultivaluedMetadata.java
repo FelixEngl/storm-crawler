@@ -22,13 +22,14 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.DocumentFragment;
 
 /**
  * Rewrites single metadata containing comma separated values into multiple values for the same key,
  * useful for instance for keyword tags.
  */
-public class CommaSeparatedToMultivaluedMetadata extends ParseFilter {
+public class CommaSeparatedToMultivaluedMetadata implements ParseFilter {
 
     private final Set<String> keys = new HashSet<>();
 
@@ -48,7 +49,11 @@ public class CommaSeparatedToMultivaluedMetadata extends ParseFilter {
     }
 
     @Override
-    public void filter(String url, byte[] content, DocumentFragment doc, ParseResult parse) {
+    public void filter(
+            @NotNull String url,
+            @Nullable byte[] content,
+            @Nullable DocumentFragment doc,
+            @NotNull ParseResult parse) {
         Metadata m = parse.get(url).getMetadata();
         for (String key : keys) {
             String val = m.getFirstValue(key);

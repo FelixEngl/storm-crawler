@@ -24,6 +24,7 @@ import java.util.Map;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.storm.shade.org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.DocumentFragment;
 
 /**
@@ -43,7 +44,7 @@ import org.w3c.dom.DocumentFragment;
  *       signature is not copied.
  * </dl>
  */
-public class MD5SignatureParseFilter extends ParseFilter {
+public class MD5SignatureParseFilter implements ParseFilter {
 
     private String key_name = "signature";
 
@@ -52,7 +53,11 @@ public class MD5SignatureParseFilter extends ParseFilter {
     private String copyKeyName = null;
 
     @Override
-    public void filter(String URL, byte[] content, DocumentFragment doc, ParseResult parse) {
+    public void filter(
+            @NotNull String URL,
+            @Nullable byte[] content,
+            @Nullable DocumentFragment doc,
+            @NotNull ParseResult parse) {
         ParseData parseData = parse.get(URL);
         Metadata metadata = parseData.getMetadata();
         if (copyKeyName != null) {

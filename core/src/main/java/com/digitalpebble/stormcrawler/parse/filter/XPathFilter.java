@@ -38,6 +38,7 @@ import org.apache.xml.serialize.Method;
 import org.apache.xml.serialize.OutputFormat;
 import org.apache.xml.serialize.XMLSerializer;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -50,7 +51,7 @@ import org.w3c.dom.NodeList;
  * Simple ParseFilter to illustrate and test the interface. Reads a XPATH pattern from the config
  * file and stores the value as metadata
  */
-public class XPathFilter extends ParseFilter {
+public class XPathFilter implements ParseFilter {
 
     private enum EvalFunction {
         NONE,
@@ -150,7 +151,11 @@ public class XPathFilter extends ParseFilter {
     }
 
     @Override
-    public void filter(String URL, byte[] content, DocumentFragment doc, ParseResult parse) {
+    public void filter(
+            @NotNull String URL,
+            @Nullable byte[] content,
+            @Nullable DocumentFragment doc,
+            @NotNull ParseResult parse) {
 
         ParseData parseData = parse.get(URL);
         Metadata metadata = parseData.getMetadata();
@@ -191,11 +196,8 @@ public class XPathFilter extends ParseFilter {
     private void addExpression(String key, JsonNode expression) {
         String xpathvalue = expression.asText();
         try {
-            List<LabelledExpression> lexpressionList = expressions.get(key);
-            if (lexpressionList == null) {
-                lexpressionList = new ArrayList<>();
-                expressions.put(key, lexpressionList);
-            }
+            List<LabelledExpression> lexpressionList =
+                    expressions.computeIfAbsent(key, k -> new ArrayList<>());
             LabelledExpression lexpression = new LabelledExpression(key, xpathvalue);
             lexpressionList.add(lexpression);
         } catch (XPathExpressionException e) {

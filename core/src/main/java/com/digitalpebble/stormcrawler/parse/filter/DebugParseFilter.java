@@ -24,15 +24,20 @@ import java.util.Map;
 import org.apache.commons.io.FileUtils;
 import org.apache.xml.serialize.XMLSerializer;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.DocumentFragment;
 
 /** Dumps the DOM representation of a document into a file */
-public class DebugParseFilter extends ParseFilter {
+public class DebugParseFilter implements ParseFilter {
 
     private OutputStream os;
 
     @Override
-    public void filter(String URL, byte[] content, DocumentFragment doc, ParseResult parse) {
+    public void filter(
+            @NotNull String URL,
+            @Nullable byte[] content,
+            @Nullable DocumentFragment doc,
+            @NotNull ParseResult parse) {
 
         try {
             // TODO: Find replacement

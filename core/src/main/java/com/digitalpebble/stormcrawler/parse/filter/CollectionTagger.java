@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DocumentFragment;
@@ -63,7 +64,7 @@ import org.w3c.dom.DocumentFragment;
  *     <p>This resources was kindly donated by the Government of Northwestern Territories in Canada
  *     (http://www.gov.nt.ca/).
  */
-public class CollectionTagger extends ParseFilter implements JSONResource {
+public class CollectionTagger implements ParseFilter, JSONResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(CollectionTagger.class);
 
@@ -115,7 +116,11 @@ public class CollectionTagger extends ParseFilter implements JSONResource {
     }
 
     @Override
-    public void filter(String URL, byte[] content, DocumentFragment doc, ParseResult parse) {
+    public void filter(
+            @NotNull String URL,
+            @Nullable byte[] content,
+            @Nullable DocumentFragment doc,
+            @NotNull ParseResult parse) {
         String[] tags = collections.tag(URL);
         if (tags.length > 0) {
             parse.get(URL).getMetadata().setValues(key, tags);

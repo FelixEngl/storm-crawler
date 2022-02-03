@@ -36,6 +36,7 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.storm.Config;
 import org.apache.storm.utils.Utils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.LoggerFactory;
@@ -46,7 +47,7 @@ import org.w3c.dom.DocumentFragment;
  *
  * @see ConfigurableUtil#configure(Class, Class, Map, JsonNode) for more information.
  */
-public class ParseFilters extends ParseFilter implements JSONResource {
+public class ParseFilters implements ParseFilter, JSONResource {
 
     public static final ParseFilters emptyParseFilter = new ParseFilters();
 
@@ -126,7 +127,11 @@ public class ParseFilters extends ParseFilter implements JSONResource {
     }
 
     @Override
-    public void filter(String URL, byte[] content, DocumentFragment doc, ParseResult parse) {
+    public void filter(
+            @NotNull String URL,
+            @Nullable byte[] content,
+            @Nullable DocumentFragment doc,
+            @NotNull ParseResult parse) {
 
         for (ParseFilter filter : filters) {
             long start = System.currentTimeMillis();

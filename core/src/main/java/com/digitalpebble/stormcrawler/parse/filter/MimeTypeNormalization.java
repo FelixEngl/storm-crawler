@@ -18,6 +18,8 @@ import com.digitalpebble.stormcrawler.Metadata;
 import com.digitalpebble.stormcrawler.parse.ParseFilter;
 import com.digitalpebble.stormcrawler.parse.ParseResult;
 import org.apache.storm.shade.org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.DocumentFragment;
 
 /**
@@ -25,10 +27,14 @@ import org.w3c.dom.DocumentFragment;
  * creates a new entry with a key 'format' in the metadata. Requires the JSoupParserBolt to be used
  * with the configuration _detect.mimetype_ set to true.
  */
-public class MimeTypeNormalization extends ParseFilter {
+public class MimeTypeNormalization implements ParseFilter {
 
     @Override
-    public void filter(String url, byte[] content, DocumentFragment doc, ParseResult parse) {
+    public void filter(
+            @NotNull String url,
+            @Nullable byte[] content,
+            @Nullable DocumentFragment doc,
+            @NotNull ParseResult parse) {
 
         Metadata m = parse.get(url).getMetadata();
         String ct = m.getFirstValue("parse.Content-Type");

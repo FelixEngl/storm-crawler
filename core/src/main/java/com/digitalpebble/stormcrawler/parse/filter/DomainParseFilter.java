@@ -24,10 +24,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.HashMap;
 import java.util.Map;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.DocumentFragment;
 
 /** Adds domain (or host) to metadata - can be used later on for indexing * */
-public class DomainParseFilter extends ParseFilter {
+public class DomainParseFilter implements ParseFilter {
 
     private URLPartitioner partitioner;
 
@@ -53,7 +54,11 @@ public class DomainParseFilter extends ParseFilter {
     }
 
     @Override
-    public void filter(String URL, byte[] content, DocumentFragment doc, ParseResult parse) {
+    public void filter(
+            @NotNull String URL,
+            @Nullable byte[] content,
+            @Nullable DocumentFragment doc,
+            @NotNull ParseResult parse) {
         Metadata metadata = parse.get(URL).getMetadata();
         String value = partitioner.getPartition(URL, metadata);
         metadata.setValue(mdKey, value);

@@ -29,6 +29,7 @@ import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DocumentFragment;
@@ -63,7 +64,7 @@ import org.w3c.dom.DocumentFragment;
  *  curl -XPUT 'localhost:9200/config/config/collections.json?pretty' -H 'Content-Type: application/json' -d @collections.json
  * </pre>
  */
-public class JSONResourceWrapper extends ParseFilter {
+public class JSONResourceWrapper implements ParseFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(JSONResourceWrapper.class);
 
@@ -149,7 +150,11 @@ public class JSONResourceWrapper extends ParseFilter {
     }
 
     @Override
-    public void filter(String URL, byte[] content, DocumentFragment doc, ParseResult parse) {
+    public void filter(
+            @NotNull String URL,
+            byte @Nullable [] content,
+            @Nullable DocumentFragment doc,
+            @NotNull ParseResult parse) {
         delegatedParseFilter.filter(URL, content, doc, parse);
     }
 }

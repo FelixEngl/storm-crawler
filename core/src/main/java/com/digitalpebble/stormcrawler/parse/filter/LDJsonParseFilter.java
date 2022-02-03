@@ -30,13 +30,14 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Node;
 
 /** Extracts data from JSON-LD representation (https://json-ld.org/) */
-public class LDJsonParseFilter extends ParseFilter {
+public class LDJsonParseFilter implements ParseFilter {
 
     public static final Logger LOG = LoggerFactory.getLogger(LDJsonParseFilter.class);
 
@@ -48,7 +49,11 @@ public class LDJsonParseFilter extends ParseFilter {
     private final List<LabelledJsonPointer> expressions = new LinkedList<>();
 
     @Override
-    public void filter(String URL, byte[] content, DocumentFragment doc, ParseResult parse) {
+    public void filter(
+            @NotNull String URL,
+            @Nullable byte[] content,
+            @Nullable DocumentFragment doc,
+            @NotNull ParseResult parse) {
         if (doc == null) {
             return;
         }

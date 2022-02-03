@@ -35,6 +35,7 @@ import java.util.Locale;
 import java.util.Map;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DocumentFragment;
@@ -50,7 +51,7 @@ import org.w3c.dom.DocumentFragment;
  * _extracted_ will be normalised and stored in the metadata, otherwise the languages above the
  * probability will be used.
  */
-public class LanguageID extends ParseFilter {
+public class LanguageID implements ParseFilter {
 
     private static final Logger LOG = LoggerFactory.getLogger(LanguageID.class);
 
@@ -100,7 +101,11 @@ public class LanguageID extends ParseFilter {
     }
 
     @Override
-    public void filter(String url, byte[] content, DocumentFragment doc, ParseResult parse) {
+    public void filter(
+            @NotNull String url,
+            @Nullable byte[] content,
+            @Nullable DocumentFragment doc,
+            @NotNull ParseResult parse) {
 
         // check whether the metadata already contains a lang value
         // in which case we normalise its value and use it
