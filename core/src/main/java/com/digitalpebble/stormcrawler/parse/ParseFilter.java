@@ -30,14 +30,14 @@ public interface ParseFilter extends Configurable {
     /**
      * Called when parsing a specific page
      *
-     * @param URL the URL of the page being parsed
+     * @param url the url of the page being parsed
      * @param content the content being parsed
      * @param doc the DOM tree resulting of the parsing of the content or null if {@link
      *     #needsDOM()} returns <code>false</code>
      * @param parse the metadata to be updated with the resulting of the parsing
      */
     void filter(
-            @NotNull String URL,
+            @NotNull String url,
             @Nullable byte[] content,
             @Nullable DocumentFragment doc,
             @NotNull ParseResult parse);

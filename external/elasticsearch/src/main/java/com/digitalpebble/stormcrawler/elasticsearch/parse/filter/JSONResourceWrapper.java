@@ -151,10 +151,10 @@ public class JSONResourceWrapper implements ParseFilter {
 
     @Override
     public void filter(
-            @NotNull String URL,
+            @NotNull String url,
             byte @Nullable [] content,
             @Nullable DocumentFragment doc,
             @NotNull ParseResult parse) {
-        delegatedParseFilter.filter(URL, content, doc, parse);
+        delegatedParseFilter.filter(url, content, doc, parse);
     }
 }

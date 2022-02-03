@@ -59,12 +59,12 @@ public class LinkParseFilter extends XPathFilter {
 
     @Override
     public void filter(
-            @NotNull String URL,
+            @NotNull String url,
             @Nullable byte[] content,
             @Nullable DocumentFragment doc,
             @NotNull ParseResult parse) {
 
-        ParseData parseData = parse.get(URL);
+        ParseData parseData = parse.get(url);
         Metadata metadata = parseData.getMetadata();
 
         Map<String, Outlink> dedup = new HashMap<>();
@@ -75,11 +75,11 @@ public class LinkParseFilter extends XPathFilter {
 
         java.net.URL sourceUrl;
         try {
-            sourceUrl = new URL(URL);
+            sourceUrl = new URL(url);
         } catch (MalformedURLException e1) {
             // we would have known by now as previous components check whether
             // the URL is valid
-            LOG.error("MalformedURLException on {}", URL);
+            LOG.error("MalformedURLException on {}", url);
             return;
         }
 
@@ -111,7 +111,7 @@ public class LinkParseFilter extends XPathFilter {
 
                         // get the metadata for the outlink from the parent one
                         Metadata metadataOL =
-                                metadataTransfer.getMetaForOutlink(target, URL, metadata);
+                                metadataTransfer.getMetaForOutlink(target, url, metadata);
 
                         ol.setMetadata(metadataOL);
                         dedup.put(ol.getTargetURL(), ol);

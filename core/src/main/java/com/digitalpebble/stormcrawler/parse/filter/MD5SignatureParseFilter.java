@@ -54,11 +54,11 @@ public class MD5SignatureParseFilter implements ParseFilter {
 
     @Override
     public void filter(
-            @NotNull String URL,
+            @NotNull String url,
             @Nullable byte[] content,
             @Nullable DocumentFragment doc,
             @NotNull ParseResult parse) {
-        ParseData parseData = parse.get(URL);
+        ParseData parseData = parse.get(url);
         Metadata metadata = parseData.getMetadata();
         if (copyKeyName != null) {
             String signature = metadata.getFirstValue(key_name);
@@ -76,7 +76,7 @@ public class MD5SignatureParseFilter implements ParseFilter {
             data = content;
         }
         if (data == null) {
-            data = URL.getBytes(StandardCharsets.UTF_8);
+            data = url.getBytes(StandardCharsets.UTF_8);
         }
         String hex = DigestUtils.md5Hex(data);
         metadata.setValue(key_name, hex);

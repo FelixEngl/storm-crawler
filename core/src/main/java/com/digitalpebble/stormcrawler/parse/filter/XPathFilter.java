@@ -152,12 +152,12 @@ public class XPathFilter implements ParseFilter {
 
     @Override
     public void filter(
-            @NotNull String URL,
+            @NotNull String url,
             @Nullable byte[] content,
             @Nullable DocumentFragment doc,
             @NotNull ParseResult parse) {
 
-        ParseData parseData = parse.get(URL);
+        ParseData parseData = parse.get(url);
         Metadata metadata = parseData.getMetadata();
 
         // applies the XPATH expression in the order in which they are produced

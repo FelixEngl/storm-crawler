@@ -39,7 +39,7 @@ public class SubDocumentsParseFilter implements ParseFilter {
 
     @Override
     public void filter(
-            @NotNull String URL,
+            @NotNull String url,
             @Nullable byte[] content,
             @Nullable DocumentFragment doc,
             @NotNull ParseResult parse) {
@@ -72,7 +72,7 @@ public class SubDocumentsParseFilter implements ParseFilter {
                 }
             }
         } catch (Exception e) {
-            LOG.error("Error processing sitemap from {}: {}", URL, e);
+            LOG.error("Error processing sitemap from {}: {}", url, e);
         }
     }
 

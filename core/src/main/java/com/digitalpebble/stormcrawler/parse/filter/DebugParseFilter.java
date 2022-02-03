@@ -34,7 +34,7 @@ public class DebugParseFilter implements ParseFilter {
 
     @Override
     public void filter(
-            @NotNull String URL,
+            @NotNull String url,
             @Nullable byte[] content,
             @Nullable DocumentFragment doc,
             @NotNull ParseResult parse) {

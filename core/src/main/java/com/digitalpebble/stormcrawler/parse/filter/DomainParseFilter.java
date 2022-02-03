@@ -55,12 +55,12 @@ public class DomainParseFilter implements ParseFilter {
 
     @Override
     public void filter(
-            @NotNull String URL,
+            @NotNull String url,
             @Nullable byte[] content,
             @Nullable DocumentFragment doc,
             @NotNull ParseResult parse) {
-        Metadata metadata = parse.get(URL).getMetadata();
-        String value = partitioner.getPartition(URL, metadata);
+        Metadata metadata = parse.get(url).getMetadata();
+        String value = partitioner.getPartition(url, metadata);
         metadata.setValue(mdKey, value);
     }
 }

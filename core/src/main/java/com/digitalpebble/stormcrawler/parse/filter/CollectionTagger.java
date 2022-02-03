@@ -117,13 +117,13 @@ public class CollectionTagger implements ParseFilter, JSONResource {
 
     @Override
     public void filter(
-            @NotNull String URL,
+            @NotNull String url,
             @Nullable byte[] content,
             @Nullable DocumentFragment doc,
             @NotNull ParseResult parse) {
-        String[] tags = collections.tag(URL);
+        String[] tags = collections.tag(url);
         if (tags.length > 0) {
-            parse.get(URL).getMetadata().setValues(key, tags);
+            parse.get(url).getMetadata().setValues(key, tags);
         }
     }
 }

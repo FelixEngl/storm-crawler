@@ -17,8 +17,6 @@ package com.digitalpebble.stormcrawler.parse;
 import com.digitalpebble.stormcrawler.JSONResource;
 import com.digitalpebble.stormcrawler.util.ConfUtils;
 import com.digitalpebble.stormcrawler.util.ConfigurableUtil;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -95,8 +93,7 @@ public class ParseFilters implements ParseFilter, JSONResource {
     }
 
     @Override
-    public void loadJSONResources(InputStream inputStream)
-            throws JsonParseException, JsonMappingException, IOException {
+    public void loadJSONResources(InputStream inputStream) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode confNode = mapper.readValue(inputStream, JsonNode.class);
         configure(stormConf, confNode);
@@ -128,7 +125,7 @@ public class ParseFilters implements ParseFilter, JSONResource {
 
     @Override
     public void filter(
-            @NotNull String URL,
+            @NotNull String url,
             @Nullable byte[] content,
             @Nullable DocumentFragment doc,
             @NotNull ParseResult parse) {
@@ -139,10 +136,10 @@ public class ParseFilters implements ParseFilter, JSONResource {
                 LOG.info(
                         "ParseFilter {} needs DOM but has none to work on - skip : {}",
                         filter.getClass().getName(),
-                        URL);
+                        url);
                 continue;
             }
-            filter.filter(URL, content, doc, parse);
+            filter.filter(url, content, doc, parse);
             long end = System.currentTimeMillis();
             LOG.debug("ParseFilter {} took {} msec", filter.getClass().getName(), end - start);
         }
