@@ -32,6 +32,8 @@ public class ProtocolFactory {
     public static ProtocolFactory getInstance(Config conf) {
 
         // https://en.wikipedia.org/wiki/Double-checked_locking#Usage_in_Java
+        // Do not use https://en.wikipedia.org/wiki/Initialization-on-demand_holder_idiom
+        // because loading the singleton could fail due to config error.
 
         ProtocolFactory temp = single_instance;
 

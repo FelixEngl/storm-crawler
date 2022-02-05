@@ -27,7 +27,8 @@ public class ConfUtils {
 
     private ConfUtils() {}
 
-    public static int getInt(Map<String, Object> conf, String key, int defaultValue) {
+    public static int getInt(
+            @NotNull Map<String, Object> conf, @NotNull String key, int defaultValue) {
         Object ret = conf.get(key);
         if (ret == null) {
             ret = defaultValue;
@@ -35,7 +36,8 @@ public class ConfUtils {
         return ((Number) ret).intValue();
     }
 
-    public static long getLong(Map<String, Object> conf, String key, long defaultValue) {
+    public static long getLong(
+            @NotNull Map<String, Object> conf, @NotNull String key, long defaultValue) {
         Object ret = conf.get(key);
         if (ret == null) {
             ret = defaultValue;
@@ -43,7 +45,8 @@ public class ConfUtils {
         return ((Number) ret).longValue();
     }
 
-    public static float getFloat(Map<String, Object> conf, String key, float defaultValue) {
+    public static float getFloat(
+            @NotNull Map<String, Object> conf, @NotNull String key, float defaultValue) {
         Object ret = conf.get(key);
         if (ret == null) {
             ret = defaultValue;
@@ -51,7 +54,8 @@ public class ConfUtils {
         return ((Number) ret).floatValue();
     }
 
-    public static boolean getBoolean(Map<String, Object> conf, String key, boolean defaultValue) {
+    public static boolean getBoolean(
+            @NotNull Map<String, Object> conf, @NotNull String key, boolean defaultValue) {
         Object ret = conf.get(key);
         if (ret == null) {
             ret = defaultValue;
@@ -64,7 +68,6 @@ public class ConfUtils {
         return (String) conf.get(key);
     }
 
-    @Nullable
     public static String getString(
             @NotNull Map<String, Object> conf, @NotNull String key, @Nullable String defaultValue) {
         Object ret = conf.get(key);
@@ -109,7 +112,6 @@ public class ConfUtils {
         return convertToEnum(enumClass, value);
     }
 
-    @Nullable
     public static <T extends Enum<T>> T getEnumOrDefault(
             @NotNull Map<String, Object> conf,
             @NotNull String key,
