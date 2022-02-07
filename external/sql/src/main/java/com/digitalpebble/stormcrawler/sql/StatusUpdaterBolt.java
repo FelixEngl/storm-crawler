@@ -35,6 +35,7 @@ import org.apache.storm.metric.api.MultiCountMetric;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.tuple.Tuple;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -127,7 +128,11 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt {
 
     @Override
     public synchronized void store(
-            String url, Status status, Metadata metadata, Optional<Date> nextFetch, Tuple t)
+            String url,
+            Status status,
+            Metadata metadata,
+            @NotNull Optional<Date> nextFetch,
+            Tuple t)
             throws Exception {
         // check whether the batch needs sending
         checkExecuteBatch();

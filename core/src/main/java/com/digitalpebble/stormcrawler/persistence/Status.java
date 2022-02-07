@@ -23,6 +23,7 @@ public enum Status {
 
     /** Maps the HTTP Code to FETCHED, FETCH_ERROR or REDIRECTION */
     public static Status fromHTTPCode(int code) {
+        // what about 204?
         if (code == 200) return Status.FETCHED;
         else if (code == 304) return Status.FETCHED;
         // REDIRS?

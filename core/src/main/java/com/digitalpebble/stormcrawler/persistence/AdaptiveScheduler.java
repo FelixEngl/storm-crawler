@@ -144,7 +144,8 @@ public class AdaptiveScheduler extends DefaultScheduler {
 
     /**
      * Name of key to hold previous signature: a copy, not overwritten by {@link
-     * MD5SignatureParseFilter}.
+     * MD5SignatureParseFilter}. This key is a temporary copy, not necessarily persisted in
+     * metadata.
      */
     public static final String SIGNATURE_OLD_KEY = "signatureOld";
 

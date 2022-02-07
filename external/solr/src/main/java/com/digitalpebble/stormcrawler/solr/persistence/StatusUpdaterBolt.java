@@ -28,6 +28,7 @@ import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.tuple.Tuple;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +65,11 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt {
 
     @Override
     public void store(
-            String url, Status status, Metadata metadata, Optional<Date> nextFetch, Tuple t)
+            String url,
+            Status status,
+            Metadata metadata,
+            @NotNull Optional<Date> nextFetch,
+            Tuple t)
             throws Exception {
 
         SolrInputDocument doc = new SolrInputDocument();

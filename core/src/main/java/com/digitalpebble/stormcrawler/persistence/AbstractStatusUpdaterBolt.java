@@ -36,6 +36,7 @@ import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -104,7 +105,12 @@ public abstract class AbstractStatusUpdaterBolt extends BaseRichBolt {
 
         if (useCache) {
             String spec = ConfUtils.getString(stormConf, cacheConfigParamName);
-            cache = Caffeine.from(spec).build();
+
+            if (spec == null) {
+                cache = Caffeine.newBuilder().build();
+            } else {
+                cache = Caffeine.from(spec).build();
+            }
 
             context.registerMetric(
                     "cache",
@@ -187,10 +193,18 @@ public abstract class AbstractStatusUpdaterBolt extends BaseRichBolt {
         if (status.equals(Status.FETCH_ERROR)) {
             String errorCount = metadata.getFirstValue(Constants.fetchErrorCountParamName);
             int count = 0;
-            try {
-                count = Integer.parseInt(errorCount);
-            } catch (NumberFormatException e) {
+
+            if (errorCount != null) {
+                try {
+                    count = Integer.parseInt(errorCount);
+                } catch (NumberFormatException e) {
+                    LOG.warn(
+                            "The fetch error count for the metadata-parameter {} does not contain an integer value but {}",
+                            Constants.fetchErrorCountParamName,
+                            errorCount);
+                }
             }
+
             count++;
             if (count >= maxFetchErrors) {
                 status = Status.ERROR;
@@ -250,7 +264,11 @@ public abstract class AbstractStatusUpdaterBolt extends BaseRichBolt {
     }
 
     protected abstract void store(
-            String url, Status status, Metadata metadata, Optional<Date> nextFetch, Tuple t)
+            String url,
+            Status status,
+            Metadata metadata,
+            @NotNull Optional<Date> nextFetch,
+            Tuple t)
             throws Exception;
 
     @Override

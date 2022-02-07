@@ -27,8 +27,8 @@ import java.util.Map.Entry;
 import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 import org.apache.storm.tuple.Values;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -95,7 +95,7 @@ public class SchedulingURLBuffer extends AbstractURLBuffer
             if (canRelease(queueName)) {
                 // try the first element
                 item = queue.poll();
-                LOG.trace("Item {}", item.url);
+                if (item != null) LOG.trace("Item {}", item.url);
             } else {
                 LOG.trace("Queue {} not ready to release yet", queueName);
             }
@@ -134,7 +134,7 @@ public class SchedulingURLBuffer extends AbstractURLBuffer
         if (times.size() < historySize) return true;
 
         // get the average duration over the recent history
-        long totalMsec = 0l;
+        long totalMsec = 0L;
         for (Long t : times) {
             totalMsec += t;
         }
@@ -180,7 +180,7 @@ public class SchedulingURLBuffer extends AbstractURLBuffer
 
     @Override
     public void onRemoval(
-            @Nullable String key, Object @Nullable [] value, @NonNull RemovalCause cause) {
+            @Nullable String key, Object @Nullable [] value, @NotNull RemovalCause cause) {
         addTiming(maxTimeMSec, key);
     }
 }

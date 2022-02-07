@@ -18,6 +18,7 @@ import com.digitalpebble.stormcrawler.Metadata;
 import java.util.Date;
 import java.util.Optional;
 import org.apache.storm.tuple.Tuple;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Dummy status updater which dumps the content of the incoming tuples to the standard output.
@@ -27,7 +28,11 @@ public class StdOutStatusUpdater extends AbstractStatusUpdaterBolt {
 
     @Override
     public void store(
-            String url, Status status, Metadata metadata, Optional<Date> nextFetch, Tuple t)
+            String url,
+            Status status,
+            Metadata metadata,
+            @NotNull Optional<Date> nextFetch,
+            Tuple t)
             throws Exception {
         String nextFetchS = "NEVER";
         if (nextFetch.isPresent()) {

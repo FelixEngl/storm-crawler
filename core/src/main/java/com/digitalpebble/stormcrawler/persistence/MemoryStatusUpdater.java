@@ -19,6 +19,7 @@ import com.digitalpebble.stormcrawler.spout.MemorySpout;
 import java.util.Date;
 import java.util.Optional;
 import org.apache.storm.tuple.Tuple;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Use in combination with the MemorySpout for testing in local mode. There is no guarantee that
@@ -29,12 +30,14 @@ public class MemoryStatusUpdater extends AbstractStatusUpdaterBolt {
 
     @Override
     public void store(
-            String url, Status status, Metadata metadata, Optional<Date> nextFetch, Tuple t)
+            String url,
+            Status status,
+            Metadata metadata,
+            @NotNull Optional<Date> nextFetch,
+            Tuple t)
             throws Exception {
         // no next fetch date present means never refetch
-        if (nextFetch.isPresent()) {
-            MemorySpout.add(url, metadata, nextFetch.get());
-        }
+        nextFetch.ifPresent(date -> MemorySpout.add(url, metadata, date));
         super.ack(t, url);
     }
 }
