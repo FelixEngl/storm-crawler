@@ -31,6 +31,7 @@ import org.apache.storm.topology.base.BaseRichBolt;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.tuple.Tuple;
 import org.apache.storm.tuple.Values;
+import org.jetbrains.annotations.MustBeInvokedByOverriders;
 
 /**
  * Provides common functionalities for Bolts which emit tuples to the status stream, e.g. Fetchers,
@@ -46,6 +47,7 @@ public abstract class StatusEmitterBolt extends BaseRichBolt {
 
     protected OutputCollector collector;
 
+    @MustBeInvokedByOverriders
     @Override
     public void prepare(
             Map<String, Object> stormConf, TopologyContext context, OutputCollector collector) {
