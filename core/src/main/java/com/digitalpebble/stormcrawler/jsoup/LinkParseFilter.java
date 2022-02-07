@@ -75,9 +75,9 @@ public class LinkParseFilter extends JSoupFilter {
     }
 
     @Override
-    public void filter(String URL, byte[] content, Document doc, ParseResult parse) {
+    public void filter(String url, byte[] content, Document doc, ParseResult parse) {
 
-        ParseData parseData = parse.get(URL);
+        ParseData parseData = parse.get(url);
         Metadata metadata = parseData.getMetadata();
 
         Map<String, Outlink> dedup = new HashMap<String, Outlink>();
@@ -88,11 +88,11 @@ public class LinkParseFilter extends JSoupFilter {
 
         java.net.URL sourceUrl;
         try {
-            sourceUrl = new URL(URL);
+            sourceUrl = new URL(url);
         } catch (MalformedURLException e1) {
             // we would have known by now as previous components check whether
             // the URL is valid
-            LOG.error("MalformedURLException on {}", URL);
+            LOG.error("MalformedURLException on {}", url);
             return;
         }
 
@@ -130,7 +130,7 @@ public class LinkParseFilter extends JSoupFilter {
                 Outlink ol = new Outlink(target);
 
                 // get the metadata for the outlink from the parent one
-                Metadata metadataOL = metadataTransfer.getMetaForOutlink(target, URL, metadata);
+                Metadata metadataOL = metadataTransfer.getMetaForOutlink(target, url, metadata);
 
                 ol.setMetadata(metadataOL);
                 dedup.put(ol.getTargetURL(), ol);

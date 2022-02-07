@@ -23,15 +23,16 @@ import com.digitalpebble.stormcrawler.util.Configurable;
  *
  * @see JSoupFilters for more information.
  */
-public interface JSoupFilter extends Configurable {
+public abstract class JSoupFilter implements Configurable {
 
     /**
      * Called when parsing a specific page
      *
-     * @param URL the URL of the page being parsed
+     * @param url the URL of the page being parsed
      * @param content the content being parsed
      * @param doc document produced by JSoup's parsingF
      * @param parse the metadata to be updated with the resulting of the parsing
      */
-    void filter(String URL, byte[] content, org.jsoup.nodes.Document doc, ParseResult parse);
+    public abstract void filter(
+            String url, byte[] content, org.jsoup.nodes.Document doc, ParseResult parse);
 }
