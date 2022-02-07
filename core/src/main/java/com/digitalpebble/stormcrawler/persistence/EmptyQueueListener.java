@@ -14,8 +14,10 @@
  */
 package com.digitalpebble.stormcrawler.persistence;
 
+import org.jetbrains.annotations.NotNull;
+
 /** Used by URLBuffer to inform the spouts when a queue has no more URLs in it */
 @FunctionalInterface
 public interface EmptyQueueListener {
-    void emptyQueue(String queueName);
+    void emptyQueue(@NotNull String queueName);
 }

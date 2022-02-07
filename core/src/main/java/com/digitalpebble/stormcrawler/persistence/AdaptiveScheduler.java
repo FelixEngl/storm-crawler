@@ -20,11 +20,7 @@ import com.digitalpebble.stormcrawler.parse.filter.MD5SignatureParseFilter;
 import com.digitalpebble.stormcrawler.protocol.HttpHeaders;
 import com.digitalpebble.stormcrawler.util.ConfUtils;
 import java.time.Duration;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -222,7 +218,7 @@ public class AdaptiveScheduler extends DefaultScheduler {
 
         final String modifiedTimeString = now.toInstant().toString();
 
-        if (metadata.getFirstValue("fetch.statusCode").equals("304")) {
+        if (Objects.equals(metadata.getFirstValue("fetch.statusCode"), "304")) {
             // HTTP 304 Not Modified
             // - no new signature calculated because no content fetched
             // - do not compare persisted signatures
@@ -263,11 +259,7 @@ public class AdaptiveScheduler extends DefaultScheduler {
         } else {
             // initialize from DefaultScheduler
             Optional<Integer> customInterval = super.checkCustomInterval(metadata, status);
-            if (customInterval.isPresent()) {
-                interval = customInterval.get();
-            } else {
-                interval = defaultfetchInterval;
-            }
+            interval = customInterval.orElseGet(() -> defaultfetchInterval);
             fetchInterval = Integer.toString(interval);
         }
 

@@ -24,6 +24,7 @@ import org.apache.storm.generated.GlobalStreamId;
 import org.apache.storm.grouping.CustomStreamGrouping;
 import org.apache.storm.shade.org.apache.commons.lang.StringUtils;
 import org.apache.storm.task.WorkerTopologyContext;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -64,7 +65,9 @@ public class URLStreamGrouping implements CustomStreamGrouping, Serializable {
 
     @Override
     public void prepare(
-            WorkerTopologyContext context, GlobalStreamId stream, List<Integer> targetTasks) {
+            WorkerTopologyContext context,
+            GlobalStreamId stream,
+            @NotNull List<Integer> targetTasks) {
         this.targetTask = targetTasks;
         partitioner = new URLPartitioner();
         if (StringUtils.isNotBlank(partitionMode)) {
@@ -75,7 +78,7 @@ public class URLStreamGrouping implements CustomStreamGrouping, Serializable {
     }
 
     @Override
-    public List<Integer> chooseTasks(int taskId, List<Object> values) {
+    public List<Integer> chooseTasks(int taskId, @NotNull List<Object> values) {
         // optimisation : single target
         if (targetTask.size() == 1) {
             return targetTask;

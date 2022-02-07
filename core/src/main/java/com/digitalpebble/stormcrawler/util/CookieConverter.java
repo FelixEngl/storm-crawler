@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Locale;
 import org.apache.http.cookie.Cookie;
 import org.apache.http.impl.cookie.BasicClientCookie;
+import org.jetbrains.annotations.NotNull;
 
 /** Helper to extract cookies from cookies string. */
 public class CookieConverter {
@@ -38,8 +39,9 @@ public class CookieConverter {
      * @param targetURL the url for which we wish to pass the cookies in the request.
      * @return List off cookies to add to the request.
      */
-    public static List<Cookie> getCookies(String[] cookiesStrings, URL targetURL) {
-        ArrayList<Cookie> list = new ArrayList<Cookie>();
+    public static @NotNull List<Cookie> getCookies(
+            @NotNull String[] cookiesStrings, @NotNull URL targetURL) {
+        ArrayList<Cookie> list = new ArrayList<>();
 
         for (String cs : cookiesStrings) {
 
@@ -57,7 +59,9 @@ public class CookieConverter {
 
             for (int i = 1; i < tokens.length; i++) {
                 String ti = tokens[i].trim();
-                if (ti.equalsIgnoreCase("secure")) secure = true;
+                if (ti.equalsIgnoreCase("secure")) {
+                    secure = true;
+                }
                 if (ti.toLowerCase().startsWith("path=")) {
                     path = ti.substring(5);
                 }
@@ -75,22 +79,29 @@ public class CookieConverter {
             if (domain != null) {
                 cookie.setDomain(domain);
 
-                if (!checkDomainMatchToUrl(domain, targetURL.getHost())) continue;
+                if (!checkDomainMatchToUrl(domain, targetURL.getHost())) {
+                    continue;
+                }
             }
 
             // check path
             if (path != null) {
                 cookie.setPath(path);
 
-                if (!path.equals("") && !path.equals("/") && !targetURL.getPath().startsWith(path))
+                if (!path.equals("")
+                        && !path.equals("/")
+                        && !targetURL.getPath().startsWith(path)) {
                     continue;
+                }
             }
 
             // check secure
             if (secure) {
-                cookie.setSecure(secure);
+                cookie.setSecure(true);
 
-                if (!targetURL.getProtocol().equalsIgnoreCase("https")) continue;
+                if (!targetURL.getProtocol().equalsIgnoreCase("https")) {
+                    continue;
+                }
             }
 
             // check expiration
@@ -100,7 +111,9 @@ public class CookieConverter {
                     cookie.setExpiryDate(expirationDate);
 
                     // check that it hasn't expired?
-                    if (cookie.isExpired(new Date())) continue;
+                    if (cookie.isExpired(new Date())) {
+                        continue;
+                    }
 
                     cookie.setExpiryDate(expirationDate);
                 } catch (ParseException e) {
@@ -122,7 +135,8 @@ public class CookieConverter {
      * @param urlHostName the host name of the url
      * @return does the cookie match the host name
      */
-    public static boolean checkDomainMatchToUrl(String cookieDomain, String urlHostName) {
+    public static boolean checkDomainMatchToUrl(
+            @NotNull String cookieDomain, @NotNull String urlHostName) {
         try {
             if (cookieDomain.startsWith(".")) {
                 cookieDomain = cookieDomain.substring(1);

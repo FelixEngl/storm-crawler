@@ -34,9 +34,12 @@ public interface Protocol {
      * @param metadata extra information
      * @return the content and optional metadata fetched via this protocol
      */
-    ProtocolResponse getProtocolOutput(String url, Metadata metadata) throws Exception;
+    @NotNull
+    ProtocolResponse getProtocolOutput(@NotNull String url, @NotNull Metadata metadata)
+            throws Exception;
 
-    BaseRobotRules getRobotRules(String url);
+    @NotNull
+    BaseRobotRules getRobotRules(@NotNull String url);
 
     void cleanup();
 }

@@ -30,7 +30,7 @@ public final class DocumentFragmentBuilder {
     /** Restrict instantiation */
     private DocumentFragmentBuilder() {}
 
-    public static DocumentFragment fromJsoup(org.jsoup.nodes.Document jsoupDocument) {
+    public static DocumentFragment fromJsoup(@NotNull org.jsoup.nodes.Document jsoupDocument) {
         HTMLDocumentImpl htmlDoc = new HTMLDocumentImpl();
         htmlDoc.setErrorChecking(false);
         DocumentFragment fragment = htmlDoc.createDocumentFragment();
@@ -47,7 +47,7 @@ public final class DocumentFragmentBuilder {
 
         private Element dest;
 
-        public W3CBuilder(HTMLDocumentImpl doc, DocumentFragment fragment) {
+        public W3CBuilder(@NotNull HTMLDocumentImpl doc, @NotNull DocumentFragment fragment) {
             this.fragment = fragment;
             this.doc = doc;
         }

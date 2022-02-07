@@ -15,43 +15,46 @@
 package com.digitalpebble.stormcrawler.parse;
 
 import com.digitalpebble.stormcrawler.Metadata;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class Outlink {
 
-    private String targetURL;
-    private String anchor;
-    private Metadata metadata;
+    private @NotNull String targetURL;
+    private @Nullable String anchor;
+    private @Nullable Metadata metadata;
 
-    public Outlink(String url) {
+    public Outlink(@NotNull String url) {
         targetURL = url;
+        anchor = null;
     }
 
-    public Outlink(String url, String a) {
+    public Outlink(@NotNull String url, @NotNull String a) {
         targetURL = url;
         anchor = a;
     }
 
-    public String getTargetURL() {
+    public @NotNull String getTargetURL() {
         return targetURL;
     }
 
-    public void setTargetURL(String targetURL) {
+    public void setTargetURL(@NotNull String targetURL) {
         this.targetURL = targetURL;
     }
 
-    public String getAnchor() {
+    public @Nullable String getAnchor() {
         return anchor;
     }
 
-    public void setAnchor(String anchor) {
+    public void setAnchor(@NotNull String anchor) {
         this.anchor = anchor;
     }
 
-    public Metadata getMetadata() {
+    public @Nullable Metadata getMetadata() {
         return metadata;
     }
 
-    public void setMetadata(Metadata metadata) {
+    public void setMetadata(@Nullable Metadata metadata) {
         this.metadata = metadata;
     }
 

@@ -28,6 +28,8 @@ import java.util.Date;
 import java.util.Locale;
 import org.apache.commons.io.IOUtils;
 import org.apache.http.HttpStatus;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.LoggerFactory;
 
 public class FileResponse {
@@ -41,7 +43,10 @@ public class FileResponse {
     private int statusCode;
     private final Metadata metadata;
 
-    public FileResponse(String u, Metadata md, FileProtocol fileProtocol) throws IOException {
+    // TODO: md is unused
+    public FileResponse(
+            @NotNull String u, @Nullable Metadata md, @NotNull FileProtocol fileProtocol)
+            throws IOException {
 
         metadata = new Metadata();
         content = new byte[0];
@@ -83,11 +88,11 @@ public class FileResponse {
         }
     }
 
-    public ProtocolResponse toProtocolResponse() {
+    public @NotNull ProtocolResponse toProtocolResponse() {
         return new ProtocolResponse(content, statusCode, metadata);
     }
 
-    private void getFileAsHttpResponse(File file) {
+    private void getFileAsHttpResponse(@NotNull File file) {
         long size = file.length();
 
         if (size > Integer.MAX_VALUE) {
@@ -108,18 +113,18 @@ public class FileResponse {
         statusCode = HttpStatus.SC_OK;
     }
 
-    private void getDirAsHttpResponse(File file) {
+    private void getDirAsHttpResponse(@NotNull File file) {
         content = generateSitemap(file);
         metadata.setValue(HttpHeaders.CONTENT_TYPE, "application/xml");
         metadata.setValue("isSitemap", "true");
         statusCode = HttpStatus.SC_OK;
     }
 
-    private static String formatDate(long date) {
+    private static @NotNull String formatDate(long date) {
         return dateFormat.format(new Date(date));
     }
 
-    private byte[] generateSitemap(File dir) {
+    private static byte[] generateSitemap(@NotNull File dir) {
         File[] files = dir.listFiles();
         StringBuilder sb = new StringBuilder("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n");
         sb.append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n");

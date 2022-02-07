@@ -135,11 +135,11 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
 
     @Override
     public void store(
-            String url,
-            Status status,
-            Metadata metadata,
+            @NotNull String url,
+            @NotNull Status status,
+            @NotNull Metadata metadata,
             @NotNull Optional<Date> nextFetch,
-            Tuple t)
+            @NotNull Tuple t)
             throws Exception {
 
         while (messagesinFlight.get() >= this.maxMessagesinFlight) {

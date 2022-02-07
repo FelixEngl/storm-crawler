@@ -571,13 +571,16 @@ public class FetcherBolt extends StatusEmitterBolt {
                     response.getMetadata().keySet().stream()
                             .filter(s -> s.startsWith("metrics."))
                             .forEach(
-                                    s ->
+                                    s -> {
+                                        String firstValue = response.getMetadata().getFirstValue(s);
+                                        if (firstValue != null) {
                                             averagedMetrics
                                                     .scope(s.substring(8))
-                                                    .update(
-                                                            Long.parseLong(
-                                                                    response.getMetadata()
-                                                                            .getFirstValue(s))));
+                                                    .update(Long.parseLong(firstValue));
+                                        } else {
+                                            LOG.warn("The value for {} was null!", s);
+                                        }
+                                    });
 
                     averagedMetrics.scope("fetch_time").update(timeFetching);
                     averagedMetrics.scope("time_in_queues").update(timeInQueues);

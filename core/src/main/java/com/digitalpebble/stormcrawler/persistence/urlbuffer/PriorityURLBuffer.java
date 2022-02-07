@@ -26,6 +26,7 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.storm.tuple.Values;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,11 +40,12 @@ public class PriorityURLBuffer extends SimpleURLBuffer {
 
     static final Logger LOG = LoggerFactory.getLogger(PriorityURLBuffer.class);
 
-    private Map<String, AtomicInteger> ackCount;
+    private final Map<String, AtomicInteger> ackCount;
 
     private Instant lastSorting;
 
-    private long minDelayReRankSec = 10l;
+    // TODO: Make configurable?
+    private static final long minDelayReRankSec = 10L;
 
     public PriorityURLBuffer() {
         lastSorting = Instant.now();
@@ -92,7 +94,7 @@ public class PriorityURLBuffer extends SimpleURLBuffer {
         lastSorting = Instant.now();
     }
 
-    public void acked(String url) {
+    public void acked(@NotNull String url) {
         // get the queue for this URL
         String key = partitioner.getPartition(url, Metadata.empty);
         if (key == null) {

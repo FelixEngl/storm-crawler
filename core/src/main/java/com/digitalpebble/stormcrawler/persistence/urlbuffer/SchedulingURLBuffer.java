@@ -52,7 +52,7 @@ public class SchedulingURLBuffer extends AbstractURLBuffer
 
     private Cache<String, Instant> lastReleased;
 
-    public void configure(Map<String, Object> stormConf) {
+    public void configure(@NotNull Map<String, Object> stormConf) {
         super.configure(stormConf);
         maxTimeMSec = ConfUtils.getInt(stormConf, MAXTIMEPARAM, maxTimeMSec);
         unacked =
@@ -153,7 +153,7 @@ public class SchedulingURLBuffer extends AbstractURLBuffer
         return lastRelease.plusMillis(average).isBefore(Instant.now());
     }
 
-    public void acked(String url) {
+    public void acked(@NotNull String url) {
         // get notified that the URL has been acked
         // use that to compute how long it took
         Object[] cached = (Object[]) unacked.getIfPresent(url);

@@ -96,12 +96,12 @@ public class FastURLFilter implements URLFilter, JSONResource {
     }
 
     @Override
-    public String getResourceFile() {
+    public @NotNull String getResourceFile() {
         return resourceFile;
     }
 
     @Override
-    public void loadJSONResources(InputStream inputStream) throws IOException {
+    public void loadJSONResources(@NotNull InputStream inputStream) throws IOException {
 
         JsonNode rootNode = objectMapper.readTree(inputStream);
         Rules rules = new Rules();
@@ -111,25 +111,26 @@ public class FastURLFilter implements URLFilter, JSONResource {
             Scope scope = new Scope();
             String scopeval = current.get("scope").asText();
             scopeval = scopeval.trim();
-            int offset = 0;
+
             Scope.Type type;
-            String value = null;
+            String value;
+
             // separate the type from the pattern
             if (scopeval.equals("GLOBAL")) {
                 type = Scope.Type.GLOBAL;
+                value = null;
             } else if (scopeval.startsWith("domain:")) {
                 type = Scope.Type.DOMAIN;
-                offset = "domain:".length();
-                value = scopeval.substring(offset);
+                value = scopeval.substring("domain:".length());
             } else if (scopeval.startsWith("host:")) {
                 type = Scope.Type.HOSTNAME;
-                offset = "host:".length();
-                value = scopeval.substring(offset);
+                value = scopeval.substring("host:".length());
             } else if (scopeval.startsWith("metadata:")) {
                 type = Scope.Type.METADATA;
-                offset = "metadata:".length();
-                value = scopeval.substring(offset);
-            } else throw new RuntimeException("Invalid scope: " + scopeval);
+                value = scopeval.substring("metadata:".length());
+            } else {
+                throw new RuntimeException("Invalid scope: " + scopeval);
+            }
 
             JsonNode patternsNode = current.get("patterns");
             if (patternsNode == null)
@@ -172,7 +173,7 @@ class Rules {
     private final Map<String, Scope> hostNameRules = new HashMap<>();
     private final List<MDScope> metadataRules = new ArrayList<>();
 
-    public void addScope(Scope s, Scope.Type t, String value) {
+    public void addScope(@NotNull Scope s, @NotNull Scope.Type t, @Nullable String value) {
         if (t.equals(Scope.Type.GLOBAL)) {
             globalRules = s;
         } else if (t.equals(Scope.Type.DOMAIN)) {
@@ -180,6 +181,10 @@ class Rules {
         } else if (t.equals(Scope.Type.HOSTNAME)) {
             hostNameRules.put(value, s);
         } else if (t.equals(Scope.Type.METADATA)) {
+            if (value == null) {
+                throw new RuntimeException(
+                        "Tried to add a metadata scope without giving a contrain.");
+            }
             metadataRules.add(new MDScope(value, s.getRules()));
         }
     }
@@ -260,11 +265,11 @@ class Scope {
         GLOBAL,
         HOSTNAME,
         METADATA
-    };
+    }
 
-    protected Rule[] rules;
+    protected @Nullable Rule[] rules;
 
-    public void setRules(List<Rule> rlist) {
+    public void setRules(@NotNull List<Rule> rlist) {
         this.rules = rlist.toArray(new Rule[0]);
     }
 
@@ -275,11 +280,12 @@ class Scope {
 
 class MDScope extends Scope {
 
-    private final String key;
-    private final String value;
+    private final @NotNull String key;
+    private final @Nullable String value;
 
-    MDScope(String constraint, Rule[] rules) {
+    MDScope(@NotNull String constraint, @Nullable Rule[] rules) {
         this.rules = rules;
+
         int eq = constraint.indexOf("=");
         if (eq != -1) {
             key = constraint.substring(0, eq);
@@ -290,6 +296,7 @@ class MDScope extends Scope {
         }
     }
 
+    @NotNull
     public String getKey() {
         return key;
     }

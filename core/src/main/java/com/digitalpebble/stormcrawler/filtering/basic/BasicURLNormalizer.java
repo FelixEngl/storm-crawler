@@ -177,9 +177,7 @@ public class BasicURLNormalizer implements URLFilter {
         node = paramNode.get("queryElementsToRemove");
         if (node != null) {
             if (!node.isArray()) {
-                LOG.warn(
-                        "Failed to configure queryElementsToRemove.  Not an array: {}",
-                        node.toString());
+                LOG.warn("Failed to configure queryElementsToRemove.  Not an array: {}", node);
             } else {
                 ArrayNode array = (ArrayNode) node;
                 for (JsonNode element : array) {
@@ -322,7 +320,7 @@ public class BasicURLNormalizer implements URLFilter {
                 sb = new StringBuilder();
             }
             // Append everything up to this group
-            sb.append(path.substring(end, matcher.start()));
+            sb.append(path, end, matcher.start());
             String group = matcher.group(1);
             int letter = Integer.valueOf(group, 16);
             sb.append((char) letter);

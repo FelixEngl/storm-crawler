@@ -15,39 +15,41 @@
 package com.digitalpebble.stormcrawler.parse;
 
 import com.digitalpebble.stormcrawler.Metadata;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 public class ParseData {
     private byte[] content;
-    private String text;
-    private Metadata metadata;
+    private @Nullable String text;
+    private @NotNull Metadata metadata;
 
     public ParseData() {
         this.metadata = new Metadata();
     }
 
-    public ParseData(String text, Metadata metadata) {
+    public ParseData(@NotNull Metadata metadata) {
+        this.metadata = metadata;
+    }
+
+    public ParseData(@Nullable String text, @NotNull Metadata metadata) {
         this.text = text;
         this.metadata = metadata;
         this.content = new byte[0];
     }
 
-    public ParseData(Metadata md) {
-        this.metadata = md;
-    }
-
-    public String getText() {
+    public @Nullable String getText() {
         return text;
     }
 
-    public Metadata getMetadata() {
+    public @NotNull Metadata getMetadata() {
         return metadata;
     }
 
-    public void setText(String text) {
+    public void setText(@Nullable String text) {
         this.text = text;
     }
 
-    public void setMetadata(Metadata metadata) {
+    public void setMetadata(@NotNull Metadata metadata) {
         this.metadata = metadata;
     }
 

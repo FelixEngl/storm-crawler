@@ -30,11 +30,11 @@ public class MemoryStatusUpdater extends AbstractStatusUpdaterBolt {
 
     @Override
     public void store(
-            String url,
-            Status status,
-            Metadata metadata,
+            @NotNull String url,
+            @NotNull Status status,
+            @NotNull Metadata metadata,
             @NotNull Optional<Date> nextFetch,
-            Tuple t)
+            @NotNull Tuple t)
             throws Exception {
         // no next fetch date present means never refetch
         nextFetch.ifPresent(date -> MemorySpout.add(url, metadata, date));

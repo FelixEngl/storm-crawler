@@ -17,6 +17,7 @@ package com.digitalpebble.stormcrawler.protocol;
 import crawlercommons.robots.BaseRobotRules;
 import crawlercommons.robots.SimpleRobotRules;
 import java.util.List;
+import org.jetbrains.annotations.TestOnly;
 
 /**
  * Wrapper for BaseRobotRules which tracks the number of requests and length of the responses needed
@@ -107,6 +108,7 @@ public class RobotRules extends crawlercommons.robots.BaseRobotRules {
         base.addSitemap(sitemap);
     }
 
+    @TestOnly
     public static void main(String[] args) {
         SimpleRobotRules wrappee = new SimpleRobotRules();
         RobotRules a = new RobotRules(wrappee);

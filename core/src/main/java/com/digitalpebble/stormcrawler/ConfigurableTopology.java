@@ -36,7 +36,7 @@ public abstract class ConfigurableTopology {
     private static final String CONFIG_ARG_PARAM_NAME = "-conf";
 
     /** Instance of the config. */
-    protected final Config conf = new Config();
+    protected final @NotNull Config conf = new Config();
 
     public static void start(ConfigurableTopology topology, String[] args) {
         // loads the default configuration file
@@ -49,14 +49,14 @@ public abstract class ConfigurableTopology {
 
     /** @deprecated use direct field accessor. */
     @Deprecated
-    protected Config getConf() {
+    protected @NotNull Config getConf() {
         return conf;
     }
 
     protected abstract int run(@NotNull String[] args);
 
     /** Submits the topology with the name taken from the configuration * */
-    protected int submit(Config conf, TopologyBuilder builder) {
+    protected int submit(@NotNull Config conf, @NotNull TopologyBuilder builder) {
         String name = ConfUtils.getString(conf, Config.TOPOLOGY_NAME);
         if (StringUtils.isBlank(name))
             throw new RuntimeException("No value found for " + Config.TOPOLOGY_NAME);
@@ -64,7 +64,8 @@ public abstract class ConfigurableTopology {
     }
 
     /** Submits the topology under a specific name * */
-    protected int submit(String name, Config conf, TopologyBuilder builder) {
+    protected int submit(
+            @NotNull String name, @NotNull Config conf, @NotNull TopologyBuilder builder) {
 
         // register for serialization with Kryo
         Config.registerSerialization(conf, Metadata.class);

@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 import org.jsoup.internal.StringUtil;
 import org.jsoup.nodes.CDataNode;
 import org.jsoup.nodes.Element;
@@ -67,7 +68,7 @@ public class TextExtractor {
     public TextExtractor(Map<String, Object> stormConf) {
         noText = ConfUtils.getBoolean(stormConf, NO_TEXT_PARAM_NAME, false);
         inclusionPatterns = ConfUtils.loadListFromConf(stormConf, INCLUDE_PARAM_NAME);
-        excludedTags = new HashSet<String>();
+        excludedTags = new HashSet<>();
         ConfUtils.loadListFromConf(stormConf, EXCLUDE_PARAM_NAME)
                 .forEach((s) -> excludedTags.add(s.toLowerCase()));
     }
@@ -109,7 +110,7 @@ public class TextExtractor {
 
                     private Node excluded = null;
 
-                    public void head(Node node, int depth) {
+                    public void head(@NotNull Node node, int depth) {
                         if (excluded == null && node instanceof TextNode) {
                             TextNode textNode = (TextNode) node;
                             appendNormalisedText(accum, textNode);
@@ -124,7 +125,7 @@ public class TextExtractor {
                         }
                     }
 
-                    public void tail(Node node, int depth) {
+                    public void tail(@NotNull Node node, int depth) {
                         // make sure there is a space between block tags and immediately
                         // following text nodes <div>One</div>Two should be "One Two".
                         if (node instanceof Element) {

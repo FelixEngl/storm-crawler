@@ -41,10 +41,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
 import org.apache.storm.metric.api.MultiCountMetric;
@@ -286,11 +283,8 @@ public class JSoupParserBolt extends StatusEmitterBolt {
                     String anchor = link.text();
                     if (StringUtils.isNotBlank(targetURL)) {
                         // any existing anchors for the same target?
-                        List<String> anchors = slinks.get(targetURL);
-                        if (anchors == null) {
-                            anchors = new LinkedList<>();
-                            slinks.put(targetURL, anchors);
-                        }
+                        List<String> anchors =
+                                slinks.computeIfAbsent(targetURL, k -> new ArrayList<>());
                         // track the anchors only if no follow is false
                         if (!noFollow && StringUtils.isNotBlank(anchor)) {
                             anchors.add(anchor);
@@ -485,7 +479,7 @@ public class JSoupParserBolt extends StatusEmitterBolt {
             // the URL is valid
             LOG.error("MalformedURLException on {}", url);
             eventCounter.scope("error_invalid_source_url").incrBy(1);
-            return new LinkedList<>();
+            return Collections.emptyList();
         }
 
         for (Map.Entry<String, List<String>> linkEntry : slinks.entrySet()) {

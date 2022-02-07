@@ -9,7 +9,7 @@ public enum QueueMode {
     QUEUE_MODE_DOMAIN("byDomain"),
     QUEUE_MODE_IP("byIP");
 
-    public final String label;
+    public final @NotNull String label;
 
     QueueMode(@NotNull String label) {
         this.label = label;

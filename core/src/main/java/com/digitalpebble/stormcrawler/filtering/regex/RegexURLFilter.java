@@ -15,6 +15,7 @@
 package com.digitalpebble.stormcrawler.filtering.regex;
 
 import java.util.regex.Pattern;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Filters URLs based on a file of regular expressions using the {@link java.util.regex Java Regex
@@ -30,7 +31,7 @@ public class RegexURLFilter extends RegexURLFilterBase {
 
     // Inherited Javadoc
     @Override
-    protected RegexRule createRule(boolean sign, String regex) {
+    protected RegexRule createRule(boolean sign, @NotNull String regex) {
         return new Rule(sign, regex);
     }
 
@@ -44,7 +45,7 @@ public class RegexURLFilter extends RegexURLFilterBase {
         }
 
         @Override
-        protected boolean match(String url) {
+        protected boolean match(@NotNull String url) {
             return pattern.matcher(url).find();
         }
     }

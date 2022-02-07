@@ -15,6 +15,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.io.ByteOrderMark;
 import org.apache.commons.io.input.BOMInputStream;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.parser.Parser;
@@ -38,8 +41,10 @@ public final class CharsetIdentification {
      *
      * @since 1.18
      */
-    public static String getCharsetFast(
-            final Metadata metadata, final byte[] content, final int maxLengthCharsetDetection) {
+    public static @NotNull String getCharsetFast(
+            @NotNull final Metadata metadata,
+            final byte[] content,
+            final int maxLengthCharsetDetection) {
 
         // let's look at the BOM first
         String charset = getCharsetFromBOM(content);
@@ -74,8 +79,8 @@ public final class CharsetIdentification {
      * metadata then use it - otherwise use ICU's charset detector to make an educated guess and if
      * that fails too returns UTF-8.
      */
-    public static String getCharset(
-            Metadata metadata, byte[] content, int maxLengthCharsetDetection) {
+    public static @NotNull String getCharset(
+            @NotNull Metadata metadata, byte[] content, int maxLengthCharsetDetection) {
 
         // let's look at the BOM first
         String BOMCharset = getCharsetFromBOM(content);
@@ -110,7 +115,7 @@ public final class CharsetIdentification {
     }
 
     /** Returns the charset declared by the server if any */
-    private static String getCharsetFromHTTP(Metadata metadata) {
+    private static @Nullable String getCharsetFromHTTP(@NotNull Metadata metadata) {
         return getCharsetFromContentType(metadata.getFirstValue(HttpHeaders.CONTENT_TYPE));
     }
 
@@ -130,7 +135,7 @@ public final class CharsetIdentification {
     /** Use a third party library as last resort to guess the charset from the bytes. */
     private static String getCharsetFromText(
             byte[] content, String declaredCharset, int maxLengthCharsetDetection) {
-        String charset = null;
+
         // filter HTML tags
         CharsetDetector charsetDetector = new CharsetDetector();
         charsetDetector.enableInputFilter(true);
@@ -142,11 +147,11 @@ public final class CharsetIdentification {
             subContent = Arrays.copyOfRange(content, 0, maxLengthCharsetDetection);
         }
         charsetDetector.setText(subContent);
+        String charset = null;
         try {
             CharsetMatch charsetMatch = charsetDetector.detect();
             charset = validateCharset(charsetMatch.getName());
         } catch (Exception e) {
-            charset = null;
         }
         return charset;
     }
@@ -222,7 +227,8 @@ public final class CharsetIdentification {
         return null;
     }
 
-    private static String validateCharset(String cs) {
+    @Contract("null -> null")
+    private static @Nullable String validateCharset(@Nullable String cs) {
         if (cs == null || cs.length() == 0) return null;
         cs = cs.trim().replaceAll("[\"']", "");
         try {

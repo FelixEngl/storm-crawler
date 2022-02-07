@@ -18,8 +18,6 @@ import com.digitalpebble.stormcrawler.JSONResource;
 import com.digitalpebble.stormcrawler.Metadata;
 import com.digitalpebble.stormcrawler.util.ConfUtils;
 import com.digitalpebble.stormcrawler.util.ConfigurableUtil;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -76,7 +74,7 @@ public class URLFilters implements URLFilter, JSONResource {
     /**
      * Loads the filters from a JSON configuration file
      *
-     * @throws IOException
+     * @throws IOException if the json ressource can not be loaded.
      */
     public URLFilters(Map<String, Object> stormConf, String configFile) throws IOException {
         this.configFile = configFile;
@@ -89,8 +87,7 @@ public class URLFilters implements URLFilter, JSONResource {
     }
 
     @Override
-    public void loadJSONResources(InputStream inputStream)
-            throws JsonParseException, JsonMappingException, IOException {
+    public void loadJSONResources(@NotNull InputStream inputStream) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode confNode = mapper.readValue(inputStream, JsonNode.class);
         configure(stormConf, confNode);
@@ -117,7 +114,7 @@ public class URLFilters implements URLFilter, JSONResource {
     }
 
     @Override
-    public String getResourceFile() {
+    public @NotNull String getResourceFile() {
         return this.configFile;
     }
 

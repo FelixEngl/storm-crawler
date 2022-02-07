@@ -195,7 +195,7 @@ public class DelegatorProtocol implements Protocol {
     }
 
     @Override
-    public BaseRobotRules getRobotRules(String url) {
+    public @NotNull BaseRobotRules getRobotRules(@NotNull String url) {
 
         FilteredProtocol proto = getProtocolFor(url, Metadata.empty);
         if (proto == null) {
@@ -205,7 +205,8 @@ public class DelegatorProtocol implements Protocol {
     }
 
     @Override
-    public ProtocolResponse getProtocolOutput(String url, Metadata metadata) throws Exception {
+    public @NotNull ProtocolResponse getProtocolOutput(
+            @NotNull String url, @NotNull Metadata metadata) throws Exception {
 
         // go through the filtered protocols to find which one to use
         FilteredProtocol proto = getProtocolFor(url, metadata);

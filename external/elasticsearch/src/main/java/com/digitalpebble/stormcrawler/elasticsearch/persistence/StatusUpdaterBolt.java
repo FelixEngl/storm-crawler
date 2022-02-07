@@ -162,11 +162,11 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
 
     @Override
     public void store(
-            String url,
-            Status status,
-            Metadata metadata,
+            @NotNull String url,
+            @NotNull Status status,
+            @NotNull Metadata metadata,
             @NotNull Optional<Date> nextFetch,
-            Tuple tuple)
+            @NotNull Tuple tuple)
             throws Exception {
 
         String sha256hex = org.apache.commons.codec.digest.DigestUtils.sha256Hex(url);

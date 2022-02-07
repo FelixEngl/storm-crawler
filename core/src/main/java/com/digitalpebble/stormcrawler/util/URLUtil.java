@@ -20,6 +20,7 @@ import java.net.URI;
 import java.net.URL;
 import java.util.Locale;
 import java.util.regex.Pattern;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /** Utility class for URL analysis */
@@ -35,7 +36,8 @@ public final class URLUtil {
      * @param target target url (may be relative)
      * @return resolved absolute url.
      */
-    public static URL resolveURL(URL base, String target) throws MalformedURLException {
+    public static @NotNull URL resolveURL(@NotNull URL base, @NotNull String target)
+            throws MalformedURLException {
         target = target.trim();
 
         if (target.startsWith("?")) {
@@ -46,7 +48,8 @@ public final class URLUtil {
     }
 
     /** Handle the case in RFC3986 section 5.4.1 example 7, and similar. */
-    static URL fixPureQueryTargets(URL base, String target) throws MalformedURLException {
+    static @NotNull URL fixPureQueryTargets(@NotNull URL base, @NotNull String target)
+            throws MalformedURLException {
         if (!target.startsWith("?")) return new URL(base, target);
 
         String basePath = base.getPath();
@@ -75,7 +78,8 @@ public final class URLUtil {
      * @return URL A URL with the params information correctly encoded.
      * @throws MalformedURLException If the url is not a well formed URL.
      */
-    private static URL fixEmbeddedParams(URL base, String target) throws MalformedURLException {
+    private static @NotNull URL fixEmbeddedParams(@NotNull URL base, @NotNull String target)
+            throws MalformedURLException {
 
         // the target contains params information or the base doesn't then no
         // conversion necessary, return regular URL
@@ -105,7 +109,7 @@ public final class URLUtil {
     private static final Pattern IP_PATTERN = Pattern.compile("(\\d{1,3}\\.){3}(\\d{1,3})");
 
     /** Partitions of the hostname of the url by "." */
-    public static String[] getHostSegments(URL url) {
+    public static @NotNull String[] getHostSegments(@NotNull URL url) {
         String host = url.getHost();
         // return whole hostname, if it is an ipv4
         // TODO : handle ipv6
@@ -114,7 +118,8 @@ public final class URLUtil {
     }
 
     /** Partitions of the hostname of the url by "." */
-    public static String[] getHostSegments(String url) throws MalformedURLException {
+    public static @NotNull String[] getHostSegments(@NotNull String url)
+            throws MalformedURLException {
         return getHostSegments(new URL(url));
     }
 
@@ -124,8 +129,7 @@ public final class URLUtil {
      * @param url The url to check.
      * @return String The hostname for the url.
      */
-    @Nullable
-    public static String getHost(String url) {
+    public static @Nullable String getHost(@NotNull String url) {
         try {
             return new URL(url).getHost().toLowerCase(Locale.ROOT);
         } catch (MalformedURLException e) {
@@ -141,7 +145,7 @@ public final class URLUtil {
      * @return String The page for the url.
      */
     @Nullable
-    public static String getPage(String url) {
+    public static String getPage(@NotNull String url) {
         try {
             // get the full url, and replace the query string with and empty
             // string
@@ -154,7 +158,7 @@ public final class URLUtil {
     }
 
     @Nullable
-    public static String toASCII(String url) {
+    public static String toASCII(@NotNull String url) {
         try {
             URL u = new URL(url);
             URI p =
@@ -174,7 +178,7 @@ public final class URLUtil {
     }
 
     @Nullable
-    public static String toUNICODE(String url) {
+    public static String toUNICODE(@NotNull String url) {
         try {
             URL u = new URL(url);
             URI p =

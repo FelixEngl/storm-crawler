@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Implements the logic of how the metadata should be passed to the outlinks, what should be stored
@@ -73,7 +74,7 @@ public class MetadataTransfer {
 
     private boolean trackDepth = true;
 
-    public static MetadataTransfer getInstance(Map<String, Object> conf) {
+    public static MetadataTransfer getInstance(@NotNull Map<String, Object> conf) {
         String className = ConfUtils.getString(conf, metadataTransferClassParamName);
 
         MetadataTransfer transferInstance;
@@ -92,7 +93,7 @@ public class MetadataTransfer {
         return transferInstance;
     }
 
-    protected void configure(Map<String, Object> conf) {
+    protected void configure(@NotNull Map<String, Object> conf) {
 
         trackPath = ConfUtils.getBoolean(conf, trackPathParamName, true);
 
@@ -119,7 +120,8 @@ public class MetadataTransfer {
      * Determine which metadata should be transfered to an outlink. Adds additional metadata like
      * the URL path.
      */
-    public Metadata getMetaForOutlink(String targetURL, String sourceURL, Metadata parentMD) {
+    public @NotNull Metadata getMetaForOutlink(
+            @NotNull String targetURL, @NotNull String sourceURL, @NotNull Metadata parentMD) {
         Metadata md = _filter(parentMD, mdToTransfer);
 
         // keep the path?
@@ -131,10 +133,14 @@ public class MetadataTransfer {
         if (trackDepth) {
             String existingDepth = md.getFirstValue(depthKeyName);
             int depth;
-            try {
-                depth = Integer.parseInt(existingDepth);
-            } catch (Exception e) {
+            if (existingDepth == null) {
                 depth = 0;
+            } else {
+                try {
+                    depth = Integer.parseInt(existingDepth);
+                } catch (Exception e) {
+                    depth = 0;
+                }
             }
             md.setValue(depthKeyName, Integer.toString(++depth));
         }

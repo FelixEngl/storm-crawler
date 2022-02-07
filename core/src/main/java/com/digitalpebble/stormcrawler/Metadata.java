@@ -21,6 +21,7 @@ import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -173,17 +174,17 @@ public class Metadata {
     }
 
     /** @return the previous value(s) associated with <tt>key</tt> */
-    public String[] remove(@NotNull String key) {
+    public @NotNull String[] remove(@NotNull String key) {
         checkLockException();
         return md.remove(key);
     }
 
-    public String toString() {
+    public @NotNull String toString() {
         return toString("");
     }
 
     /** Returns a String representation of the metadata with one K/V per line */
-    public String toString(String prefix) {
+    public @NotNull String toString(String prefix) {
         StringBuilder sb = new StringBuilder();
         if (prefix == null) prefix = "";
         for (Entry<String, String[]> entry : md.entrySet()) {
@@ -198,12 +199,12 @@ public class Metadata {
         return md.size();
     }
 
-    public Set<String> keySet() {
+    public @NotNull Set<String> keySet() {
         return md.keySet();
     }
 
     /** Returns the first non empty value found for the keys or null if none found. */
-    public static String getFirstValue(Metadata md, String... keys) {
+    public static @Nullable String getFirstValue(@NotNull Metadata md, String... keys) {
         for (String key : keys) {
             String val = md.getFirstValue(key);
             if (StringUtils.isBlank(val)) continue;
@@ -218,12 +219,12 @@ public class Metadata {
      * @deprecated replace with getMap, getShallowCopyOfMap or getDeepCopyOfMap.
      */
     @Deprecated
-    public Map<String, String[]> asMap() {
+    public @NotNull Map<String, String[]> asMap() {
         return md;
     }
 
     /** Returns the underlying map. */
-    public Map<String, String[]> getMap() {
+    public @NotNull Map<String, String[]> getMap() {
         return md;
     }
 
@@ -231,7 +232,7 @@ public class Metadata {
      * Get a shallow copy of the underlying map. Changes to the keys are not changing the original
      * metadata, but changing the values does change the original metadata.
      */
-    public Map<String, String[]> getShallowCopyOfMap() {
+    public @NotNull Map<String, String[]> getShallowCopyOfMap() {
         return new HashMap<>(md);
     }
 
@@ -239,7 +240,7 @@ public class Metadata {
      * Get a deep copy of the underlying map. Changes to the keys and values are not changing the
      * original metadata.
      */
-    public Map<String, String[]> getDeepCopyOfMap() {
+    public @NotNull Map<String, String[]> getDeepCopyOfMap() {
         return md.entrySet().stream()
                 .collect(
                         Collectors.toMap(
@@ -258,7 +259,7 @@ public class Metadata {
      *
      * @return a copy of this
      */
-    public Metadata copy() {
+    public @NotNull Metadata copy() {
         return new Metadata(md);
     }
 
@@ -271,7 +272,7 @@ public class Metadata {
      * @param shallow if true creates a shallow copy, otherwise it creates a deep copy
      * @return a shallow or deep copy of this
      */
-    public Metadata copy(boolean shallow) {
+    public @NotNull Metadata copy(boolean shallow) {
         if (shallow) return copyShallow();
         else return copyDeep();
     }
@@ -280,7 +281,7 @@ public class Metadata {
      * Get a shallow copy of this. Changes to the keys are not changing the original metadata, but
      * changing the values does change the original metadata.
      */
-    public Metadata copyShallow() {
+    public @NotNull Metadata copyShallow() {
         return new Metadata(getShallowCopyOfMap());
     }
 
@@ -288,7 +289,7 @@ public class Metadata {
      * Get a deep copy of this. Changes to the keys and values are not changing the original
      * metadata.
      */
-    public Metadata copyDeep() {
+    public @NotNull Metadata copyDeep() {
         return new Metadata(getDeepCopyOfMap());
     }
 
@@ -302,7 +303,8 @@ public class Metadata {
      *
      * @since 1.16
      */
-    public Metadata lock() {
+    @Contract(" -> this")
+    public @NotNull Metadata lock() {
         locked = true;
         return this;
     }
@@ -312,7 +314,8 @@ public class Metadata {
      *
      * @since 1.16
      */
-    public Metadata unlock() {
+    @Contract(" -> this")
+    public @NotNull Metadata unlock() {
         locked = false;
         return this;
     }

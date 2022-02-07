@@ -61,7 +61,7 @@ import org.apache.http.util.Args;
 import org.apache.http.util.ByteArrayBuffer;
 import org.apache.storm.Config;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 import org.slf4j.LoggerFactory;
 
 /** Uses Apache httpclient to handle http and https */
@@ -146,7 +146,8 @@ public class HttpProtocol extends AbstractHttpProtocol
     }
 
     @Override
-    public ProtocolResponse getProtocolOutput(String url, Metadata md) throws Exception {
+    public @NotNull ProtocolResponse getProtocolOutput(@NotNull String url, @NotNull Metadata md)
+            throws Exception {
 
         LOG.debug("HTTP connection manager stats {}", CONNECTION_MANAGER.getTotalStats());
 
@@ -194,45 +195,43 @@ public class HttpProtocol extends AbstractHttpProtocol
         HttpRequestBase request = new HttpGet(url);
         ResponseHandler<ProtocolResponse> responseHandler = this;
 
-        if (md != null) {
-            String useHead = md.getFirstValue("http.method.head");
-            if (Boolean.parseBoolean(useHead)) {
-                request = new HttpHead(url);
-            }
+        String useHead = md.getFirstValue("http.method.head");
+        if (Boolean.parseBoolean(useHead)) {
+            request = new HttpHead(url);
+        }
 
-            String lastModified = md.getFirstValue(HttpHeaders.LAST_MODIFIED);
-            if (StringUtils.isNotBlank(lastModified)) {
-                request.addHeader("If-Modified-Since", HttpHeaders.formatHttpDate(lastModified));
-            }
+        String lastModified = md.getFirstValue(HttpHeaders.LAST_MODIFIED);
+        if (StringUtils.isNotBlank(lastModified)) {
+            request.addHeader("If-Modified-Since", HttpHeaders.formatHttpDate(lastModified));
+        }
 
-            String ifNoneMatch = md.getFirstValue("etag", protocolMDprefix);
-            if (StringUtils.isNotBlank(ifNoneMatch)) {
-                request.addHeader("If-None-Match", ifNoneMatch);
-            }
+        String ifNoneMatch = md.getFirstValue("etag", protocolMDprefix);
+        if (StringUtils.isNotBlank(ifNoneMatch)) {
+            request.addHeader("If-None-Match", ifNoneMatch);
+        }
 
-            String accept = md.getFirstValue("http.accept");
-            if (StringUtils.isNotBlank(accept)) {
-                request.setHeader(new BasicHeader("Accept", accept));
-            }
+        String accept = md.getFirstValue("http.accept");
+        if (StringUtils.isNotBlank(accept)) {
+            request.setHeader(new BasicHeader("Accept", accept));
+        }
 
-            String acceptLanguage = md.getFirstValue("http.accept.language");
-            if (StringUtils.isNotBlank(acceptLanguage)) {
-                request.setHeader(new BasicHeader("Accept-Language", acceptLanguage));
-            }
+        String acceptLanguage = md.getFirstValue("http.accept.language");
+        if (StringUtils.isNotBlank(acceptLanguage)) {
+            request.setHeader(new BasicHeader("Accept-Language", acceptLanguage));
+        }
 
-            String pageMaxContentStr = md.getFirstValue("http.content.limit");
-            if (StringUtils.isNotBlank(pageMaxContentStr)) {
-                try {
-                    int pageMaxContent = Integer.parseInt(pageMaxContentStr);
-                    responseHandler = getResponseHandlerWithContentLimit(pageMaxContent);
-                } catch (NumberFormatException e) {
-                    LOG.warn("Invalid http.content.limit in metadata: {}", pageMaxContentStr);
-                }
+        String pageMaxContentStr = md.getFirstValue("http.content.limit");
+        if (StringUtils.isNotBlank(pageMaxContentStr)) {
+            try {
+                int pageMaxContent = Integer.parseInt(pageMaxContentStr);
+                responseHandler = getResponseHandlerWithContentLimit(pageMaxContent);
+            } catch (NumberFormatException e) {
+                LOG.warn("Invalid http.content.limit in metadata: {}", pageMaxContentStr);
             }
+        }
 
-            if (useCookies) {
-                addCookiesToRequest(request, md);
-            }
+        if (useCookies) {
+            addCookiesToRequest(request, md);
         }
 
         request.setConfig(reqConfig);
@@ -319,9 +318,8 @@ public class HttpProtocol extends AbstractHttpProtocol
         return response -> handleResponseWithContentLimit(response, pageMaxContent);
     }
 
-    @Nullable
     private static byte[] toByteArray(
-            @NotNull final HttpEntity entity, int maxContent, @NotNull MutableBoolean trimmed)
+            @NotNull final HttpEntity entity, int maxContent, @NotNull final MutableBoolean trimmed)
             throws IOException {
         final InputStream instream = entity.getContent();
         if (instream == null) {
@@ -355,6 +353,7 @@ public class HttpProtocol extends AbstractHttpProtocol
         return buffer.toByteArray();
     }
 
+    @TestOnly
     public static void main(String[] args) throws Exception {
         HttpProtocol.mainForTest(new HttpProtocol(), args);
     }

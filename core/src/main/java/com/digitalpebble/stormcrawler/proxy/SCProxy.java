@@ -17,6 +17,7 @@ package com.digitalpebble.stormcrawler.proxy;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -45,18 +46,11 @@ public class SCProxy {
     private String status;
 
     // define fields for management
-    private AtomicInteger totalUsage;
-
-    /** Default constructor for setting up the proxy */
-    private void init() {
-        // initialize usage tracker to 0
-        this.totalUsage = new AtomicInteger();
-    }
+    private final AtomicInteger totalUsage = new AtomicInteger();
 
     /** Construct a proxy object from a valid proxy connection string */
-    public SCProxy(String connectionString) throws IllegalArgumentException {
+    public SCProxy(@NotNull String connectionString) throws IllegalArgumentException {
         // call default constructor
-        this.init();
 
         // load connection string into regex matched
         Matcher matcher = PROXY_STRING_REGEX.matcher(connectionString);
@@ -84,18 +78,16 @@ public class SCProxy {
 
     /** Construct a proxy class from it's variables */
     public SCProxy(
-            String protocol,
-            String address,
-            String port,
-            String username,
-            String password,
-            String country,
-            String area,
-            String location,
-            String status)
+            @NotNull String protocol,
+            @NotNull String address,
+            @NotNull String port,
+            @NotNull String username,
+            @NotNull String password,
+            @NotNull String country,
+            @NotNull String area,
+            @NotNull String location,
+            @NotNull String status)
             throws IllegalArgumentException {
-        // call default constructor
-        this.init();
 
         // load required parameters
         this.protocol = protocol;

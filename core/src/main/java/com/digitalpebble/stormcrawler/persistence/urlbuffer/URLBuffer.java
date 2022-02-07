@@ -18,6 +18,8 @@ import com.digitalpebble.stormcrawler.Metadata;
 import com.digitalpebble.stormcrawler.persistence.EmptyQueueListener;
 import java.util.Map;
 import org.apache.storm.tuple.Values;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Buffers URLs to be processed into separate queues; used by spouts. Guarantees that no URL can be
@@ -49,7 +51,7 @@ public interface URLBuffer {
      *
      * @return false if the URL was already in the buffer, true if it wasn't and was added
      */
-    boolean add(String URL, Metadata m, String key);
+    boolean add(@NotNull String url, @NotNull Metadata m, @Nullable String key);
 
     /**
      * Stores the URL and its Metadata using the hostname as key.
@@ -58,7 +60,7 @@ public interface URLBuffer {
      *
      * @return false if the URL was already in the buffer, true if it wasn't and was added
      */
-    default boolean add(String URL, Metadata m) {
+    default boolean add(@NotNull String URL, @NotNull Metadata m) {
         return add(URL, m, null);
     }
 
@@ -73,6 +75,7 @@ public interface URLBuffer {
      *
      * <p>Implementations of this method should be synchronised
      */
+    @Nullable
     Values next();
 
     /** Implementations of this method should be synchronised */
@@ -84,9 +87,9 @@ public interface URLBuffer {
      * Notify the buffer that a URL has been successfully processed used e.g to compute an ideal
      * delay for a host queue
      */
-    default void acked(String url) {
+    default void acked(@NotNull String url) {
         // do nothing with the information about URLs being acked
     }
 
-    default void configure(Map<String, Object> stormConf) {}
+    default void configure(@NotNull Map<String, Object> stormConf) {}
 }

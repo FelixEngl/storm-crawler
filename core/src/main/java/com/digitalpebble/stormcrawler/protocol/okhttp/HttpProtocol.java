@@ -58,6 +58,7 @@ import org.apache.commons.lang.mutable.MutableObject;
 import org.apache.http.cookie.Cookie;
 import org.apache.storm.Config;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.TestOnly;
 import org.slf4j.LoggerFactory;
 
 public class HttpProtocol extends AbstractHttpProtocol {
@@ -242,8 +243,8 @@ public class HttpProtocol extends AbstractHttpProtocol {
     }
 
     @Override
-    public ProtocolResponse getProtocolOutput(String url, final Metadata metadata)
-            throws Exception {
+    public @NotNull ProtocolResponse getProtocolOutput(
+            @NotNull String url, final @NotNull Metadata metadata) throws Exception {
         // create default local client
         OkHttpClient localClient = client;
 
@@ -556,6 +557,7 @@ public class HttpProtocol extends AbstractHttpProtocol {
         }
     }
 
+    @TestOnly
     public static void main(String[] args) throws Exception {
         HttpProtocol.mainForTest(new HttpProtocol(), args);
     }

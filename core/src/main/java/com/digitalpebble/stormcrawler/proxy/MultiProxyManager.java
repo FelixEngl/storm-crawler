@@ -26,6 +26,7 @@ import java.util.Scanner;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.commons.lang.ArrayUtils;
 import org.apache.storm.Config;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 
 /** MultiProxyManager is a ProxyManager implementation for a multiple proxy endpoints */
@@ -54,7 +55,7 @@ public class MultiProxyManager implements ProxyManager {
     public MultiProxyManager() {}
 
     @Override
-    public void configure(Config conf) {
+    public void configure(@NotNull Config conf) {
         // load proxy file from configuration
         String proxyFile = ConfUtils.getString(conf, "http.proxy.file", null);
         // load proxy rotation from config
@@ -206,7 +207,7 @@ public class MultiProxyManager implements ProxyManager {
     }
 
     @Override
-    public SCProxy getProxy(Metadata metadata) {
+    public SCProxy getProxy(@NotNull Metadata metadata) {
         // create a variable to hold the proxy generated in the following switch statement
         SCProxy proxy;
 

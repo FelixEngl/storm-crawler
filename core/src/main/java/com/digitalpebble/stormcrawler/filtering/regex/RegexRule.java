@@ -14,6 +14,8 @@
  */
 package com.digitalpebble.stormcrawler.filtering.regex;
 
+import org.jetbrains.annotations.NotNull;
+
 /** A generic regular expression rule. Borrowed from Apache Nutch 1.9. */
 public abstract class RegexRule {
 
@@ -27,7 +29,7 @@ public abstract class RegexRule {
      *     that any url matching this rule must be rejected.
      * @param regex is the regular expression used for matching (see {@link #match(String)} method).
      */
-    protected RegexRule(boolean sign, String regex) {
+    protected RegexRule(boolean sign, @NotNull String regex) {
         this.sign = sign;
     }
 
@@ -48,5 +50,5 @@ public abstract class RegexRule {
      * @return <code>true</code> if the specified url matches this rule, otherwise <code>false
      *     </code>.
      */
-    protected abstract boolean match(String url);
+    protected abstract boolean match(@NotNull String url);
 }

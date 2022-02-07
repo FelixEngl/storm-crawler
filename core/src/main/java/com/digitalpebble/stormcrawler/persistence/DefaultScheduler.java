@@ -118,6 +118,7 @@ public class DefaultScheduler extends Scheduler {
         } else {
             switch (status) {
                 case FETCHED:
+                case REDIRECTION:
                     minutesIncrement = defaultfetchInterval;
                     break;
                 case FETCH_ERROR:
@@ -125,9 +126,6 @@ public class DefaultScheduler extends Scheduler {
                     break;
                 case ERROR:
                     minutesIncrement = errorFetchInterval;
-                    break;
-                case REDIRECTION:
-                    minutesIncrement = defaultfetchInterval;
                     break;
                 default:
                     // leave it to now e.g. DISCOVERED

@@ -36,6 +36,7 @@ import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
+import org.jetbrains.annotations.NotNull;
 import org.joda.time.format.ISODateTimeFormat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +69,7 @@ public class HybridSpout extends AggregationSpout implements EmptyQueueListener 
     }
 
     @Override
-    public void emptyQueue(String queueName) {
+    public void emptyQueue(@NotNull String queueName) {
 
         LOG.info("{} Emptied buffer queue for {}", logIdprefix, queueName);
 
@@ -130,7 +131,7 @@ public class HybridSpout extends AggregationSpout implements EmptyQueueListener 
         }
 
         // dump query to log
-        LOG.debug("{} ES query {} - {}", logIdprefix, queueName, request.toString());
+        LOG.debug("{} ES query {} - {}", logIdprefix, queueName, request);
 
         client.searchAsync(request, RequestOptions.DEFAULT, this);
     }

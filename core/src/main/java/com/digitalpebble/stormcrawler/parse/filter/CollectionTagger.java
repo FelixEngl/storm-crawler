@@ -105,12 +105,12 @@ public class CollectionTagger extends ParseFilter implements JSONResource {
     }
 
     @Override
-    public String getResourceFile() {
+    public @NotNull String getResourceFile() {
         return resourceFile;
     }
 
     @Override
-    public void loadJSONResources(InputStream inputStream)
+    public void loadJSONResources(@NotNull InputStream inputStream)
             throws JsonParseException, JsonMappingException, IOException {
         collections = (Collections) objectMapper.readValue(inputStream, reference);
     }

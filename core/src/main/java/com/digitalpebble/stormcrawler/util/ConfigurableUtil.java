@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 
 public final class ConfigurableUtil {
@@ -19,11 +20,11 @@ public final class ConfigurableUtil {
      *
      * @see ConfigurableUtil#configure(String, Class, Map, JsonNode) for more information.
      */
-    public static <T extends Configurable> List<T> configure(
-            Class<?> caller,
-            Class<T> filterClass,
-            Map<String, Object> stormConf,
-            JsonNode filtersConf) {
+    public static <T extends Configurable> @NotNull List<T> configure(
+            @NotNull Class<?> caller,
+            @NotNull Class<T> filterClass,
+            @NotNull Map<String, Object> stormConf,
+            @NotNull JsonNode filtersConf) {
         return configure(caller.getName(), filterClass, stormConf, filtersConf);
     }
 
@@ -70,11 +71,11 @@ public final class ConfigurableUtil {
      * }
      * }</pre>
      */
-    public static <T extends Configurable> List<T> configure(
-            String configName,
-            Class<T> filterClass,
-            Map<String, Object> stormConf,
-            JsonNode filtersConf) {
+    public static <T extends Configurable> @NotNull List<T> configure(
+            @NotNull String configName,
+            @NotNull Class<T> filterClass,
+            @NotNull Map<String, Object> stormConf,
+            @NotNull JsonNode filtersConf) {
         // initialises the filters
         List<T> filterLists = new ArrayList<>();
 

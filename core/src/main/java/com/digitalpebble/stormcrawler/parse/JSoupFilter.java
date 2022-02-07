@@ -15,6 +15,7 @@
 package com.digitalpebble.stormcrawler.parse;
 
 import com.digitalpebble.stormcrawler.util.Configurable;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Implementations of ParseFilter are responsible for extracting custom data from the crawled
@@ -34,5 +35,8 @@ public abstract class JSoupFilter implements Configurable {
      * @param parse the metadata to be updated with the resulting of the parsing
      */
     public abstract void filter(
-            String url, byte[] content, org.jsoup.nodes.Document doc, ParseResult parse);
+            @NotNull String url,
+            byte[] content,
+            @NotNull org.jsoup.nodes.Document doc,
+            @NotNull ParseResult parse);
 }

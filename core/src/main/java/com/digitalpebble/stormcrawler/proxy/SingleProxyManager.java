@@ -17,6 +17,7 @@ package com.digitalpebble.stormcrawler.proxy;
 import com.digitalpebble.stormcrawler.Metadata;
 import com.digitalpebble.stormcrawler.util.ConfUtils;
 import org.apache.storm.Config;
+import org.jetbrains.annotations.NotNull;
 
 /** SingleProxyManager is a ProxyManager implementation for a single proxy endpoint */
 public class SingleProxyManager implements ProxyManager {
@@ -24,7 +25,7 @@ public class SingleProxyManager implements ProxyManager {
 
     public SingleProxyManager() {}
 
-    public void configure(Config conf) {
+    public void configure(@NotNull Config conf) {
         // values for single proxy
         String proxyHost = ConfUtils.getString(conf, "http.proxy.host", null);
         String proxyType = ConfUtils.getString(conf, "http.proxy.type", "HTTP");
@@ -48,7 +49,7 @@ public class SingleProxyManager implements ProxyManager {
     }
 
     @Override
-    public SCProxy getProxy(Metadata metadata) {
+    public SCProxy getProxy(@NotNull Metadata metadata) {
         return proxy;
     }
 }

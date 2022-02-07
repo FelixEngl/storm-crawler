@@ -44,6 +44,10 @@ public class DelegatorRemoteDriverProtocol extends RemoteDriverProtocol {
     public void configure(@NotNull Config conf) {
         super.configure(conf);
         String protocolimplementation = ConfUtils.getString(conf, PROTOCOL_IMPL_CONFIG);
+        if (protocolimplementation == null) {
+            throw new RuntimeException(
+                    String.format("The config-value for %s was not found.", PROTOCOL_IMPL_CONFIG));
+        }
         try {
             directProtocol =
                     InitialisationUtil.initializeFromQualifiedName(
@@ -60,7 +64,8 @@ public class DelegatorRemoteDriverProtocol extends RemoteDriverProtocol {
     }
 
     @Override
-    public ProtocolResponse getProtocolOutput(String url, Metadata metadata) throws Exception {
+    public @NotNull ProtocolResponse getProtocolOutput(
+            @NotNull String url, @NotNull Metadata metadata) throws Exception {
         if (metadata.getFirstValue(USE_SELENIUM_KEY) != null) {
             return super.getProtocolOutput(url, metadata);
         } else {
@@ -75,7 +80,7 @@ public class DelegatorRemoteDriverProtocol extends RemoteDriverProtocol {
     }
 
     @Override
-    public BaseRobotRules getRobotRules(String url) {
+    public @NotNull BaseRobotRules getRobotRules(@NotNull String url) {
         return directProtocol.getRobotRules(url);
     }
 }

@@ -33,13 +33,14 @@ public class FileProtocol implements Protocol {
     }
 
     @Override
-    public ProtocolResponse getProtocolOutput(String url, Metadata md) throws Exception {
+    public @NotNull ProtocolResponse getProtocolOutput(@NotNull String url, @NotNull Metadata md)
+            throws Exception {
         FileResponse response = new FileResponse(url, md, this);
         return response.toProtocolResponse();
     }
 
     @Override
-    public BaseRobotRules getRobotRules(String url) {
+    public @NotNull BaseRobotRules getRobotRules(@NotNull String url) {
         return RobotRulesParser.EMPTY_RULES;
     }
 

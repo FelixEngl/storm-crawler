@@ -47,7 +47,7 @@ public class MemorySpout extends BaseRichSpout {
     private final StringTabScheme scheme = new StringTabScheme();
     private boolean active = true;
 
-    private boolean withDiscoveredStatus = false;
+    private boolean withDiscoveredStatus;
 
     private static final PriorityQueue<ScheduledURL> queue = new PriorityQueue<>();
 
@@ -96,7 +96,7 @@ public class MemorySpout extends BaseRichSpout {
                     scheme.deserialize(ByteBuffer.wrap(u.getBytes(StandardCharsets.UTF_8)));
             add((String) tuple.get(0), (Metadata) tuple.get(1), now);
         }
-        context.registerMetric("queue_size", () -> queue.size(), 10);
+        context.registerMetric("queue_size", queue::size, 10);
     }
 
     @Override

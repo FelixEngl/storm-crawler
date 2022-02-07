@@ -41,7 +41,8 @@ public abstract class SeleniumProtocol extends AbstractHttpProtocol {
         filters = NavigationFilters.fromConf(conf);
     }
 
-    public ProtocolResponse getProtocolOutput(String url, Metadata metadata) throws Exception {
+    public @NotNull ProtocolResponse getProtocolOutput(
+            @NotNull String url, @NotNull Metadata metadata) throws Exception {
         RemoteWebDriver driver;
         while ((driver = getDriver()) == null) {}
         try {

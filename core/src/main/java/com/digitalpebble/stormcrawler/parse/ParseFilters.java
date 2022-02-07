@@ -35,6 +35,7 @@ import org.apache.storm.Config;
 import org.apache.storm.utils.Utils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.slf4j.LoggerFactory;
@@ -93,14 +94,14 @@ public class ParseFilters extends ParseFilter implements JSONResource {
     }
 
     @Override
-    public void loadJSONResources(InputStream inputStream) throws IOException {
+    public void loadJSONResources(@NotNull InputStream inputStream) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode confNode = mapper.readValue(inputStream, JsonNode.class);
         configure(stormConf, confNode);
     }
 
     @Override
-    public String getResourceFile() {
+    public @NotNull String getResourceFile() {
         return this.configFile;
     }
 
@@ -150,6 +151,7 @@ public class ParseFilters extends ParseFilter implements JSONResource {
      *
      * @since 1.17
      */
+    @TestOnly
     public static void main(String[] args) throws IOException, ParseException {
 
         Config conf = new Config();
@@ -184,7 +186,7 @@ public class ParseFilters extends ParseFilter implements JSONResource {
 
         filters.filter(url, content, DocumentFragmentBuilder.fromJsoup(doc), parse);
 
-        System.out.println(parse.toString());
+        System.out.println(parse);
 
         System.exit(0);
     }

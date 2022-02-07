@@ -17,13 +17,9 @@ package com.digitalpebble.stormcrawler.persistence.urlbuffer;
 import com.digitalpebble.stormcrawler.Metadata;
 import com.digitalpebble.stormcrawler.persistence.EmptyQueueListener;
 import com.digitalpebble.stormcrawler.util.URLPartitioner;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
+import java.util.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +41,7 @@ public abstract class AbstractURLBuffer implements URLBuffer {
     protected final Map<String, Queue<URLMetadata>> queues =
             Collections.synchronizedMap(new LinkedHashMap<>());
 
-    public void configure(Map<String, Object> stormConf) {
+    public void configure(@NotNull Map<String, Object> stormConf) {
         partitioner.configure(stormConf);
     }
 
@@ -58,20 +54,24 @@ public abstract class AbstractURLBuffer implements URLBuffer {
      * Stores the URL and its Metadata under a given key.
      *
      * @return false if the URL was already in the buffer, true if it wasn't and was added
+     * @param url
+     * @param m
+     * @param key
      */
-    public synchronized boolean add(String URL, Metadata m, String key) {
+    public synchronized boolean add(
+            @NotNull String url, @NotNull Metadata m, @Nullable String key) {
 
-        LOG.debug("Adding {}", URL);
+        LOG.debug("Adding {}", url);
 
-        if (in_buffer.contains(URL)) {
-            LOG.debug("already in buffer {}", URL);
+        if (in_buffer.contains(url)) {
+            LOG.debug("already in buffer {}", url);
             return false;
         }
 
         // determine which queue to use
         // configure with other than hostname
         if (key == null) {
-            key = partitioner.getPartition(URL, m);
+            key = partitioner.getPartition(url, m);
             if (key == null) {
                 key = "_DEFAULT_";
             }
@@ -79,17 +79,18 @@ public abstract class AbstractURLBuffer implements URLBuffer {
 
         // create the queue if it does not exist
         // and add the url
-        queues.computeIfAbsent(key, k -> new LinkedList<URLMetadata>())
-                .add(new URLMetadata(URL, m));
-        return in_buffer.add(URL);
+        queues.computeIfAbsent(key, k -> new ArrayDeque<>()).add(new URLMetadata(url, m));
+        return in_buffer.add(url);
     }
 
     /**
      * Stores the URL and its Metadata using the hostname as key.
      *
      * @return false if the URL was already in the buffer, true if it wasn't and was added
+     * @param URL
+     * @param m
      */
-    public synchronized boolean add(String URL, Metadata m) {
+    public synchronized boolean add(@NotNull String URL, @NotNull Metadata m) {
         return add(URL, m, null);
     }
 

@@ -138,7 +138,7 @@ public abstract class AbstractIndexerBolt extends BaseRichBolt {
     /** Returns a mapping field name / values for the metadata to index * */
     protected Map<String, String[]> filterMetadata(Metadata meta) {
 
-        Pattern indexValuePattern = Pattern.compile("\\[(\\d+)\\]");
+        Pattern indexValuePattern = Pattern.compile("\\[(\\d+)]");
 
         Map<String, String[]> fieldVals = new HashMap<>();
         for (Entry<String, String> entry : metadata2field.entrySet()) {

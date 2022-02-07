@@ -57,7 +57,7 @@ public class FileSpout extends BaseRichSpout {
 
     protected LinkedList<byte[]> buffer = new LinkedList<>();
     protected boolean active;
-    private boolean withDiscoveredStatus = false;
+    private boolean withDiscoveredStatus;
 
     /**
      * @param dir containing the seed files

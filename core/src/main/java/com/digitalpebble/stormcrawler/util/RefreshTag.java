@@ -22,6 +22,9 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 import org.apache.commons.lang.StringUtils;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.DocumentFragment;
 
 // Utility class used to extract refresh tags from HTML pages
@@ -43,7 +46,9 @@ public final class RefreshTag {
     }
 
     // Returns a normalised value of the content attribute for the refresh tag
-    public static String extractRefreshURL(String value) {
+    @Nullable
+    @Contract("null -> null")
+    public static String extractRefreshURL(@Nullable String value) {
         if (StringUtils.isBlank(value)) return null;
 
         // 0;URL=http://www.apollocolors.com/site
@@ -57,7 +62,7 @@ public final class RefreshTag {
         return null;
     }
 
-    public static String extractRefreshURL(DocumentFragment doc) {
+    public static @Nullable String extractRefreshURL(@NotNull DocumentFragment doc) {
         String value;
         try {
             value = (String) expression.evaluate(doc, XPathConstants.STRING);

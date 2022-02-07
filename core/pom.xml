@@ -30,7 +30,6 @@
 		<cli.version>1.5.0</cli.version>
 		<okhttp.version>4.9.3</okhttp.version>
 		<caffeine.version>2.9.2</caffeine.version>
-		<jetbrains.annotations.version>23.0.0</jetbrains.annotations.version>
 	</properties>
 
 	<build>
@@ -218,14 +217,6 @@
 			<groupId>com.squareup.okhttp3</groupId>
 			<artifactId>okhttp-brotli</artifactId>
 			<version>${okhttp.version}</version>
-		</dependency>
-
-		<!-- https://mvnrepository.com/artifact/org.jetbrains/annotations -->
-		<dependency>
-			<groupId>org.jetbrains</groupId>
-			<artifactId>annotations</artifactId>
-			<version>${jetbrains.annotations.version}</version>
-			<scope>compile</scope>
 		</dependency>
 
 	</dependencies>

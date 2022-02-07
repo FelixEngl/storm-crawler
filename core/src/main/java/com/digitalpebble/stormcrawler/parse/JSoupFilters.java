@@ -95,14 +95,14 @@ public class JSoupFilters extends JSoupFilter implements JSONResource {
     }
 
     @Override
-    public void loadJSONResources(InputStream inputStream) throws IOException {
+    public void loadJSONResources(@NotNull InputStream inputStream) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         JsonNode confNode = mapper.readValue(inputStream, JsonNode.class);
         configure(stormConf, confNode);
     }
 
     @Override
-    public String getResourceFile() {
+    public @NotNull String getResourceFile() {
         return this.configFile;
     }
 
@@ -115,7 +115,11 @@ public class JSoupFilters extends JSoupFilter implements JSONResource {
     }
 
     @Override
-    public void filter(String url, byte[] content, Document doc, ParseResult parse) {
+    public void filter(
+            @NotNull String url,
+            byte[] content,
+            @NotNull Document doc,
+            @NotNull ParseResult parse) {
         for (JSoupFilter filter : filters) {
             long start = System.currentTimeMillis();
             filter.filter(url, content, doc, parse);

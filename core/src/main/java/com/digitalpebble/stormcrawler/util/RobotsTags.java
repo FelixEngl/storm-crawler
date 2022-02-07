@@ -20,6 +20,8 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -61,7 +63,7 @@ public class RobotsTags {
     }
 
     /** Get the values from the fetch metadata * */
-    public RobotsTags(Metadata metadata, String protocolMDprefix) {
+    public RobotsTags(@NotNull Metadata metadata, @Nullable String protocolMDprefix) {
         // HTTP headers
         // X-Robots-Tag: noindex
         String[] values = metadata.getValues("X-Robots-Tag", protocolMDprefix);
@@ -73,13 +75,18 @@ public class RobotsTags {
         parseValues(values);
     }
 
+    /** Get the values from the fetch metadata * */
+    public RobotsTags(@NotNull Metadata metadata) {
+        this(metadata, null);
+    }
+
     public RobotsTags() {}
 
     // set the values based on the meta tags
     // HTML tags
     // <meta name="robots" content="noarchive, nofollow"/>
     // called by the parser bolts
-    public void extractMetaTags(DocumentFragment doc) throws XPathExpressionException {
+    public void extractMetaTags(@NotNull DocumentFragment doc) throws XPathExpressionException {
         NodeList nodes = (NodeList) expression.evaluate(doc, XPathConstants.NODESET);
         if (nodes == null) return;
         int numNodes = nodes.getLength();
@@ -111,13 +118,13 @@ public class RobotsTags {
     }
 
     /** Extracts meta tags based on the value of the content attribute * */
-    public void extractMetaTags(String content) {
+    public void extractMetaTags(@Nullable String content) {
         if (content == null) return;
         String[] vals = content.split(" *, *");
         parseValues(vals);
     }
 
-    private void parseValues(String[] values) {
+    private void parseValues(@NotNull String[] values) {
         for (String v : values) {
             v = v.trim();
             if ("noindex".equalsIgnoreCase(v)) {
@@ -135,7 +142,7 @@ public class RobotsTags {
     }
 
     /** Adds a normalised representation of the directives in the metadata * */
-    public void normaliseToMetadata(Metadata metadata) {
+    public void normaliseToMetadata(@NotNull Metadata metadata) {
         metadata.setValue(ROBOTS_NO_INDEX, Boolean.toString(noIndex));
         metadata.setValue(ROBOTS_NO_CACHE, Boolean.toString(noCache));
         metadata.setValue(ROBOTS_NO_FOLLOW, Boolean.toString(noFollow));

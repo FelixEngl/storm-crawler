@@ -143,7 +143,7 @@ public abstract class RegexURLFilterBase implements URLFilter {
      *     matching this rule must be excluded.
      * @param regex is the regular expression associated to this rule.
      */
-    protected abstract RegexRule createRule(boolean sign, String regex);
+    protected abstract RegexRule createRule(boolean sign, @NotNull String regex);
 
     /*
      * -------------------------- * <implementation:URLFilter> *

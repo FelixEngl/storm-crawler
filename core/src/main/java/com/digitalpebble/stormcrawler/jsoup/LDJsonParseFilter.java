@@ -66,25 +66,26 @@ public class LDJsonParseFilter extends JSoupFilter {
 
     static class LabelledJsonPointer {
 
-        String label;
-        JsonPointer pointer;
+        @NotNull String label;
+        @NotNull JsonPointer pointer;
 
-        public LabelledJsonPointer(String label, JsonPointer pointer) {
+        public LabelledJsonPointer(@NotNull String label, @NotNull JsonPointer pointer) {
             this.label = label;
             this.pointer = pointer;
         }
 
         @Override
         public String toString() {
-            return label + " => " + pointer.toString();
+            return label + " => " + pointer;
         }
     }
 
     @Override
-    public void filter(String url, byte[] content, Document doc, ParseResult parse) {
-        if (doc == null) {
-            return;
-        }
+    public void filter(
+            @NotNull String url,
+            byte[] content,
+            @NotNull Document doc,
+            @NotNull ParseResult parse) {
         try {
             JsonNode json = filterJson(doc);
             if (json == null) {

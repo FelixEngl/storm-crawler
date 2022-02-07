@@ -28,6 +28,7 @@ import java.util.Map.Entry;
 import org.apache.storm.Config;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 import org.openqa.selenium.WebDriver.Timeouts;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
@@ -168,6 +169,7 @@ public class RemoteDriverProtocol extends SeleniumProtocol {
         }
     }
 
+    @TestOnly
     public static void main(String[] args) throws Exception {
         RemoteDriverProtocol.mainForTest(new RemoteDriverProtocol(), args);
     }

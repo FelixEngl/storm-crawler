@@ -129,7 +129,7 @@ public abstract class AbstractHttpProtocol implements Protocol {
     }
 
     @Override
-    public BaseRobotRules getRobotRules(String url) {
+    public @NotNull BaseRobotRules getRobotRules(@NotNull String url) {
         if (this.skipRobots) return RobotRulesParser.EMPTY_RULES;
         return robots.getRobotRulesSet(this, url);
     }
