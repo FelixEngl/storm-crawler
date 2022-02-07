@@ -89,14 +89,12 @@ public class Metadata {
         return getFirstValue(prefix + key);
     }
 
-    @Nullable
-    public String[] getValues(@NotNull String key, @Nullable String prefix) {
+    public String @Nullable [] getValues(@NotNull String key, @Nullable String prefix) {
         if (prefix == null || prefix.length() == 0) return getValues(key);
         return getValues(prefix + key);
     }
 
-    @Nullable
-    public String[] getValues(@NotNull String key) {
+    public String @Nullable [] getValues(@NotNull String key) {
         String[] values = md.get(key);
         if (values == null) return null;
         if (values.length == 0) return null;
@@ -174,7 +172,7 @@ public class Metadata {
     }
 
     /** @return the previous value(s) associated with <tt>key</tt> */
-    public @NotNull String[] remove(@NotNull String key) {
+    public @NotNull String @Nullable [] remove(@NotNull String key) {
         checkLockException();
         return md.remove(key);
     }
