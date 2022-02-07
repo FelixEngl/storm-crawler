@@ -45,7 +45,7 @@ import org.w3c.dom.DocumentFragment;
  *
  * @see ConfigurableUtil#configure(Class, Class, Map, JsonNode) for more information.
  */
-public class ParseFilters implements ParseFilter, JSONResource {
+public class ParseFilters extends ParseFilter implements JSONResource {
 
     public static final ParseFilters emptyParseFilter = new ParseFilters();
 
@@ -126,7 +126,7 @@ public class ParseFilters implements ParseFilter, JSONResource {
     @Override
     public void filter(
             @NotNull String url,
-            @Nullable byte[] content,
+            byte[] content,
             @Nullable DocumentFragment doc,
             @NotNull ParseResult parse) {
 

@@ -33,14 +33,14 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class SubDocumentsParseFilter implements ParseFilter {
+public class SubDocumentsParseFilter extends ParseFilter {
     private static final org.slf4j.Logger LOG =
             LoggerFactory.getLogger(SubDocumentsParseFilter.class);
 
     @Override
     public void filter(
             @NotNull String url,
-            @Nullable byte[] content,
+            byte[] content,
             @Nullable DocumentFragment doc,
             @NotNull ParseResult parse) {
 

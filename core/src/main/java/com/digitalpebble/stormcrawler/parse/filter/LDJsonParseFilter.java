@@ -37,7 +37,7 @@ import org.w3c.dom.DocumentFragment;
 import org.w3c.dom.Node;
 
 /** Extracts data from JSON-LD representation (https://json-ld.org/) */
-public class LDJsonParseFilter implements ParseFilter {
+public class LDJsonParseFilter extends ParseFilter {
 
     public static final Logger LOG = LoggerFactory.getLogger(LDJsonParseFilter.class);
 
@@ -51,7 +51,7 @@ public class LDJsonParseFilter implements ParseFilter {
     @Override
     public void filter(
             @NotNull String url,
-            @Nullable byte[] content,
+            byte[] content,
             @Nullable DocumentFragment doc,
             @NotNull ParseResult parse) {
         if (doc == null) {

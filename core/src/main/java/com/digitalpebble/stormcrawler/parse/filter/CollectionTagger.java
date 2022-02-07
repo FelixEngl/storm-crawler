@@ -64,7 +64,7 @@ import org.w3c.dom.DocumentFragment;
  *     <p>This resources was kindly donated by the Government of Northwestern Territories in Canada
  *     (http://www.gov.nt.ca/).
  */
-public class CollectionTagger implements ParseFilter, JSONResource {
+public class CollectionTagger extends ParseFilter implements JSONResource {
 
     private static final Logger LOG = LoggerFactory.getLogger(CollectionTagger.class);
 
@@ -118,7 +118,7 @@ public class CollectionTagger implements ParseFilter, JSONResource {
     @Override
     public void filter(
             @NotNull String url,
-            @Nullable byte[] content,
+            byte[] content,
             @Nullable DocumentFragment doc,
             @NotNull ParseResult parse) {
         String[] tags = collections.tag(url);

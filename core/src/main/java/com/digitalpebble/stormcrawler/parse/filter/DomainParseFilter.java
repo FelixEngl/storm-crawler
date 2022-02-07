@@ -28,7 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.DocumentFragment;
 
 /** Adds domain (or host) to metadata - can be used later on for indexing * */
-public class DomainParseFilter implements ParseFilter {
+public class DomainParseFilter extends ParseFilter {
 
     private URLPartitioner partitioner;
 
@@ -56,7 +56,7 @@ public class DomainParseFilter implements ParseFilter {
     @Override
     public void filter(
             @NotNull String url,
-            @Nullable byte[] content,
+            byte[] content,
             @Nullable DocumentFragment doc,
             @NotNull ParseResult parse) {
         Metadata metadata = parse.get(url).getMetadata();

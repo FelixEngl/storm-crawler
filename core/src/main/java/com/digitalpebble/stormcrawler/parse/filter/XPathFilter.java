@@ -51,7 +51,7 @@ import org.w3c.dom.NodeList;
  * Simple ParseFilter to illustrate and test the interface. Reads a XPATH pattern from the config
  * file and stores the value as metadata
  */
-public class XPathFilter implements ParseFilter {
+public class XPathFilter extends ParseFilter {
 
     private enum EvalFunction {
         NONE,
@@ -153,7 +153,7 @@ public class XPathFilter implements ParseFilter {
     @Override
     public void filter(
             @NotNull String url,
-            @Nullable byte[] content,
+            byte[] content,
             @Nullable DocumentFragment doc,
             @NotNull ParseResult parse) {
 

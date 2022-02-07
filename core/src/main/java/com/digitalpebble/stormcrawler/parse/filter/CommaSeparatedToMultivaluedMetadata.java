@@ -29,7 +29,7 @@ import org.w3c.dom.DocumentFragment;
  * Rewrites single metadata containing comma separated values into multiple values for the same key,
  * useful for instance for keyword tags.
  */
-public class CommaSeparatedToMultivaluedMetadata implements ParseFilter {
+public class CommaSeparatedToMultivaluedMetadata extends ParseFilter {
 
     private final Set<String> keys = new HashSet<>();
 
@@ -51,7 +51,7 @@ public class CommaSeparatedToMultivaluedMetadata implements ParseFilter {
     @Override
     public void filter(
             @NotNull String url,
-            @Nullable byte[] content,
+            byte[] content,
             @Nullable DocumentFragment doc,
             @NotNull ParseResult parse) {
         Metadata m = parse.get(url).getMetadata();

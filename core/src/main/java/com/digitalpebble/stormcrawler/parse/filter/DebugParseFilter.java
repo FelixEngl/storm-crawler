@@ -28,14 +28,14 @@ import org.jetbrains.annotations.Nullable;
 import org.w3c.dom.DocumentFragment;
 
 /** Dumps the DOM representation of a document into a file */
-public class DebugParseFilter implements ParseFilter {
+public class DebugParseFilter extends ParseFilter {
 
     private OutputStream os;
 
     @Override
     public void filter(
             @NotNull String url,
-            @Nullable byte[] content,
+            byte[] content,
             @Nullable DocumentFragment doc,
             @NotNull ParseResult parse) {
 

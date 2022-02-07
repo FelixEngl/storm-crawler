@@ -44,7 +44,7 @@ import org.w3c.dom.DocumentFragment;
  *       signature is not copied.
  * </dl>
  */
-public class MD5SignatureParseFilter implements ParseFilter {
+public class MD5SignatureParseFilter extends ParseFilter {
 
     private String key_name = "signature";
 
@@ -55,7 +55,7 @@ public class MD5SignatureParseFilter implements ParseFilter {
     @Override
     public void filter(
             @NotNull String url,
-            @Nullable byte[] content,
+            byte[] content,
             @Nullable DocumentFragment doc,
             @NotNull ParseResult parse) {
         ParseData parseData = parse.get(url);

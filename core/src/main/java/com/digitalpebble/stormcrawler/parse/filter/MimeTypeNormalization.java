@@ -27,12 +27,12 @@ import org.w3c.dom.DocumentFragment;
  * creates a new entry with a key 'format' in the metadata. Requires the JSoupParserBolt to be used
  * with the configuration _detect.mimetype_ set to true.
  */
-public class MimeTypeNormalization implements ParseFilter {
+public class MimeTypeNormalization extends ParseFilter {
 
     @Override
     public void filter(
             @NotNull String url,
-            @Nullable byte[] content,
+            byte[] content,
             @Nullable DocumentFragment doc,
             @NotNull ParseResult parse) {
 
