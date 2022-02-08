@@ -36,11 +36,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.html.dom.HTMLDocumentImpl;
 import org.apache.storm.metric.api.MultiCountMetric;
@@ -63,6 +60,7 @@ import org.apache.tika.sax.Link;
 import org.apache.tika.sax.LinkContentHandler;
 import org.apache.tika.sax.TeeContentHandler;
 import org.apache.tika.sax.XHTMLContentHandler;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.DocumentFragment;
 import org.xml.sax.ContentHandler;
@@ -96,7 +94,10 @@ public class ParserBolt extends BaseRichBolt {
 
     @Override
     public void prepare(
-            Map<String, Object> conf, TopologyContext context, OutputCollector collector) {
+            @NotNull Map<String, Object> conf,
+            @NotNull TopologyContext context,
+            @NotNull OutputCollector collector
+    ) {
 
         emitOutlinks = ConfUtils.getBoolean(conf, "parser.emitOutlinks", true);
 
@@ -365,7 +366,7 @@ public class ParserBolt extends BaseRichBolt {
             // components check whether the URL is valid
             LOG.error("MalformedURLException on {}", parentURL);
             eventCounter.scope("error_invalid_source_url").incrBy(1);
-            return new LinkedList<Outlink>();
+            return Collections.emptyList();
         }
 
         for (Link l : links) {
