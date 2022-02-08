@@ -54,9 +54,6 @@ public abstract class AbstractURLBuffer implements URLBuffer {
      * Stores the URL and its Metadata under a given key.
      *
      * @return false if the URL was already in the buffer, true if it wasn't and was added
-     * @param url
-     * @param m
-     * @param key
      */
     public synchronized boolean add(
             @NotNull String url, @NotNull Metadata m, @Nullable String key) {
@@ -87,8 +84,6 @@ public abstract class AbstractURLBuffer implements URLBuffer {
      * Stores the URL and its Metadata using the hostname as key.
      *
      * @return false if the URL was already in the buffer, true if it wasn't and was added
-     * @param URL
-     * @param m
      */
     public synchronized boolean add(@NotNull String URL, @NotNull Metadata m) {
         return add(URL, m, null);

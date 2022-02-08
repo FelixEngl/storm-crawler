@@ -36,6 +36,7 @@ import javax.xml.parsers.DocumentBuilderFactory;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.w3c.dom.Document;
@@ -225,6 +226,7 @@ public class RegexURLNormalizer implements URLFilter {
      * Utility method to test rules against an input. the first arg is the absolute path of the
      * rules file, the second is the URL to be normalised
      */
+    @TestOnly
     public static void main(String[] args) throws FileNotFoundException {
         RegexURLNormalizer normalizer = new RegexURLNormalizer();
         normalizer.rules = normalizer.readConfiguration(new FileReader(args[0]));

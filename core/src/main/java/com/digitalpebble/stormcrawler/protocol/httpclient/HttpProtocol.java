@@ -318,7 +318,8 @@ public class HttpProtocol extends AbstractHttpProtocol
         return response -> handleResponseWithContentLimit(response, pageMaxContent);
     }
 
-    private static byte[] toByteArray(
+
+    private static byte @Nullable [] toByteArray(
             @NotNull final HttpEntity entity, int maxContent, @NotNull final MutableBoolean trimmed)
             throws IOException {
         final InputStream instream = entity.getContent();

@@ -28,6 +28,7 @@ import org.openqa.selenium.remote.RemoteWebDriver;
  *
  * @see NavigationFilters for more information.
  */
+// TODO: Revert to abstract class?
 public interface NavigationFilter extends Configurable {
 
     /**

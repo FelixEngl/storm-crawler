@@ -217,7 +217,8 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
     }
 
     @Override
-    public void onRemoval(@Nullable String key, @Nullable List<Tuple> values, RemovalCause cause) {
+    public void onRemoval(
+            @Nullable String key, @Nullable List<Tuple> values, @NotNull RemovalCause cause) {
 
         // explicit removal
         if (!cause.wasEvicted()) {
