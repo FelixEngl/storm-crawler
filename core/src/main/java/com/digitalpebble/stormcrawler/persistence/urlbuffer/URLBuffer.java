@@ -19,7 +19,6 @@ import com.digitalpebble.stormcrawler.persistence.EmptyQueueListener;
 import com.digitalpebble.stormcrawler.util.ConfUtils;
 import com.digitalpebble.stormcrawler.util.InitialisationUtil;
 import java.util.Map;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.storm.tuple.Values;
 import org.jetbrains.annotations.NotNull;

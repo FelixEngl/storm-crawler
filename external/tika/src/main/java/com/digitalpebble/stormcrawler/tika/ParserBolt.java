@@ -31,7 +31,6 @@ import com.digitalpebble.stormcrawler.util.ConfUtils;
 import com.digitalpebble.stormcrawler.util.InitialisationUtil;
 import com.digitalpebble.stormcrawler.util.MetadataTransfer;
 import com.digitalpebble.stormcrawler.util.URLUtil;
-import com.digitalpebble.stormcrawler.util.exceptions.initialisation.ClassForInitialisationNotFoundException;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;

@@ -17,7 +17,6 @@ package com.digitalpebble.stormcrawler.parse;
 import com.digitalpebble.stormcrawler.JSONResource;
 import com.digitalpebble.stormcrawler.util.ConfUtils;
 import com.digitalpebble.stormcrawler.util.Configurable;
-import com.digitalpebble.stormcrawler.util.ConfigurableUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
