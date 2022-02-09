@@ -37,7 +37,6 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.html.dom.HTMLDocumentImpl;
 import org.apache.storm.metric.api.MultiCountMetric;
@@ -96,8 +95,7 @@ public class ParserBolt extends BaseRichBolt {
     public void prepare(
             @NotNull Map<String, Object> conf,
             @NotNull TopologyContext context,
-            @NotNull OutputCollector collector
-    ) {
+            @NotNull OutputCollector collector) {
 
         emitOutlinks = ConfUtils.getBoolean(conf, "parser.emitOutlinks", true);
 

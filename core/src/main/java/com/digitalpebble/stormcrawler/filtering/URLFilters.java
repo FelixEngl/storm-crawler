@@ -76,7 +76,8 @@ public class URLFilters implements URLFilter, JSONResource {
      *
      * @throws IOException if the json ressource can not be loaded.
      */
-    public URLFilters(@NotNull Map<String, Object> stormConf, @NotNull String configFile) throws IOException {
+    public URLFilters(@NotNull Map<String, Object> stormConf, @NotNull String configFile)
+            throws IOException {
         this.configFile = configFile;
         this.stormConf = stormConf;
         try {

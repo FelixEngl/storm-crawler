@@ -61,6 +61,7 @@ import org.apache.http.util.Args;
 import org.apache.http.util.ByteArrayBuffer;
 import org.apache.storm.Config;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.TestOnly;
 import org.slf4j.LoggerFactory;
 
@@ -317,7 +318,6 @@ public class HttpProtocol extends AbstractHttpProtocol
             int pageMaxContent) {
         return response -> handleResponseWithContentLimit(response, pageMaxContent);
     }
-
 
     private static byte @Nullable [] toByteArray(
             @NotNull final HttpEntity entity, int maxContent, @NotNull final MutableBoolean trimmed)
