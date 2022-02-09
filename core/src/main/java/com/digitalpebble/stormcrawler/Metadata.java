@@ -14,98 +14,132 @@
  */
 package com.digitalpebble.stormcrawler;
 
-import com.esotericsoftware.kryo.serializers.DefaultArraySerializers.StringArraySerializer;
-import com.esotericsoftware.kryo.serializers.DefaultSerializers.StringSerializer;
-import com.esotericsoftware.kryo.serializers.MapSerializer.BindMap;
+import static java.util.Collections.EMPTY_MAP;
+
+import com.digitalpebble.stormcrawler.util.MetadataKryoSerializer;
+import com.esotericsoftware.kryo.DefaultSerializer;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
-import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.Unmodifiable;
 
 /** Wrapper around Map &lt;String,String[]&gt; * */
+@DefaultSerializer(MetadataKryoSerializer.class)
 public class Metadata {
 
-    // customize the behaviour of Kryo via annotations
-    @SuppressWarnings("FieldMayBeFinal")
-    @BindMap(
-            valueSerializer = StringArraySerializer.class,
-            keySerializer = StringSerializer.class,
-            valueClass = String[].class,
-            keyClass = String.class,
-            keysCanBeNull = false)
-    private Map<String, String[]> md;
+    // The content of the metadata
+    private final @NotNull Map<@NotNull String, String @NotNull []> map;
 
+    // Make it transient to protect from serialisation.
     private transient boolean locked = false;
 
-    public static final Metadata empty = new Metadata(Collections.<String, String[]>emptyMap());
+    /** An empty Metadata instance, readonly. */
+    @NotNull @Unmodifiable
+    public static final Metadata EMPTY_METADATA = new Metadata(Collections.emptyMap());
 
+    /**
+     * An empty Metadata instance, readonly.
+     *
+     * @deprecated use {@link Metadata#EMPTY_METADATA} or {@link Metadata#emptyMetadata()} instead.
+     */
+    @Deprecated @NotNull @Unmodifiable public static final Metadata empty = EMPTY_METADATA;
+
+    /** An empty Metadata instance, readonly. */
+    @NotNull
+    @Unmodifiable
+    @Contract(pure = true)
+    public static Metadata emptyMetadata() {
+        return EMPTY_METADATA;
+    }
+
+    /** Initializes an empty instance. */
     public Metadata() {
-        md = new HashMap<>();
+        this.map = new HashMap<>();
     }
 
-    /** Wraps an existing HashMap into a Metadata object - does not clone the content */
-    public Metadata(@NotNull Map<String, String[]> metadata) {
-        md = Objects.requireNonNull(metadata);
-    }
-
-    /** Puts all the metadata into the current instance * */
-    public void putAll(@NotNull Metadata m) {
-        checkLockException();
-        md.putAll(m.md);
+    /** Wraps an existing Map into a Metadata object - does not clone the content */
+    public Metadata(final @NotNull Map<String, String[]> map) {
+        this(map, false);
     }
 
     /**
-     * Puts all prefixed metadata into the current instance
-     *
-     * @param m metadata to be added
-     * @param prefix string to prefix keys in m before adding them to the current metadata. No
-     *     separator is inserted between prefix and original key, so the prefix must include any
-     *     separator (eg. a dot)
+     * Wraps an existing HashMap into a Metadata object if {@code clone} is false. Otherwise it
+     * creates a deep copy of the map.
      */
-    public void putAll(@NotNull Metadata m, @Nullable String prefix) {
-        if (prefix == null || prefix.isEmpty()) {
-            putAll(m);
-            return;
+    public Metadata(final @NotNull Map<String, String[]> map, final boolean clone) {
+        Objects.requireNonNull(map);
+        if (clone) {
+            this.map =
+                    map.entrySet().stream()
+                            .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().clone()));
+        } else {
+            this.map = map;
         }
-        m.md.forEach((k, v) -> setValues(prefix + k, v));
     }
 
-    /** @return the first value for the key or null if it does not exist * */
+    /** Returns true if this instance is locked by the serializer. */
+    public boolean isLocked() {
+        return locked;
+    }
+
+    /** Returns true if the instance has a {@link Collections#EMPTY_MAP} as backing map. */
+    public boolean isReadOnly() {
+        return this.map == EMPTY_MAP;
+    }
+
+    /** Returns the first value for the key or null if it does not exist */
+    @Contract(pure = true)
     @Nullable
     public String getFirstValue(@NotNull String key) {
-        String[] values = md.get(key);
-        if (values == null) return null;
-        if (values.length == 0) return null;
+        String[] values = map.get(key);
+        if (values == null || values.length == 0) return null;
         return values[0];
     }
 
-    /** @return the first value for the key or null if it does not exist, given a prefix */
+    /** Returns the first value for the key or null if it does not exist, given a prefix */
+    @Contract(pure = true)
     @Nullable
     public String getFirstValue(@NotNull String key, @Nullable String prefix) {
-        if (prefix == null || prefix.length() == 0) return getFirstValue(key);
+        if (isNullOrEmpty(prefix)) return getFirstValue(key);
         return getFirstValue(prefix + key);
     }
 
-    public String @Nullable [] getValues(@NotNull String key, @Nullable String prefix) {
-        if (prefix == null || prefix.length() == 0) return getValues(key);
+    /**
+     * Returns the array of values for the given {@code key} and {@code prefix} by calling {@code
+     * getValues(prefix+key)} It ignores the prefix if it is null or empty.
+     */
+    @Contract(pure = true)
+    @Nullable
+    public String[] getValues(@NotNull String key, @Nullable String prefix) {
+        if (isNullOrEmpty(prefix)) return getValues(key);
         return getValues(prefix + key);
     }
 
+    /** Returns the array of values for the given {@code key}. */
+    @Contract(pure = true)
+    @Nullable
     public String @Nullable [] getValues(@NotNull String key) {
-        String[] values = md.get(key);
-        if (values == null) return null;
-        if (values.length == 0) return null;
+        String[] values = map.get(key);
+        if (values == null || values.length == 0) return null;
         return values;
     }
 
+    /**
+     * Returns true if this Metadata contains the given {@code key}.
+     *
+     * @throws NullPointerException if the {@code key} is null.
+     */
+    @Contract(pure = true)
     public boolean containsKey(@NotNull String key) {
-        return md.containsKey(key);
+        return map.containsKey(key);
     }
 
-    public boolean containsKeyWithValue(@NotNull String key, String value) {
+    /** Returns true if the {@code key} points to an array containing the provided {@code value}. */
+    @Contract(pure = true)
+    public boolean containsKeyWithValue(@NotNull String key, @Nullable String value) {
         String[] values = getValues(key);
         if (values == null) return false;
         for (String s : values) {
@@ -114,67 +148,144 @@ public class Metadata {
         return false;
     }
 
-    /** Set the value for a given key. The value can be null. */
-    public void setValue(@NotNull String key, @Nullable String value) {
+    /** Internal set method without safety check. */
+    @Contract(mutates = "this")
+    @Nullable
+    private String[] putValueInternal(@NotNull String key, @Nullable String value) {
+        return map.put(key, new String[] {value});
+    }
+
+    /** Internal set method without safety check. */
+    @Contract(mutates = "this")
+    private void putValuesInternal(@NotNull String key, String[] values) {
+        if (values == null || values.length == 0) return;
+        map.put(key, values.clone());
+    }
+
+    /** Internal put method without safety check. */
+    @Contract(mutates = "this")
+    private void putAllInternal(@NotNull Map<String, String[]> mapToPut) {
+        if (mapToPut.isEmpty()) return;
+
+        for (Map.Entry<String, String[]> entry : mapToPut.entrySet()) {
+            putValuesInternal(entry.getKey(), entry.getValue());
+        }
+    }
+
+    /**
+     * Puts all the entries of {@code mapToPut} into the current instance, overrides potentially
+     * existing keys.
+     */
+    @Contract(mutates = "this")
+    public void putAll(@NotNull Map<String, String[]> mapToPut) {
         checkLockException();
-        md.put(key, new String[] {value});
+        putAllInternal(mapToPut);
+    }
+
+    /**
+     * Puts all the entries of {@code mapToPut} into the current instance with the provided prefix,
+     * overrides potentially existing keys.
+     */
+    @Contract(mutates = "this")
+    public void putAll(@NotNull Map<String, String[]> mapToPut, @Nullable String prefix) {
+        checkLockException();
+
+        if (isNullOrEmpty(prefix)) {
+            putAllInternal(mapToPut);
+        } else {
+            for (Map.Entry<String, String[]> entry : mapToPut.entrySet()) {
+                putValuesInternal(prefix + entry.getKey(), entry.getValue());
+            }
+        }
+    }
+
+    /** Puts all the metadata into the current instance, overrides potentially existing keys. */
+    @Contract(mutates = "this")
+    public void putAll(@NotNull Metadata metadata) {
+        putAll(metadata.map);
+    }
+
+    /**
+     * Puts all prefixed metadata into the current instance, overrides potentially existing keys.
+     *
+     * @param metadata metadata to be added
+     * @param prefix string to prefix keys in metadata before adding them to the current metadata.
+     *     No separator is inserted between prefix and original key, so the prefix must include any
+     *     separator (eg. a dot)
+     */
+    @Contract(mutates = "this")
+    public void putAll(@NotNull Metadata metadata, @Nullable String prefix) {
+        putAll(metadata.map, prefix);
+    }
+
+    /**
+     * Sets the value for a given key and discards the old value. The new value can be null.
+     *
+     * @return the previous value associated with key, or null if there was no mapping for key. (A
+     *     null return can also indicate that the map previously associated null with key, if the
+     *     implementation supports null values.)
+     */
+    @Contract(mutates = "this")
+    @Nullable
+    public String[] setValue(@NotNull String key, @Nullable String value) {
+        checkLockException();
+        return putValueInternal(key, value);
     }
 
     /** Set the value for a given key. The value can be null. */
-    public void setValues(@NotNull String key, @Nullable String[] values) {
+    @Contract(mutates = "this")
+    public void setValues(@NotNull String key, @Nullable String... values) {
         checkLockException();
-        if (values == null || values.length == 0) return;
-        md.put(key, values);
+        putValuesInternal(key, values);
     }
 
     /** Add or set the value for a given key. The value can be null. */
+    @Contract(mutates = "this")
     public void addValue(@NotNull String key, @Nullable String value) {
         checkLockException();
 
-        if (StringUtils.isBlank(value)) return;
-
-        String[] existingvals = md.get(key);
-        if (existingvals == null || existingvals.length == 0) {
-            setValue(key, value);
-            return;
+        String[] existingValues = map.get(key);
+        if (existingValues == null || existingValues.length == 0) {
+            putValueInternal(key, value);
+        } else {
+            map.put(key, concat(existingValues, value));
         }
-
-        int currentLength = existingvals.length;
-        String[] newvals = new String[currentLength + 1];
-        newvals[currentLength] = value;
-        System.arraycopy(existingvals, 0, newvals, 0, currentLength);
-        md.put(key, newvals);
     }
 
     /** Add or set the value for a given key. The values can be null. */
+    @Contract(mutates = "this")
     public void addValues(@NotNull String key, @Nullable String... values) {
         checkLockException();
 
         if (values == null || values.length == 0) return;
-        String[] existingvals = md.get(key);
-        if (existingvals == null) {
-            md.put(key, values.clone());
-            return;
-        }
 
-        String[] newValue = Arrays.copyOf(values, existingvals.length + values.length);
-        System.arraycopy(values, 0, newValue, existingvals.length, values.length);
-        md.put(key, newValue);
+        String[] existingValues = map.get(key);
+        if (existingValues == null) {
+            putValuesInternal(key, values.clone());
+        } else {
+            map.put(key, concat(existingValues, values));
+        }
     }
 
     /** Add or set the value for a given key. The value can be null. */
+    @Contract(mutates = "this")
     public void addValues(@NotNull String key, @Nullable Collection<String> values) {
-        String[] tmp = null;
-        if (values != null) {
-            tmp = values.toArray(new String[0]);
+        String[] toAdd;
+
+        if (values == null || values.isEmpty()) {
+            toAdd = null;
+        } else {
+            toAdd = values.toArray(new String[0]);
         }
-        addValues(key, tmp);
+
+        addValues(key, toAdd);
     }
 
     /** @return the previous value(s) associated with <tt>key</tt> */
+    @Contract(mutates = "this")
     public @NotNull String @Nullable [] remove(@NotNull String key) {
         checkLockException();
-        return md.remove(key);
+        return map.remove(key);
     }
 
     public @NotNull String toString() {
@@ -185,7 +296,7 @@ public class Metadata {
     public @NotNull String toString(String prefix) {
         StringBuilder sb = new StringBuilder();
         if (prefix == null) prefix = "";
-        for (Entry<String, String[]> entry : md.entrySet()) {
+        for (Entry<String, String[]> entry : map.entrySet()) {
             for (String val : entry.getValue()) {
                 sb.append(prefix).append(entry.getKey()).append(": ").append(val).append("\n");
             }
@@ -193,20 +304,21 @@ public class Metadata {
         return sb.toString();
     }
 
+    /** Returns the size of the keys in this */
     public int size() {
-        return md.size();
+        return map.size();
     }
 
-    public @NotNull Set<String> keySet() {
-        return md.keySet();
+    /** Returns a set of all keys of this instance */
+    public @NotNull Set<@Nullable String> keySet() {
+        return map.keySet();
     }
 
-    /** Returns the first non empty value found for the keys or null if none found. */
+    /** Returns the first non-empty value found for the keys or null if none found. */
     public static @Nullable String getFirstValue(@NotNull Metadata md, String... keys) {
         for (String key : keys) {
             String val = md.getFirstValue(key);
-            if (StringUtils.isBlank(val)) continue;
-            return val;
+            if (!isNullOrEmpty(val)) return val;
         }
         return null;
     }
@@ -218,37 +330,21 @@ public class Metadata {
      */
     @Deprecated
     public @NotNull Map<String, String[]> asMap() {
-        return md;
+        return map;
     }
 
     /** Returns the underlying map. */
     public @NotNull Map<String, String[]> getMap() {
-        return md;
-    }
-
-    /**
-     * Get a shallow copy of the underlying map. Changes to the keys are not changing the original
-     * metadata, but changing the values does change the original metadata.
-     */
-    public @NotNull Map<String, String[]> getShallowCopyOfMap() {
-        return new HashMap<>(md);
+        return map;
     }
 
     /**
      * Get a deep copy of the underlying map. Changes to the keys and values are not changing the
      * original metadata.
      */
-    public @NotNull Map<String, String[]> getDeepCopyOfMap() {
-        return md.entrySet().stream()
-                .collect(
-                        Collectors.toMap(
-                                Entry::getKey,
-                                e -> {
-                                    String[] origin = e.getValue();
-                                    String[] copy = new String[origin.length];
-                                    System.arraycopy(origin, 0, copy, 0, origin.length);
-                                    return copy;
-                                }));
+    public @NotNull Map<String, String[]> createDeepCopyOfMap() {
+        return map.entrySet().stream()
+                .collect(Collectors.toMap(Entry::getKey, e -> e.getValue().clone()));
     }
 
     /**
@@ -258,29 +354,7 @@ public class Metadata {
      * @return a copy of this
      */
     public @NotNull Metadata copy() {
-        return new Metadata(md);
-    }
-
-    /**
-     * Create a shallow or deep copy of this, depending on the {@code shallow} parameter. When
-     * creating a shallow copy: Changes to the keys are not changing the original metadata, but
-     * changing the values does change the original metadata. When creating a deep copy: Changes to
-     * the keys and values are not changing the original metadata.
-     *
-     * @param shallow if true creates a shallow copy, otherwise it creates a deep copy
-     * @return a shallow or deep copy of this
-     */
-    public @NotNull Metadata copy(boolean shallow) {
-        if (shallow) return copyShallow();
-        else return copyDeep();
-    }
-
-    /**
-     * Get a shallow copy of this. Changes to the keys are not changing the original metadata, but
-     * changing the values does change the original metadata.
-     */
-    public @NotNull Metadata copyShallow() {
-        return new Metadata(getShallowCopyOfMap());
+        return new Metadata(map);
     }
 
     /**
@@ -288,7 +362,7 @@ public class Metadata {
      * metadata.
      */
     public @NotNull Metadata copyDeep() {
-        return new Metadata(getDeepCopyOfMap());
+        return new Metadata(createDeepCopyOfMap());
     }
 
     /**
@@ -318,10 +392,56 @@ public class Metadata {
         return this;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Metadata)) return false;
+        Metadata metadata = (Metadata) o;
+
+        for (Entry<String, String[]> stringEntry : map.entrySet()) {
+            if (!metadata.map.containsKey(stringEntry.getKey())) {
+                return false;
+            }
+            String[] otherValue = metadata.map.get(stringEntry.getKey());
+            if (!Arrays.equals(stringEntry.getValue(), otherValue)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(map);
+    }
+
     /** @since 1.16 */
     private void checkLockException() {
         if (locked)
             throw new ConcurrentModificationException(
                     "Attempt to modify a metadata after it has been sent to the serializer");
+    }
+
+    // Easier check.
+    @Contract("null -> true")
+    private static boolean isNullOrEmpty(@Nullable String s) {
+        return s == null || s.isEmpty();
+    }
+
+    // use (possibly) intrinsic methods for faster array concat.
+    @Contract(pure = true)
+    private static String @NotNull [] concat(String @NotNull [] arr, @Nullable String toAppend) {
+        String[] result = Arrays.copyOf(arr, arr.length + 1);
+        result[result.length - 1] = toAppend;
+        return result;
+    }
+
+    // use (possibly) intrinsic methods for faster array concat.
+    @Contract(pure = true)
+    private static String @NotNull [] concat(String @NotNull [] arr1, String @NotNull [] arr2) {
+        String[] result = Arrays.copyOf(arr1, arr1.length + arr2.length);
+        System.arraycopy(arr2, 0, result, arr1.length, arr2.length);
+        return result;
     }
 }
