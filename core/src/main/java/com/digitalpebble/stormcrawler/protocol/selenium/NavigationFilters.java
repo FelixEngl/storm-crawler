@@ -17,7 +17,7 @@ package com.digitalpebble.stormcrawler.protocol.selenium;
 import com.digitalpebble.stormcrawler.Metadata;
 import com.digitalpebble.stormcrawler.protocol.ProtocolResponse;
 import com.digitalpebble.stormcrawler.util.ConfUtils;
-import com.digitalpebble.stormcrawler.util.ConfigurableUtil;
+import com.digitalpebble.stormcrawler.util.Configurable;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
@@ -33,9 +33,10 @@ import org.slf4j.LoggerFactory;
 /**
  * Wrapper for the NavigationFilter defined in a JSON configuration
  *
- * @see ConfigurableUtil#configure(Class, Class, Map, JsonNode) for more information.
+ * @see com.digitalpebble.stormcrawler.util.Configurable#createConfiguredInstance(Class, Class, Map,
+ *     JsonNode) for more information.
  */
-public class NavigationFilters implements NavigationFilter {
+public class NavigationFilters extends NavigationFilter {
 
     public static final NavigationFilters emptyNavigationFilters = new NavigationFilters();
 
@@ -99,7 +100,7 @@ public class NavigationFilters implements NavigationFilter {
     @Override
     public void configure(@NotNull Map<String, Object> stormConf, @NotNull JsonNode filtersConf) {
         List<NavigationFilter> filterLists =
-                ConfigurableUtil.configure(
+                Configurable.createConfiguredInstance(
                         this.getClass(), NavigationFilter.class, stormConf, filtersConf);
 
         filters = filterLists.toArray(new NavigationFilter[0]);

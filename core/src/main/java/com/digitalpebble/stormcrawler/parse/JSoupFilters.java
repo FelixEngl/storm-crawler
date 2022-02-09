@@ -16,6 +16,7 @@ package com.digitalpebble.stormcrawler.parse;
 
 import com.digitalpebble.stormcrawler.JSONResource;
 import com.digitalpebble.stormcrawler.util.ConfUtils;
+import com.digitalpebble.stormcrawler.util.Configurable;
 import com.digitalpebble.stormcrawler.util.ConfigurableUtil;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -79,11 +80,7 @@ public class JSoupFilters extends JSoupFilter implements JSONResource {
         return JSoupFilters.emptyParseFilter;
     }
 
-    /**
-     * loads the filters from a JSON configuration file
-     *
-     * @throws IOException
-     */
+    /** loads the filters from a JSON configuration file */
     public JSoupFilters(Map<String, Object> stormConf, String configFile) throws IOException {
         this.configFile = configFile;
         this.stormConf = stormConf;
@@ -109,7 +106,7 @@ public class JSoupFilters extends JSoupFilter implements JSONResource {
     @Override
     public void configure(@NotNull Map<String, Object> stormConf, @NotNull JsonNode filtersConf) {
         List<JSoupFilter> list =
-                ConfigurableUtil.configure(
+                Configurable.createConfiguredInstance(
                         this.getClass(), JSoupFilter.class, stormConf, filtersConf);
         filters = list.toArray(new JSoupFilter[0]);
     }

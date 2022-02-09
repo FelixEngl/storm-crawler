@@ -17,25 +17,12 @@ package com.digitalpebble.stormcrawler.protocol.selenium;
 import com.digitalpebble.stormcrawler.Metadata;
 import com.digitalpebble.stormcrawler.protocol.ProtocolResponse;
 import com.digitalpebble.stormcrawler.util.Configurable;
-import org.apache.storm.thrift.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
-/**
- * Implementations of NavigationFilter are responsible for extracting the page content and
- * additional metadata via the provided {@link RemoteWebDriver}. They are used exclusively by {@link
- * NavigationFilters}.
- *
- * @see NavigationFilters for more information.
- */
-// TODO: Revert to abstract class?
-public interface NavigationFilter extends Configurable {
-
-    /**
-     * The end result comes from the first filter to return non-null.
-     *
-     * @return null if the filter does not fit
-     */
-    @Nullable
-    ProtocolResponse filter(@NotNull RemoteWebDriver driver, @NotNull Metadata metadata);
+public abstract class NavigationFilter implements Configurable {
+    /** The end result comes from the first filter to return non-null * */
+    public abstract @Nullable ProtocolResponse filter(
+            @NotNull RemoteWebDriver driver, @NotNull Metadata metadata);
 }

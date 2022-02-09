@@ -43,12 +43,6 @@ public abstract class Scheduler {
         Scheduler scheduler;
 
         String className = ConfUtils.getString(stormConf, schedulerClassParamName);
-        if (className == null) {
-            throw new RuntimeException(
-                    String.format(
-                            "The config-value %s is missing, can not instantiate a scheduler.",
-                            schedulerClassParamName));
-        }
         try {
             scheduler = InitialisationUtil.initializeFromQualifiedName(className, Scheduler.class);
         } catch (Exception e) {

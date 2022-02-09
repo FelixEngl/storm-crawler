@@ -115,7 +115,7 @@ public class ParserBolt extends BaseRichBolt {
 
         try {
             htmlMapperClass = InitialisationUtil.getClassFor(htmlmapperClassName, HtmlMapper.class);
-        } catch (ClassForInitialisationNotFoundException e) {
+        } catch (RuntimeException e) {
             LOG.error("Can't load class {}", htmlmapperClassName);
             throw e;
         }

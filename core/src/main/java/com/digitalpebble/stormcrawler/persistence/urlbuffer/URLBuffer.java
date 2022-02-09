@@ -16,7 +16,11 @@ package com.digitalpebble.stormcrawler.persistence.urlbuffer;
 
 import com.digitalpebble.stormcrawler.Metadata;
 import com.digitalpebble.stormcrawler.persistence.EmptyQueueListener;
+import com.digitalpebble.stormcrawler.util.ConfUtils;
+import com.digitalpebble.stormcrawler.util.InitialisationUtil;
 import java.util.Map;
+
+import org.apache.commons.lang.StringUtils;
 import org.apache.storm.tuple.Values;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -35,15 +39,34 @@ import org.jetbrains.annotations.Nullable;
  */
 public interface URLBuffer {
 
-    /** Replace with URLBufferUtil.bufferClassParamName */
-    @Deprecated
-    public static final String bufferClassParamName = URLBufferUtil.bufferClassParamName;
+    /** Implementation to use for URLBuffer. Must implement the interface URLBuffer. */
+    String bufferClassParamName = "urlbuffer.class";
 
-    /** Replace with URLBufferUtil.createInstance */
-    @Deprecated
-    public static URLBuffer getInstance(Map<String, Object> stormConf) {
-        return URLBufferUtil.createInstance(stormConf);
+    /** Returns a URLBuffer instance based on the configuration * */
+    static @NotNull URLBuffer createInstance(@NotNull Map<String, Object> stormConf) {
+
+        String className = ConfUtils.getString(stormConf, bufferClassParamName);
+        if (StringUtils.isBlank(className)) {
+            throw new RuntimeException("Missing value for config  " + bufferClassParamName);
+        }
+
+        URLBuffer buffer;
+        try {
+            buffer = InitialisationUtil.initializeFromQualifiedName(className, URLBuffer.class);
+            buffer.configure(stormConf);
+        } catch (Exception e) {
+            throw new RuntimeException("Can't instanciate " + className, e);
+        }
+
+        return buffer;
     }
+
+    /** Replace with {@link URLBuffer#createInstance(Map)} */
+    @Deprecated
+    static URLBuffer getInstance(Map<String, Object> stormConf) {
+        return URLBuffer.createInstance(stormConf);
+    }
+
     /**
      * Stores the URL and its Metadata under a given key.
      *
@@ -91,5 +114,5 @@ public interface URLBuffer {
         // do nothing with the information about URLs being acked
     }
 
-    default void configure(@NotNull Map<String, Object> stormConf) {}
+    default void configure(Map<String, Object> stormConf) {}
 }

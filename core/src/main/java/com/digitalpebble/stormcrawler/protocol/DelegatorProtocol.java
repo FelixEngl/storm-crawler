@@ -68,7 +68,7 @@ public class DelegatorProtocol implements Protocol {
     static class FilteredProtocol {
 
         final Protocol protoInstance;
-        final List<Filter> filters = new LinkedList<>();
+        final List<Filter> filters = new ArrayList<>();
 
         @NotNull
         Protocol getProtocolInstance() {
@@ -91,10 +91,7 @@ public class DelegatorProtocol implements Protocol {
 
             // instantiate filters
             if (filterImpls != null) {
-                filterImpls.forEach(
-                        (k, v) -> {
-                            filters.add(new Filter(k, v));
-                        });
+                filterImpls.forEach((k, v) -> filters.add(new Filter(k, v)));
             }
 
             // log filters found
@@ -212,7 +209,7 @@ public class DelegatorProtocol implements Protocol {
         FilteredProtocol proto = getProtocolFor(url, metadata);
         if (proto == null) {
             throw new RuntimeException(
-                    "No sub protocol eligible to retrieve " + url + "given " + metadata.toString());
+                    "No sub protocol eligible to retrieve " + url + "given " + metadata);
         }
         // execute and return protocol with url-meta combo
         return proto.getProtocolOutput(url, metadata);
