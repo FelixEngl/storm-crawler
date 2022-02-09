@@ -19,7 +19,6 @@ import com.digitalpebble.stormcrawler.Metadata;
 import com.digitalpebble.stormcrawler.elasticsearch.ElasticSearchConnection;
 import com.digitalpebble.stormcrawler.filtering.URLFilter;
 import com.digitalpebble.stormcrawler.util.InitialisationUtil;
-import com.digitalpebble.stormcrawler.util.exceptions.initialisation.ClassNotAssignableException;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.io.ByteArrayInputStream;
 import java.net.URL;
@@ -95,7 +94,7 @@ public class JSONURLFilterWrapper implements URLFilter {
             delegatedURLFilter =
                     InitialisationUtil.initializeFromQualifiedName(
                             urlfilterclass, URLFilter.class, JSONResource.class);
-        } catch (ClassNotAssignableException e) {
+        } catch (RuntimeException e) {
             throw new RuntimeException(
                     "Filter " + urlfilterclass + " does not implement JSONResource", e);
         } catch (Exception e) {
