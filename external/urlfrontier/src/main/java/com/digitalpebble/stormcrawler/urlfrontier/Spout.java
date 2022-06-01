@@ -55,7 +55,7 @@ public class Spout extends AbstractQueryingSpout {
         super.open(conf, context, collector);
 
         // host and port of URL Frontier(s)
-        List<String> addresses = ConfUtils.loadListFromConf("urlfrontier.address", conf);
+        List<String> addresses = ConfUtils.loadListFromConf(conf, "urlfrontier.address");
 
         String address = null;
 
@@ -150,7 +150,7 @@ public class Spout extends AbstractQueryingSpout {
                     }
                 };
 
-        LOG.trace("{} isInquery set to true");
+        LOG.trace("isInquery set to true");
         isInQuery.set(true);
 
         frontier.getURLs(request, responseObserver);

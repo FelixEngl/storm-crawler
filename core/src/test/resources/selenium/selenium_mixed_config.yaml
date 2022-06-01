@@ -10,7 +10,3 @@ selenium.addresses:
     resolve: IPv4
   - address: http://localhost:4444/
     resolve: IPv6
-  - address: http://127.0.0.1:4444
-    resolve: HOSTNAME
-  - address: http://localhost:4444/
-    resolve: CANONICAL_HOSTNAME

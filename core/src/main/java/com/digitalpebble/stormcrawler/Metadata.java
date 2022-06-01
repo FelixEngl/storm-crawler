@@ -278,7 +278,7 @@ public class Metadata {
 
     /** @return the previous value(s) associated with <tt>key</tt> */
     @Contract(mutates = "this")
-    @NotNull
+    @Nullable
     public String[] remove(@NotNull String key) {
         checkLockException();
         return map.remove(key);

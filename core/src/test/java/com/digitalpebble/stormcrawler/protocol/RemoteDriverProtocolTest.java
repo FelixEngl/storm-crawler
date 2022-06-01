@@ -34,8 +34,6 @@ public class RemoteDriverProtocolTest {
                                 new URL("http://127.0.0.1:4444/"),
                                 new URL("http://127.0.0.1:4444/"),
                                 new URL("http://127.0.0.1:4444/"),
-                                new URL("http://view-localhost:4444"),
-                                new URL("http://localhost:4444/"),
                             }
                         },
                         {

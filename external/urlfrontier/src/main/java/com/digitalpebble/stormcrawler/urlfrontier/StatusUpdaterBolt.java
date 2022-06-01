@@ -59,16 +59,15 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
                 StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage> {
 
     public static final Logger LOG = LoggerFactory.getLogger(StatusUpdaterBolt.class);
-    private URLFrontierStub frontier;
     private ManagedChannel channel;
     private URLPartitioner partitioner;
     private StreamObserver<URLItem> requestObserver;
-    private Cache<String, List<Tuple>> waitAck;
+    private final Cache<String, List<Tuple>> waitAck;
 
     private int maxMessagesinFlight = 100000;
     private int throttleTime = 10;
 
-    private AtomicInteger messagesinFlight = new AtomicInteger();
+    private final AtomicInteger messagesinFlight = new AtomicInteger();
 
     private MultiCountMetric eventCounter;
 
@@ -89,7 +88,7 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
         super.prepare(stormConf, context, collector);
 
         // host and port of URL Frontier(s)
-        List<String> addresses = ConfUtils.loadListFromConf("urlfrontier.address", stormConf);
+        List<String> addresses = ConfUtils.loadListFromConf(stormConf, "urlfrontier.address");
 
         String address = null;
 
@@ -135,7 +134,7 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
         }
 
         channel = ManagedChannelBuilder.forTarget(address).usePlaintext().build();
-        frontier = URLFrontierGrpc.newStub(channel);
+        URLFrontierStub frontier = URLFrontierGrpc.newStub(channel);
 
         partitioner = new URLPartitioner();
         partitioner.configure(stormConf);
@@ -192,8 +191,7 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
             @NotNull Status status,
             @NotNull Metadata metadata,
             @NotNull Optional<Date> nextFetch,
-            @NotNull Tuple t)
-            throws Exception {
+            @NotNull Tuple t) {
 
         while (messagesinFlight.get() >= this.maxMessagesinFlight) {
             LOG.debug("{} messages in flight - waiting a bit...", messagesinFlight.get());
