@@ -25,6 +25,7 @@ import com.github.benmanes.caffeine.cache.RemovalCause;
 import com.github.benmanes.caffeine.cache.RemovalListener;
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
+import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
 import crawlercommons.urlfrontier.Urlfrontier.DiscoveredURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.KnownURLItem;
 import crawlercommons.urlfrontier.Urlfrontier.StringList;
@@ -34,6 +35,7 @@ import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -54,7 +56,7 @@ import org.slf4j.LoggerFactory;
 
 public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
         implements RemovalListener<String, List<Tuple>>,
-                StreamObserver<crawlercommons.urlfrontier.Urlfrontier.String> {
+                StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage> {
 
     public static final Logger LOG = LoggerFactory.getLogger(StatusUpdaterBolt.class);
     private URLFrontierStub frontier;
@@ -70,6 +72,9 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
 
     private MultiCountMetric eventCounter;
 
+    /** Globally set crawlID * */
+    private String globalCrawlID = null;
+
     public StatusUpdaterBolt() {
         waitAck =
                 Caffeine.newBuilder()
@@ -82,8 +87,31 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
     public void prepare(
             Map<String, Object> stormConf, TopologyContext context, OutputCollector collector) {
         super.prepare(stormConf, context, collector);
-        String host = ConfUtils.getString(stormConf, "urlfrontier.host", "localhost");
-        int port = ConfUtils.getInt(stormConf, "urlfrontier.port", 7071);
+
+        // host and port of URL Frontier(s)
+        List<String> addresses = ConfUtils.loadListFromConf("urlfrontier.address", stormConf);
+
+        String address = null;
+
+        // check that we have the same number of tasks and frontier nodes
+        if (addresses.size() > 1) {
+            int totalTasks = context.getComponentTasks(context.getThisComponentId()).size();
+            if (totalTasks != addresses.size()) {
+                String message =
+                        "Not one task per frontier node. " + totalTasks + " vs " + addresses.size();
+                LOG.error(message);
+                throw new RuntimeException();
+            }
+            int nodeIndex = context.getThisTaskIndex();
+            Collections.sort(addresses);
+            address = addresses.get(nodeIndex);
+        }
+
+        if (address == null) {
+            String host = ConfUtils.getString(stormConf, "urlfrontier.host", "localhost");
+            int port = ConfUtils.getInt(stormConf, "urlfrontier.port", 7071);
+            address = host + ":" + port;
+        }
 
         maxMessagesinFlight =
                 ConfUtils.getInt(
@@ -98,27 +126,52 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
                 ConfUtils.getInt(
                         stormConf, "urlfrontier.updater.max.messages", maxMessagesinFlight);
 
-        LOG.info("Initialisation of connection to URLFrontier service on {}:{}", host, port);
+        LOG.info("Initialisation of connection to URLFrontier service on {}", address);
         LOG.info("Allowing up to {} message in flight", maxMessagesinFlight);
 
-        channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build();
+        // add the default port if missing
+        if (!address.contains(":")) {
+            address += ":7071";
+        }
+
+        channel = ManagedChannelBuilder.forTarget(address).usePlaintext().build();
         frontier = URLFrontierGrpc.newStub(channel);
 
         partitioner = new URLPartitioner();
         partitioner.configure(stormConf);
 
+        globalCrawlID = ConfUtils.getString(stormConf, "urlfrontier.crawlid", "DEFAULT");
+
         requestObserver = frontier.putURLs(this);
     }
 
     @Override
-    public void onNext(final crawlercommons.urlfrontier.Urlfrontier.String value) {
-        final String url = value.getValue();
+    public void onNext(final crawlercommons.urlfrontier.Urlfrontier.AckMessage confirmation) {
+        // use the URL as ID
+        final String url = confirmation.getID();
+        final boolean hasFailed = confirmation.getStatus().equals(AckMessage.Status.FAIL);
+
         synchronized (waitAck) {
-            List<Tuple> xx = waitAck.getIfPresent(url);
-            if (xx != null) {
-                waitAck.invalidate(url);
-            } else {
+            List<Tuple> values = waitAck.getIfPresent(url);
+            if (values == null) {
                 LOG.warn("Could not find unacked tuple for {}", url);
+                return;
+            }
+            waitAck.invalidate(url);
+            if (!hasFailed) {
+                LOG.debug("Acked {} tuple(s) for ID {}", values.size(), url);
+                for (Tuple t : values) {
+                    messagesinFlight.decrementAndGet();
+                    eventCounter.scope("acked").incrBy(1);
+                    super.ack(t, url);
+                }
+            } else {
+                LOG.info("Failed {} tuple(s) for ID {}", values.size(), url);
+                for (Tuple t : values) {
+                    messagesinFlight.decrementAndGet();
+                    eventCounter.scope("failed").incrBy(1);
+                    _collector.fail(t);
+                }
             }
         }
     }
@@ -188,6 +241,7 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
                     URLInfo.newBuilder()
                             .setKey(partitionKey)
                             .setUrl(url)
+                            .setCrawlID(globalCrawlID)
                             .putAllMetadata(mdCopy)
                             .build();
 
@@ -222,12 +276,6 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
 
         // explicit removal
         if (!cause.wasEvicted()) {
-            LOG.debug("Acked {} tuple(s) for ID {}", values.size(), key);
-            for (Tuple x : values) {
-                messagesinFlight.decrementAndGet();
-                eventCounter.scope("acked").incrBy(1);
-                super.ack(x, key);
-            }
             return;
         }
 

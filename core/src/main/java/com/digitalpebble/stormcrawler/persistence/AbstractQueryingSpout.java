@@ -34,6 +34,8 @@ import org.apache.storm.topology.OutputFieldsDeclarer;
 import org.apache.storm.topology.base.BaseRichSpout;
 import org.apache.storm.tuple.Fields;
 import org.apache.storm.utils.Utils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Common features of spouts which query a backend to generate tuples. Tracks the URLs being
@@ -43,6 +45,8 @@ import org.apache.storm.utils.Utils;
  * @since 1.11
  */
 public abstract class AbstractQueryingSpout extends BaseRichSpout {
+
+    private static final Logger LOG = LoggerFactory.getLogger(AbstractQueryingSpout.class);
 
     /**
      * Time in seconds for which acked or failed URLs will be considered for fetching again, default
@@ -106,7 +110,7 @@ public abstract class AbstractQueryingSpout extends BaseRichSpout {
 
         eventCounter = context.registerMetric("counters", new MultiCountMetric(), 10);
 
-        buffer = URLBufferUtil.createInstance(stormConf);
+        buffer = URLBuffer.createInstance(stormConf);
 
         context.registerMetric("buffer_size", () -> buffer.size(), 10);
         context.registerMetric("numQueues", () -> buffer.numQueues(), 10);
@@ -150,12 +154,11 @@ public abstract class AbstractQueryingSpout extends BaseRichSpout {
 
         @Override
         public boolean containsKey(Object key) {
-            boolean incache = super.containsKey(key);
-            if (!incache) {
-                //noinspection OptionalAssignedToNull
-                incache = deletionCache.getIfPresent(key) != null;
+            boolean inCache = super.containsKey(key);
+            if (!inCache) {
+                inCache = deletionCache.getIfPresent(key) != null;
             }
-            return incache;
+            return inCache;
         }
 
         @Override
@@ -200,6 +203,7 @@ public abstract class AbstractQueryingSpout extends BaseRichSpout {
         if (isInQuery.get() || throttleQueries() > 0) {
             // sleep for a bit but not too much in order to give ack/fail a
             // chance
+            LOG.trace("isInQuery {}", isInQuery);
             Utils.sleep(10);
             return;
         }
@@ -246,6 +250,7 @@ public abstract class AbstractQueryingSpout extends BaseRichSpout {
     /** sets the marker that we are in a query to false and timeLastQueryReceived to now */
     protected void markQueryReceivedNow() {
         isInQuery.set(false);
+        LOG.trace("{} isInquery set to false");
         timeLastQueryReceived = System.currentTimeMillis();
     }
 

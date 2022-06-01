@@ -329,6 +329,7 @@ public class JSoupParserBolt extends StatusEmitterBolt {
                     LOG.info("Found redir in {} to {}", url, redirection);
                     metadata.setValue("_redirTo", redirection);
 
+                    // https://github.com/DigitalPebble/storm-crawler/issues/954
                     if (allowRedirs() && StringUtils.isNotBlank(redirection)) {
                         emitOutlink(tuple, new URL(url), redirection, metadata);
                     }
@@ -468,7 +469,7 @@ public class JSoupParserBolt extends StatusEmitterBolt {
         }
     }
 
-    private List<Outlink> toOutlinks(
+    protected List<Outlink> toOutlinks(
             String url, Metadata metadata, Map<String, List<String>> slinks) {
         Map<String, Outlink> outlinks = new HashMap<>();
         URL sourceUrl;

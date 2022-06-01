@@ -167,6 +167,7 @@ public class AggregationSpout extends AbstractSpout implements ActionListener<Se
         // dump query to log
         LOG.debug("{} ES query {}", logIdprefix, request);
 
+        LOG.trace("{} isInquery set to true");
         isInQuery.set(true);
         client.searchAsync(request, RequestOptions.DEFAULT, this);
     }
@@ -221,17 +222,19 @@ public class AggregationSpout extends AbstractSpout implements ActionListener<Se
             // being processed
             TopHits topHits = entry.getAggregations().get("docs");
             for (SearchHit hit : topHits.getHits().getHits()) {
+
+                LOG.debug(
+                        "{} -> id [{}], _source [{}]",
+                        logIdprefix,
+                        hit.getId(),
+                        hit.getSourceAsString());
+
                 hitsForThisBucket++;
 
                 lastHit = hit;
 
                 Map<String, Object> keyValues = hit.getSourceAsMap();
                 String url = (String) keyValues.get("url");
-                LOG.debug(
-                        "{} -> id [{}], _source [{}]",
-                        logIdprefix,
-                        hit.getId(),
-                        hit.getSourceAsString());
 
                 // consider only the first document of the last bucket
                 // for optimising the nextFetchDate
