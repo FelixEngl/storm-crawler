@@ -15,7 +15,6 @@
 package com.digitalpebble.stormcrawler.persistence;
 
 import com.digitalpebble.stormcrawler.persistence.urlbuffer.URLBuffer;
-import com.digitalpebble.stormcrawler.persistence.urlbuffer.URLBufferUtil;
 import com.digitalpebble.stormcrawler.util.CollectionMetric;
 import com.digitalpebble.stormcrawler.util.ConfUtils;
 import com.github.benmanes.caffeine.cache.Cache;

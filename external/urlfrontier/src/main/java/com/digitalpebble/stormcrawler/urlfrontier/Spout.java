@@ -141,7 +141,23 @@ public class Spout extends AbstractQueryingSpout {
 
                     @Override
                     public void onError(Throwable t) {
+
+                        if (t instanceof io.grpc.StatusRuntimeException) {
+                            io.grpc.StatusRuntimeException e = (io.grpc.StatusRuntimeException) t;
+
+                            LOG.error(
+                                    "StatusRuntimeException caught"
+                                            + "\n"
+                                            + "--  Status  --\n"
+                                            + e.getStatus().toString()
+                                            + "\n"
+                                            + "-- Trailers --\n "
+                                            + e.getTrailers().toString(),
+                                    e);
+                        }
+
                         LOG.error("Exception caught", t);
+
                         markQueryReceivedNow();
                     }
 
