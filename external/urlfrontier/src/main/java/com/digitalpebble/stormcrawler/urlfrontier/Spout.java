@@ -154,9 +154,9 @@ public class Spout extends AbstractQueryingSpout {
                                             + "-- Trailers --\n "
                                             + e.getTrailers().toString(),
                                     e);
+                        } else {
+                            LOG.error("Exception caught", t);
                         }
-
-                        LOG.error("Exception caught", t);
 
                         markQueryReceivedNow();
                     }
