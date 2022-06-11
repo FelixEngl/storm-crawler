@@ -36,7 +36,6 @@ import org.apache.logging.log4j.MarkerManager;
 import org.apache.storm.Config;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
-import org.jetbrains.annotations.NotNull;
 
 public class Spout extends AbstractQueryingSpout {
 
@@ -57,6 +56,8 @@ public class Spout extends AbstractQueryingSpout {
     private int maxBucketNum;
 
     private int delayRequestable;
+
+    private ConnectivityState connectivityStateTmp;
 
     @Override
     public void open(
@@ -80,6 +81,8 @@ public class Spout extends AbstractQueryingSpout {
             int nodeIndex = context.getThisTaskIndex();
             Collections.sort(addresses);
             address = addresses.get(nodeIndex);
+        } else if (addresses.size() == 1) {
+            LOG.warn("urlfrontier.address with a size of one is not used!");
         }
 
         if (address == null) {
@@ -109,26 +112,7 @@ public class Spout extends AbstractQueryingSpout {
 
         channel = ManagedChannelBuilder.forTarget(address).usePlaintext().build();
         frontier = URLFrontierGrpc.newStub(channel);
-
-        LOG.debug("State of Channel: {}", channel.getState(true));
-
-        LOG.trace(URL_FRONTIER_SPOUT_CHANNEL_MARKER, "Start tracing state changes.");
-        registerTraceLoggerFor_notifyWhenStateChanged(ConnectivityState.CONNECTING);
-        registerTraceLoggerFor_notifyWhenStateChanged(ConnectivityState.SHUTDOWN);
-        registerTraceLoggerFor_notifyWhenStateChanged(ConnectivityState.TRANSIENT_FAILURE);
-    }
-
-    private void registerTraceLoggerFor_notifyWhenStateChanged(
-            @NotNull ConnectivityState connectivityState) {
-        if (LOG.isTraceEnabled()) {
-            channel.notifyWhenStateChanged(
-                    connectivityState,
-                    () ->
-                            LOG.trace(
-                                    STATE_CHANGE_MARKER,
-                                    "The state of the channel changed to {}",
-                                    connectivityState));
-        }
+        LOG.debug("State of Channel: {}", channel.getState(false));
     }
 
     @Override
