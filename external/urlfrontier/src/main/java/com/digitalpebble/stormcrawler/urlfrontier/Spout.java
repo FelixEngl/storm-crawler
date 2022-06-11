@@ -45,7 +45,8 @@ public class Spout extends AbstractQueryingSpout {
     private static final Marker URL_FRONTIER_SPOUT_CHANNEL_MARKER =
             MarkerManager.getMarker("UrlFrontier_Spout_Channel");
     private static final Marker STATE_CHANGE_MARKER =
-            MarkerManager.getMarker("StateChanged").addParents(URL_FRONTIER_SPOUT_CHANNEL_MARKER);
+            MarkerManager.getMarker("UFSC_StateChanged")
+                    .addParents(URL_FRONTIER_SPOUT_CHANNEL_MARKER);
 
     private ManagedChannel channel;
 
