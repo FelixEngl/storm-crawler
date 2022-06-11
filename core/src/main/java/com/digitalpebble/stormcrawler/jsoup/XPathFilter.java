@@ -91,7 +91,10 @@ public class XPathFilter extends JSoupFilter {
 
     @Override
     public void filter(
-            @NotNull String url, byte[] content, org.jsoup.nodes.@NotNull Document doc, @NotNull ParseResult parse) {
+            @NotNull String url,
+            byte[] content,
+            org.jsoup.nodes.@NotNull Document doc,
+            @NotNull ParseResult parse) {
 
         ParseData parseData = parse.get(url);
         Metadata metadata = parseData.getMetadata();
