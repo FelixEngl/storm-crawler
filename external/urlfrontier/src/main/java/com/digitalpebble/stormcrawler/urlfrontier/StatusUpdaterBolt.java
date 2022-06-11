@@ -153,7 +153,7 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
         synchronized (waitAck) {
             List<Tuple> values = waitAck.getIfPresent(url);
             if (values == null) {
-                LOG.warn("Could not find unacked tuple for {}", url);
+                LOG.debug("Could not find unacked tuple for {}", url);
                 return;
             }
             waitAck.invalidate(url);
@@ -193,10 +193,16 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
             @NotNull Optional<Date> nextFetch,
             @NotNull Tuple t) {
 
+        int counter = 0;
+
         while (messagesinFlight.get() >= this.maxMessagesinFlight) {
-            LOG.debug("{} messages in flight - waiting a bit...", messagesinFlight.get());
-            eventCounter.scope("timeSpentThrottling").incrBy(throttleTime);
-            Utils.sleep(throttleTime);
+            counter++;
+            LOG.debug(
+                    "{} messages in flight - waiting for {} msec",
+                    messagesinFlight.get(),
+                    throttleTime * counter);
+            eventCounter.scope("timeSpentThrottling").incrBy(throttleTime * counter);
+            Utils.sleep(throttleTime * counter);
         }
 
         // only 1 thread at a time will access the store method
@@ -264,7 +270,12 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
             requestObserver.onNext(itemBuilder.build());
 
             tt.add(t);
-            LOG.trace("Added to waitAck {} with ID {} total {}", url, url, tt.size());
+            LOG.trace(
+                    "Added to waitAck {} with ID {} total {} - sent to {}",
+                    url,
+                    url,
+                    tt.size(),
+                    channel.authority());
         }
     }
 
