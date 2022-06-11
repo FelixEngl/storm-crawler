@@ -21,6 +21,7 @@ import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
+import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
@@ -28,15 +29,23 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
 import org.apache.storm.Config;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.jetbrains.annotations.NotNull;
 
 public class Spout extends AbstractQueryingSpout {
 
-    public static final Logger LOG = LoggerFactory.getLogger(Spout.class);
+    private static final Logger LOG = LogManager.getLogger(Spout.class);
+
+    private static final Marker URL_FRONTIER_SPOUT_CHANNEL_MARKER =
+            MarkerManager.getMarker("UrlFrontier_Spout_Channel");
+    private static final Marker STATE_CHANGE_MARKER =
+            MarkerManager.getMarker("StateChanged").addParents(URL_FRONTIER_SPOUT_CHANNEL_MARKER);
 
     private ManagedChannel channel;
 
@@ -51,7 +60,6 @@ public class Spout extends AbstractQueryingSpout {
     @Override
     public void open(
             Map<String, Object> conf, TopologyContext context, SpoutOutputCollector collector) {
-
         super.open(conf, context, collector);
 
         // host and port of URL Frontier(s)
@@ -100,6 +108,26 @@ public class Spout extends AbstractQueryingSpout {
 
         channel = ManagedChannelBuilder.forTarget(address).usePlaintext().build();
         frontier = URLFrontierGrpc.newStub(channel);
+
+        LOG.debug("State of Channel: {}", channel.getState(true));
+
+        LOG.trace(URL_FRONTIER_SPOUT_CHANNEL_MARKER, "Start tracing state changes.");
+        registerTraceLoggerFor_notifyWhenStateChanged(ConnectivityState.CONNECTING);
+        registerTraceLoggerFor_notifyWhenStateChanged(ConnectivityState.SHUTDOWN);
+        registerTraceLoggerFor_notifyWhenStateChanged(ConnectivityState.TRANSIENT_FAILURE);
+    }
+
+    private void registerTraceLoggerFor_notifyWhenStateChanged(
+            @NotNull ConnectivityState connectivityState) {
+        if (LOG.isTraceEnabled()) {
+            channel.notifyWhenStateChanged(
+                    connectivityState,
+                    () ->
+                            LOG.trace(
+                                    STATE_CHANGE_MARKER,
+                                    "The state of the channel changed to {}",
+                                    connectivityState));
+        }
     }
 
     @Override
@@ -145,15 +173,15 @@ public class Spout extends AbstractQueryingSpout {
                         if (t instanceof io.grpc.StatusRuntimeException) {
                             io.grpc.StatusRuntimeException e = (io.grpc.StatusRuntimeException) t;
 
-                            LOG.error(
-                                    "StatusRuntimeException caught"
-                                            + "\n"
-                                            + "--  Status  --\n"
-                                            + e.getStatus().toString()
-                                            + "\n"
-                                            + "-- Trailers --\n "
-                                            + e.getTrailers().toString(),
-                                    e);
+                            StringBuilder sb =
+                                    new StringBuilder("StatusRuntimeException: ")
+                                            .append(e.getStatus().toString());
+
+                            io.grpc.Metadata trailers = e.getTrailers();
+                            if (trailers != null) {
+                                sb.append(" ").append(trailers);
+                            }
+                            LOG.error(sb.toString(), e);
                         } else {
                             LOG.error("Exception caught", t);
                         }
