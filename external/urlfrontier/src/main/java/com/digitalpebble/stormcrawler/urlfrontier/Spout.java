@@ -111,7 +111,7 @@ public class Spout extends AbstractQueryingSpout {
         }
 
         channel = ManagedChannelBuilder.forTarget(address).usePlaintext().build();
-        frontier = URLFrontierGrpc.newStub(channel);
+        frontier = URLFrontierGrpc.newStub(channel).withWaitForReady();
         LOG.debug("State of Channel: {}", channel.getState(false));
     }
 
