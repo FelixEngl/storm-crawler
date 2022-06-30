@@ -21,9 +21,7 @@ import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
 import crawlercommons.urlfrontier.Urlfrontier.GetParams;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
-import io.grpc.ConnectivityState;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import java.util.Collections;
 import java.util.List;
@@ -56,8 +54,6 @@ public class Spout extends AbstractQueryingSpout {
     private int maxBucketNum;
 
     private int delayRequestable;
-
-    private ConnectivityState connectivityStateTmp;
 
     @Override
     public void open(
@@ -110,7 +106,7 @@ public class Spout extends AbstractQueryingSpout {
             address += ":7071";
         }
 
-        channel = ManagedChannelBuilder.forTarget(address).usePlaintext().build();
+        channel = ChannelManager.getChannel(address);
         frontier = URLFrontierGrpc.newStub(channel).withWaitForReady();
         LOG.debug("State of Channel: {}", channel.getState(false));
     }
@@ -134,7 +130,7 @@ public class Spout extends AbstractQueryingSpout {
         final long start = System.currentTimeMillis();
 
         StreamObserver<URLInfo> responseObserver =
-                new StreamObserver<URLInfo>() {
+                new StreamObserver<>() {
 
                     @Override
                     public void onNext(URLInfo item) {
@@ -143,8 +139,8 @@ public class Spout extends AbstractQueryingSpout {
                                 .forEach(
                                         (k, v) -> {
                                             for (int index = 0;
-                                                    index < v.getValuesCount();
-                                                    index++) {
+                                                 index < v.getValuesCount();
+                                                 index++) {
                                                 m.addValue(k, v.getValues(index));
                                             }
                                         });
@@ -207,6 +203,6 @@ public class Spout extends AbstractQueryingSpout {
     public void close() {
         super.close();
         LOG.info("Shutting down connection to URLFrontier service");
-        channel.shutdown();
+        ChannelManager.returnChannel(channel);
     }
 }

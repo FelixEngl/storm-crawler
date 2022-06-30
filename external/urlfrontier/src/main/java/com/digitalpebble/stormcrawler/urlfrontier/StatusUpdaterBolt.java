@@ -161,7 +161,7 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
             address += ":7071";
         }
 
-        channel = ManagedChannelBuilder.forTarget(address).usePlaintext().build();
+        channel = ChannelManager.getChannel(address);
         URLFrontierStub frontier = URLFrontierGrpc.newStub(channel).withWaitForReady();
 
         partitioner = new URLPartitioner();
@@ -186,7 +186,7 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
         }
 
         if (values == null) {
-            LOG.debug("Could not find unacked tuple for {}", url);
+            LOG.warn("Could not find unacked tuple for {}", url);
             return;
         }
 
@@ -379,6 +379,6 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
     @Override
     public void cleanup() {
         requestObserver.onCompleted();
-        channel.shutdownNow();
+        ChannelManager.returnChannel(channel);
     }
 }
