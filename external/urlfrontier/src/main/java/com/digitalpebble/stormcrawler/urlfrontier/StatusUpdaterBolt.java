@@ -341,7 +341,7 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
             }
         }
 
-        requestObserver.onNext(itemBuilder.build());
+        requestObserver.onNext(itemBuilder.setID(url).build());
     }
 
     @Override
