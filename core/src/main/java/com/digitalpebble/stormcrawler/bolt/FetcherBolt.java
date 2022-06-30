@@ -697,11 +697,7 @@ public class FetcherBolt extends StatusEmitterBolt {
                         message = "Unknown host";
                     } else {
                         message = exece.getClass().getName();
-                        if (LOG.isDebugEnabled()) {
-                            LOG.debug("Exception while fetching {}", fit.url, exece);
-                        } else {
-                            LOG.info("Exception while fetching {} -> {}", fit.url, message);
-                        }
+                        LOG.error("Exception while fetching", exece);
                     }
 
                     if (metadata.size() == 0) {

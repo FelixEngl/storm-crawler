@@ -309,7 +309,7 @@ public class Metadata {
 
     /** Returns a set of all keys of this instance */
     @NotNull
-    public Set<@Nullable String> keySet() {
+    public Set<String> keySet() {
         return map.keySet();
     }
 
