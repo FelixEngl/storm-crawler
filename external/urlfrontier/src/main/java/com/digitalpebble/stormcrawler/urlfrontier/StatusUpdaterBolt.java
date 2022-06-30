@@ -60,11 +60,14 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
                 StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage> {
 
     public static final Logger LOG = LoggerFactory.getLogger(StatusUpdaterBolt.class);
+
+    public static final String expireAfterKey = "urlfrontier.cache.expireafterms";
+
     private ManagedChannel channel;
     private URLPartitioner partitioner;
     private StreamObserver<URLItem> requestObserver;
 
-    private final Cache<String, List<Tuple>> waitAck;
+    private Cache<String, List<Tuple>> waitAck;
 
     //We have to prevent starving caused by the cache.
     private final ReentrantReadWriteLock waitAckLock = new ReentrantReadWriteLock(true);
@@ -79,18 +82,20 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
     /** Globally set crawlID * */
     private String globalCrawlID = null;
 
-    public StatusUpdaterBolt() {
-        waitAck =
-                Caffeine.newBuilder()
-                        .expireAfterWrite(60, TimeUnit.SECONDS)
-                        .removalListener(this)
-                        .build();
-    }
 
     @Override
     public void prepare(
             Map<String, Object> stormConf, TopologyContext context, OutputCollector collector) {
         super.prepare(stormConf, context, collector);
+
+        long expireAfterNMillisec = ConfUtils.getLong(stormConf, expireAfterKey, 60_000L);
+
+        waitAck =
+                Caffeine.newBuilder()
+                        .expireAfterWrite(expireAfterNMillisec, TimeUnit.MILLISECONDS)
+                        .removalListener(this)
+                        .build();
+
 
         // host and port of URL Frontier(s)
         List<String> addresses = ConfUtils.loadListFromConf(stormConf, "urlfrontier.address");
