@@ -259,6 +259,12 @@ public class ConfUtils {
         return list;
     }
 
+    @NotNull
+    public static List<String> loadListFromConf(
+            @NotNull String key, @NotNull Map<String, Object> stormConf) {
+        return loadListFromConf(stormConf, key);
+    }
+
     /** Loads the resource at {@code pathToResource} into the given {@code target}. */
     public static void loadConfigIntoTarget(@NotNull String pathToResource, @NotNull Config target)
             throws FileNotFoundException {

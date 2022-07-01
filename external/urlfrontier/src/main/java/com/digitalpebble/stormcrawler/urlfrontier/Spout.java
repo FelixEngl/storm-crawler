@@ -14,6 +14,8 @@
  */
 package com.digitalpebble.stormcrawler.urlfrontier;
 
+import static com.digitalpebble.stormcrawler.urlfrontier.Constants.*;
+
 import com.digitalpebble.stormcrawler.Metadata;
 import com.digitalpebble.stormcrawler.persistence.AbstractQueryingSpout;
 import com.digitalpebble.stormcrawler.util.ConfUtils;
@@ -29,8 +31,6 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.Marker;
-import org.apache.logging.log4j.MarkerManager;
 import org.apache.storm.Config;
 import org.apache.storm.spout.SpoutOutputCollector;
 import org.apache.storm.task.TopologyContext;
@@ -38,12 +38,6 @@ import org.apache.storm.task.TopologyContext;
 public class Spout extends AbstractQueryingSpout {
 
     private static final Logger LOG = LogManager.getLogger(Spout.class);
-
-    private static final Marker URL_FRONTIER_SPOUT_CHANNEL_MARKER =
-            MarkerManager.getMarker("UrlFrontier_Spout_Channel");
-    private static final Marker STATE_CHANGE_MARKER =
-            MarkerManager.getMarker("UFSC_StateChanged")
-                    .addParents(URL_FRONTIER_SPOUT_CHANNEL_MARKER);
 
     private ManagedChannel channel;
 
@@ -61,7 +55,7 @@ public class Spout extends AbstractQueryingSpout {
         super.open(conf, context, collector);
 
         // host and port of URL Frontier(s)
-        List<String> addresses = ConfUtils.loadListFromConf(conf, "urlfrontier.address");
+        List<String> addresses = ConfUtils.loadListFromConf(URLFRONTIER_ADDRESS_KEY, conf);
 
         String address = null;
 
@@ -82,14 +76,14 @@ public class Spout extends AbstractQueryingSpout {
         }
 
         if (address == null) {
-            String host = ConfUtils.getString(conf, "urlfrontier.host", "localhost");
-            int port = ConfUtils.getInt(conf, "urlfrontier.port", 7071);
+            String host = ConfUtils.getString(conf, URLFRONTIER_HOST_KEY, URLFRONTIER_DEFAULT_HOST);
+            int port = ConfUtils.getInt(conf, URLFRONTIER_PORT_KEY, URLFRONTIER_DEFAULT_PORT);
             address = host + ":" + port;
         }
 
-        maxURLsPerBucket = ConfUtils.getInt(conf, "urlfrontier.max.urls.per.bucket", 10);
+        maxURLsPerBucket = ConfUtils.getInt(conf, URLFRONTIER_MAX_URLS_PER_BUCKET_KEY, 10);
 
-        maxBucketNum = ConfUtils.getInt(conf, "urlfrontier.max.buckets", 10);
+        maxBucketNum = ConfUtils.getInt(conf, URLFRONTIER_MAX_BUCKETS_KEY, 10);
 
         // initialise the delay requestable with the timeout for messages
         delayRequestable =
@@ -97,7 +91,7 @@ public class Spout extends AbstractQueryingSpout {
 
         // then override with any user specified config
         delayRequestable =
-                ConfUtils.getInt(conf, "urlfrontier.delay.requestable", delayRequestable);
+                ConfUtils.getInt(conf, URLFRONTIER_DELAY_REQUESTABLE_KEY, delayRequestable);
 
         LOG.info("Initialisation of connection to URLFrontier service on {}", address);
 
@@ -139,8 +133,8 @@ public class Spout extends AbstractQueryingSpout {
                                 .forEach(
                                         (k, v) -> {
                                             for (int index = 0;
-                                                 index < v.getValuesCount();
-                                                 index++) {
+                                                    index < v.getValuesCount();
+                                                    index++) {
                                                 m.addValue(k, v.getValues(index));
                                             }
                                         });
@@ -202,7 +196,6 @@ public class Spout extends AbstractQueryingSpout {
     @Override
     public void close() {
         super.close();
-        LOG.info("Shutting down connection to URLFrontier service");
         ChannelManager.returnChannel(channel);
     }
 }

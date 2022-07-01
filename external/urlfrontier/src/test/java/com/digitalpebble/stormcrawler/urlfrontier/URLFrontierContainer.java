@@ -1,5 +1,21 @@
+/**
+ * Licensed to DigitalPebble Ltd under one or more contributor license agreements. See the NOTICE
+ * file distributed with this work for additional information regarding copyright ownership.
+ * DigitalPebble licenses this file to You under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License. You may obtain a copy of the
+ * License at
+ *
+ * <p>http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * <p>Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either
+ * express or implied. See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.digitalpebble.stormcrawler.urlfrontier;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
@@ -7,16 +23,15 @@ import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.utility.DockerImageName;
 
-import java.util.ArrayList;
-import java.util.List;
-
-public class URLFrontierContainer extends GenericContainer<URLFrontierContainer> implements URLFrontierContainerConfig {
-    public static final DockerImageName DEFAULT_IMAGE_NAME = DockerImageName.parse("crawlercommons/url-frontier");
+/** A container for "crawlercommons/url-frontier". */
+public class URLFrontierContainer extends GenericContainer<URLFrontierContainer>
+        implements URLFrontierContainerConfig {
+    public static final DockerImageName DEFAULT_IMAGE_NAME =
+            DockerImageName.parse("crawlercommons/url-frontier");
     public static final String DEFAULT_TAG = "2.1";
     public static final int INTERNAL_FRONTIER_PORT = 7071;
 
-    @Nullable
-    private String rocksPath;
+    @Nullable private String rocksPath;
     private int prometheusPort = -1;
 
     @Deprecated
@@ -28,19 +43,15 @@ public class URLFrontierContainer extends GenericContainer<URLFrontierContainer>
         this(DockerImageName.parse(dockerImageName));
     }
 
-    public URLFrontierContainer(DockerImageName dockerImageName){
+    public URLFrontierContainer(DockerImageName dockerImageName) {
         super(dockerImageName);
         dockerImageName.assertCompatibleWith(DEFAULT_IMAGE_NAME);
         setExposedPorts(List.of(INTERNAL_FRONTIER_PORT));
-        setWaitStrategy(
-                Wait.forLogMessage(
-                        ".*Started URLFrontierServer.*\\n",
-                        1
-                )
-        );
+        setWaitStrategy(Wait.forLogMessage(".*Started URLFrontierServer.*\\n", 1));
     }
 
-    @Override @Nullable
+    @Override
+    @Nullable
     public String getRocksPath() {
         return rocksPath;
     }
@@ -50,7 +61,8 @@ public class URLFrontierContainer extends GenericContainer<URLFrontierContainer>
         this.rocksPath = rocksPath;
     }
 
-    @Override @Range(from = 0, to = 65535)
+    @Override
+    @Range(from = 0, to = 65535)
     public int getPrometheusPort() {
         return prometheusPort;
     }
@@ -60,7 +72,8 @@ public class URLFrontierContainer extends GenericContainer<URLFrontierContainer>
         this.prometheusPort = prometheusPort;
     }
 
-    public URLFrontierContainer withPrometheusPort(@Range(from = 0, to = 65535) int prometheusPort) {
+    public URLFrontierContainer withPrometheusPort(
+            @Range(from = 0, to = 65535) int prometheusPort) {
         setPrometheusPort(prometheusPort);
         return this;
     }
@@ -73,35 +86,30 @@ public class URLFrontierContainer extends GenericContainer<URLFrontierContainer>
     @Override
     protected void configure() {
         ArrayList<String> args = new ArrayList<>(2);
-        if(rocksPath != null){
-            args.add("rocksdb.path="+rocksPath);
+        if (rocksPath != null) {
+            args.add("rocksdb.path=" + rocksPath);
         }
-        if (prometheusPort != -1){
+        if (prometheusPort != -1) {
             setExposedPorts(List.of(INTERNAL_FRONTIER_PORT, prometheusPort));
-            args.add("-s "+prometheusPort);
+            args.add("-s " + prometheusPort);
         }
         setCommandParts(args.toArray(new String[0]));
     }
 
     @NotNull
     public ConnectionInfo.URLFrontier getFrontierConnection() {
-        return new ConnectionInfo.URLFrontier(
-                getHost(),
-                getMappedPort(INTERNAL_FRONTIER_PORT)
-        );
+        return new ConnectionInfo.URLFrontier(getHost(), getMappedPort(INTERNAL_FRONTIER_PORT));
     }
 
     @Nullable
-    public ConnectionInfo.Prometheus getPrometheusConnection(){
+    public ConnectionInfo.Prometheus getPrometheusConnection() {
         if (prometheusPort == -1) return null;
-        return new ConnectionInfo.Prometheus(
-                getHost(),
-                getMappedPort(prometheusPort)
-        );
+        return new ConnectionInfo.Prometheus(getHost(), getMappedPort(prometheusPort));
     }
 
-    public static abstract class ConnectionInfo {
+    public abstract static class ConnectionInfo {
         public abstract String getHost();
+
         public abstract int getPort();
 
         @NotNull

@@ -14,6 +14,8 @@
  */
 package com.digitalpebble.stormcrawler.urlfrontier;
 
+import static com.digitalpebble.stormcrawler.urlfrontier.Constants.*;
+
 import com.digitalpebble.stormcrawler.Metadata;
 import com.digitalpebble.stormcrawler.persistence.AbstractStatusUpdaterBolt;
 import com.digitalpebble.stormcrawler.persistence.Status;
@@ -23,6 +25,7 @@ import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.RemovalCause;
 import com.github.benmanes.caffeine.cache.RemovalListener;
+import crawlercommons.urlfrontier.CrawlID;
 import crawlercommons.urlfrontier.URLFrontierGrpc;
 import crawlercommons.urlfrontier.URLFrontierGrpc.URLFrontierStub;
 import crawlercommons.urlfrontier.Urlfrontier.AckMessage;
@@ -44,7 +47,6 @@ import java.util.Optional;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 import org.apache.storm.metric.api.MultiCountMetric;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
@@ -61,37 +63,33 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
 
     private static final Logger LOG = LoggerFactory.getLogger(StatusUpdaterBolt.class);
 
-    public static final String expireAfterKey = "urlfrontier.cache.expireafterms";
-    public static final String addressKey = "urlfrontier.address";
-    public static final String hostKey = "urlfrontier.host";
-    public static final String portKey = "urlfrontier.port";
-
     private ManagedChannel channel;
     private URLPartitioner partitioner;
     private StreamObserver<URLItem> requestObserver;
 
     private Cache<String, List<Tuple>> waitAck;
 
-    //We have to prevent starving caused by the cache.
+    // We have to prevent starving caused by the cache. Therefore, sophisticated lock with fairness.
     private final ReentrantReadWriteLock waitAckLock = new ReentrantReadWriteLock(true);
 
     private int maxMessagesInFlight = 100000;
     private long throttleTime = 10;
 
+    // Faster ways of locking until n messages are processed
     private Semaphore inFlightSemaphore;
 
     private MultiCountMetric eventCounter;
 
     /** Globally set crawlID * */
-    private String globalCrawlID = null;
-
+    private String globalCrawlID;
 
     @Override
     public void prepare(
             Map<String, Object> stormConf, TopologyContext context, OutputCollector collector) {
         super.prepare(stormConf, context, collector);
 
-        long expireAfterNMillisec = ConfUtils.getLong(stormConf, expireAfterKey, 60_000L);
+        long expireAfterNMillisec =
+                ConfUtils.getLong(stormConf, URLFRONTIER_CACHE_EXPIREAFTER_MS_KEY, 60_000L);
 
         waitAck =
                 Caffeine.newBuilder()
@@ -99,9 +97,8 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
                         .removalListener(this)
                         .build();
 
-
         // host and port of URL Frontier(s)
-        List<String> addresses = ConfUtils.loadListFromConf(stormConf, addressKey);
+        List<String> addresses = ConfUtils.loadListFromConf(URLFRONTIER_ADDRESS_KEY, stormConf);
 
         String address = null;
 
@@ -134,26 +131,28 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
         }
 
         if (address == null) {
-            String host = ConfUtils.getString(stormConf, hostKey, "localhost");
-            int port = ConfUtils.getInt(stormConf, portKey, 7071);
+            String host =
+                    ConfUtils.getString(stormConf, URLFRONTIER_HOST_KEY, URLFRONTIER_DEFAULT_HOST);
+            int port = ConfUtils.getInt(stormConf, URLFRONTIER_PORT_KEY, URLFRONTIER_DEFAULT_PORT);
             address = host + ":" + port;
         }
 
         maxMessagesInFlight =
                 ConfUtils.getInt(
-                        stormConf, "urlfrontier.max.messages.in.flight", maxMessagesInFlight);
+                        stormConf, URLFRONTIER_MAX_MESSAGES_IN_FLIGHT_KEY, maxMessagesInFlight);
 
         throttleTime =
-                ConfUtils.getLong(stormConf, "urlfrontier.throttling.time.msec", throttleTime);
+                ConfUtils.getLong(stormConf, URLFRONTIER_THROTTLING_TIME_MS_KEY, throttleTime);
 
         this.eventCounter =
                 context.registerMetric(this.getClass().getSimpleName(), new MultiCountMetric(), 30);
 
         maxMessagesInFlight =
                 ConfUtils.getInt(
-                        stormConf, "urlfrontier.updater.max.messages", maxMessagesInFlight);
+                        stormConf, URLFRONTIER_UPDATER_MAX_MESSAGES_KEY, maxMessagesInFlight);
 
-        // Fairness not necessary, we are not in a hurry, as long as we may be processed at some point.
+        // Fairness not necessary, we are not in a hurry, as long as we may be processed at some
+        // point.
         inFlightSemaphore = new Semaphore(maxMessagesInFlight, false);
 
         LOG.info("Initialisation of connection to URLFrontier service on {}", address);
@@ -170,7 +169,7 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
         partitioner = new URLPartitioner();
         partitioner.configure(stormConf);
 
-        globalCrawlID = ConfUtils.getString(stormConf, "urlfrontier.crawlid", "DEFAULT");
+        globalCrawlID = ConfUtils.getString(stormConf, URLFRONTIER_CRAWL_ID_KEY, CrawlID.DEFAULT);
 
         requestObserver = frontier.putURLs(this);
     }
@@ -189,13 +188,20 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
         }
 
         if (values == null) {
-            if (StringUtils.isBlank(url)){
-                LOG.warn("Could not find unacked tuple for blank id `{}`. (Ack: {})", url, confirmation);
-                if (LOG.isTraceEnabled()){
+            if (StringUtils.isBlank(url)) {
+                LOG.warn(
+                        "Could not find unacked tuple for blank id `{}`. (Ack: {})",
+                        url,
+                        confirmation);
+                if (LOG.isTraceEnabled()) {
                     final StringBuilder sb = new StringBuilder();
                     sb.append("Trace for unpacked tuple for blank id: ");
-                    for(var entry: confirmation.getAllFields().entrySet()){
-                        sb.append("\n").append("ENTRY: ").append(entry.getKey().toString()).append(" -> ").append(entry.getValue().toString());
+                    for (var entry : confirmation.getAllFields().entrySet()) {
+                        sb.append("\n")
+                                .append("ENTRY: ")
+                                .append(entry.getKey().toString())
+                                .append(" -> ")
+                                .append(entry.getValue().toString());
                     }
                     LOG.trace(sb.toString());
                 }
@@ -282,8 +288,6 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
             waitAckLock.writeLock().unlock();
         }
 
-
-
         String partitionKey = partitioner.getPartition(url, metadata);
         if (partitionKey == null) {
             partitionKey = "_DEFAULT_";
@@ -307,8 +311,7 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
                         .putAllMetadata(mdCopy)
                         .build();
 
-        crawlercommons.urlfrontier.Urlfrontier.URLItem.Builder itemBuilder =
-                URLItem.newBuilder();
+        crawlercommons.urlfrontier.Urlfrontier.URLItem.Builder itemBuilder = URLItem.newBuilder();
         if (status.equals(Status.DISCOVERED)) {
             itemBuilder.setDiscovered(DiscoveredURLItem.newBuilder().setInfo(info).build());
         } else {
@@ -318,41 +321,34 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
                 date = nextFetch.get().toInstant().getEpochSecond();
             }
             itemBuilder.setKnown(
-                    KnownURLItem.newBuilder()
-                            .setInfo(info)
-                            .setRefetchableFromDate(date)
-                            .build());
+                    KnownURLItem.newBuilder().setInfo(info).setRefetchableFromDate(date).build());
         }
-
 
         var hasPermit = false;
         var timeSpent = 0L;
 
-        while(!hasPermit){
+        while (!hasPermit) {
             try {
                 hasPermit = inFlightSemaphore.tryAcquire(throttleTime, TimeUnit.MILLISECONDS);
-                if(!hasPermit){
+                if (!hasPermit) {
                     LOG.debug(
                             "{} messages in flight, time spent throttling {}",
                             inFlightSemaphore.getQueueLength(),
-                            timeSpent
-                    );
+                            timeSpent);
                     eventCounter.scope("timeSpentThrottling").incrBy(throttleTime);
                     timeSpent += throttleTime;
-                    if (timeSpent >= 30000L){
+                    if (timeSpent >= 30000L) {
                         LOG.warn(
                                 "Waiting more than {} ms for processing. There are {} permits available for {} waiting threads.",
                                 timeSpent,
                                 inFlightSemaphore.availablePermits(),
-                                inFlightSemaphore.getQueueLength()
-                        );
+                                inFlightSemaphore.getQueueLength());
                     }
                 }
-            } catch (InterruptedException e){
+            } catch (InterruptedException e) {
                 LOG.info(
                         "InterruptedException - {} messages in flight",
-                        inFlightSemaphore.getQueueLength()
-                );
+                        inFlightSemaphore.getQueueLength());
             }
         }
 
@@ -365,21 +361,24 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
 
         // explicit removal
         if (!cause.wasEvicted()) {
-            if (values != null){
-                LOG.trace("Evicted {} from waitAck with {} values. [{}]", key, values.size(), cause);
+            if (values != null) {
+                LOG.trace(
+                        "Evicted {} from waitAck with {} values. [{}]", key, values.size(), cause);
             } else {
                 LOG.trace("Evicted {} from waitAck with no values. [{}]", key, cause);
             }
             return;
         }
 
-        if(values != null){
+        if (values != null) {
             inFlightSemaphore.release(values.size());
             var permits = inFlightSemaphore.availablePermits();
             LOG.warn("Evicted {} from waitAck with {} values. [{}]", key, values.size(), cause);
 
-            if(permits < 0){
-                LOG.warn("Removing more elements than possible, the semaphore is negative {}.", permits);
+            if (permits < 0) {
+                LOG.warn(
+                        "Removing more elements than possible, the semaphore is negative {}.",
+                        permits);
             }
 
             for (Tuple t : values) {
