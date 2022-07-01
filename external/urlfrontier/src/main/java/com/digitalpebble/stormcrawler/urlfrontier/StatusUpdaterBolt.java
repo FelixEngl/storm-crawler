@@ -33,7 +33,6 @@ import crawlercommons.urlfrontier.Urlfrontier.StringList.Builder;
 import crawlercommons.urlfrontier.Urlfrontier.URLInfo;
 import crawlercommons.urlfrontier.Urlfrontier.URLItem;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
 import io.grpc.stub.StreamObserver;
 import java.util.Collections;
 import java.util.Date;
@@ -50,6 +49,7 @@ import org.apache.storm.metric.api.MultiCountMetric;
 import org.apache.storm.task.OutputCollector;
 import org.apache.storm.task.TopologyContext;
 import org.apache.storm.tuple.Tuple;
+import org.apache.tika.utils.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -59,9 +59,12 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
         implements RemovalListener<String, List<Tuple>>,
                 StreamObserver<crawlercommons.urlfrontier.Urlfrontier.AckMessage> {
 
-    public static final Logger LOG = LoggerFactory.getLogger(StatusUpdaterBolt.class);
+    private static final Logger LOG = LoggerFactory.getLogger(StatusUpdaterBolt.class);
 
     public static final String expireAfterKey = "urlfrontier.cache.expireafterms";
+    public static final String addressKey = "urlfrontier.address";
+    public static final String hostKey = "urlfrontier.host";
+    public static final String portKey = "urlfrontier.port";
 
     private ManagedChannel channel;
     private URLPartitioner partitioner;
@@ -98,7 +101,7 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
 
 
         // host and port of URL Frontier(s)
-        List<String> addresses = ConfUtils.loadListFromConf(stormConf, "urlfrontier.address");
+        List<String> addresses = ConfUtils.loadListFromConf(stormConf, addressKey);
 
         String address = null;
 
@@ -131,8 +134,8 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
         }
 
         if (address == null) {
-            String host = ConfUtils.getString(stormConf, "urlfrontier.host", "localhost");
-            int port = ConfUtils.getInt(stormConf, "urlfrontier.port", 7071);
+            String host = ConfUtils.getString(stormConf, hostKey, "localhost");
+            int port = ConfUtils.getInt(stormConf, portKey, 7071);
             address = host + ":" + port;
         }
 
@@ -186,7 +189,19 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
         }
 
         if (values == null) {
-            LOG.warn("Could not find unacked tuple for {}", url);
+            if (StringUtils.isBlank(url)){
+                LOG.warn("Could not find unacked tuple for blank id `{}`. (Ack: {})", url, confirmation);
+                if (LOG.isTraceEnabled()){
+                    final StringBuilder sb = new StringBuilder();
+                    sb.append("Trace for unpacked tuple for blank id: ");
+                    for(var entry: confirmation.getAllFields().entrySet()){
+                        sb.append("\n").append("ENTRY: ").append(entry.getKey().toString()).append(" -> ").append(entry.getValue().toString());
+                    }
+                    LOG.trace(sb.toString());
+                }
+            } else {
+                LOG.debug("Could not find unacked tuple for id `{}`.", url);
+            }
             return;
         }
 

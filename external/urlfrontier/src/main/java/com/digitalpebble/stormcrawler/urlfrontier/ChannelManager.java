@@ -2,7 +2,9 @@ package com.digitalpebble.stormcrawler.urlfrontier;
 
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -18,16 +20,21 @@ final class ChannelManager {
 
     private final static HashMap<String, ManagedChannelTuple> channels = new HashMap<>();
 
+    @Contract("null -> false")
+    private static boolean validChannelInTuple(@Nullable ManagedChannelTuple tuple){
+        return tuple != null && !tuple.channel.isShutdown() && !tuple.channel.isShutdown();
+    }
+
     @NotNull
     static ManagedChannel getChannel(@NotNull String target){
         ManagedChannelTuple result = channels.get(target);
-        if (result != null){
+        if (validChannelInTuple(result)){
             result.inc();
             return result.channel;
         }
         synchronized (lock){
             result = channels.get(target);
-            if (result != null) {
+            if (validChannelInTuple(result)) {
                 result.inc();
                 return result.channel;
             }
@@ -59,6 +66,7 @@ final class ChannelManager {
         }
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     private static class ManagedChannelTuple {
         @NotNull ManagedChannel channel;
         @NotNull private final AtomicInteger usedBy = new AtomicInteger(0);
