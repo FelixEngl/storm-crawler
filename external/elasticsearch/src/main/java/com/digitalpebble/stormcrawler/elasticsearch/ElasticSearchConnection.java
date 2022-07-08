@@ -62,7 +62,8 @@ public final class ElasticSearchConnection {
         this(c, p, null);
     }
 
-    private ElasticSearchConnection(@NotNull RestHighLevelClient c, @NotNull BulkProcessor p, @Nullable Sniffer s) {
+    private ElasticSearchConnection(
+            @NotNull RestHighLevelClient c, @NotNull BulkProcessor p, @Nullable Sniffer s) {
         processor = p;
         client = c;
         sniffer = s;
@@ -72,7 +73,7 @@ public final class ElasticSearchConnection {
         return client;
     }
 
-    public void addToProcessor(final IndexRequest request){
+    public void addToProcessor(final IndexRequest request) {
         processor.add(request);
     }
 
@@ -127,10 +128,8 @@ public final class ElasticSearchConnection {
                             final CredentialsProvider credentialsProvider =
                                     new BasicCredentialsProvider();
                             credentialsProvider.setCredentials(
-                                    AuthScope.ANY,
-                                    new UsernamePasswordCredentials(user, password));
-                            httpClientBuilder.setDefaultCredentialsProvider(
-                                    credentialsProvider);
+                                    AuthScope.ANY, new UsernamePasswordCredentials(user, password));
+                            httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider);
                         }
                         if (needsProxy) {
                             httpClientBuilder.setProxy(
@@ -202,7 +201,8 @@ public final class ElasticSearchConnection {
      * Creates a connection with a default listener. The values for bolt type are
      * [indexer,status,metrics]
      */
-    public static ElasticSearchConnection getConnection(Map<String, Object> stormConf, String boltType) {
+    public static ElasticSearchConnection getConnection(
+            Map<String, Object> stormConf, String boltType) {
         BulkProcessor.Listener listener =
                 new BulkProcessor.Listener() {
                     @Override
@@ -246,7 +246,7 @@ public final class ElasticSearchConnection {
                                         client.bulkAsync(
                                                 request, RequestOptions.DEFAULT, bulkListener),
                                 listener,
-                                boltType+"-bulk-processor")
+                                boltType + "-bulk-processor")
                         .setFlushInterval(flushInterval)
                         .setBulkActions(bulkActions)
                         .setConcurrentRequests(concurrentRequests)
@@ -259,7 +259,7 @@ public final class ElasticSearchConnection {
 
     public void close() {
 
-        if (isClosed){
+        if (isClosed) {
             LOG.warn("Tried to close an already closed connection!");
             return;
         }

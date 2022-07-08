@@ -19,8 +19,8 @@ import static org.elasticsearch.xcontent.XContentFactory.jsonBuilder;
 
 import com.digitalpebble.stormcrawler.Constants;
 import com.digitalpebble.stormcrawler.Metadata;
-import com.digitalpebble.stormcrawler.elasticsearch.ElasticSearchConnection;
 import com.digitalpebble.stormcrawler.elasticsearch.BulkItemResponseToFailedFlag;
+import com.digitalpebble.stormcrawler.elasticsearch.ElasticSearchConnection;
 import com.digitalpebble.stormcrawler.indexing.AbstractIndexerBolt;
 import com.digitalpebble.stormcrawler.persistence.Status;
 import com.digitalpebble.stormcrawler.util.ConfUtils;
@@ -34,7 +34,6 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
-
 import org.apache.commons.lang.StringUtils;
 import org.apache.storm.metric.api.MultiCountMetric;
 import org.apache.storm.metric.api.MultiReducedMetric;
@@ -138,7 +137,7 @@ public class IndexerBolt extends AbstractIndexerBolt
     public void onRemoval(
             @Nullable String key, @Nullable List<Tuple> value, @NotNull RemovalCause cause) {
         if (!cause.wasEvicted()) return;
-        if (value != null){
+        if (value != null) {
             LOG.error("Purged from waitAck {} with {} values", key, value.size());
             for (Tuple t : value) {
                 _collector.fail(t);
@@ -274,25 +273,26 @@ public class IndexerBolt extends AbstractIndexerBolt
 
         var idsToBulkItemsWithFailedFlag =
                 Arrays.stream(response.getItems())
-                        .map(bir -> {
-                            String id = bir.getId();
-                            BulkItemResponse.Failure f = bir.getFailure();
-                            boolean failed = false;
-                            if (f != null) {
-                                if (f.getStatus().equals(RestStatus.CONFLICT)) {
-                                    eventCounter.scope("doc_conflicts").incrBy(1);
-                                    LOG.debug("Doc conflict ID {}", id);
-                                } else {
-                                    failed = true;
-                                }
-                            }
-                            return new BulkItemResponseToFailedFlag(bir, failed);
-                        }).collect(
-                                Collectors.toMap(
+                        .map(
+                                bir -> {
+                                    String id = bir.getId();
+                                    BulkItemResponse.Failure f = bir.getFailure();
+                                    boolean failed = false;
+                                    if (f != null) {
+                                        if (f.getStatus().equals(RestStatus.CONFLICT)) {
+                                            eventCounter.scope("doc_conflicts").incrBy(1);
+                                            LOG.debug("Doc conflict ID {}", id);
+                                        } else {
+                                            failed = true;
+                                        }
+                                    }
+                                    return new BulkItemResponseToFailedFlag(bir, failed);
+                                })
+                        .collect(
+                                // https://github.com/DigitalPebble/storm-crawler/issues/832
+                                Collectors.groupingBy(
                                         idWithFailedFlagTuple -> idWithFailedFlagTuple.id,
-                                        idWithFailedFlagTuple -> idWithFailedFlagTuple //we safe one wrapping by doing this
-                                )
-                        );
+                                        Collectors.toUnmodifiableList()));
 
         Map<String, List<Tuple>> presentTuples;
         long estimatedSize;
@@ -300,12 +300,12 @@ public class IndexerBolt extends AbstractIndexerBolt
         waitAckLock.lock();
         try {
             presentTuples = waitAck.getAllPresent(idsToBulkItemsWithFailedFlag.keySet());
-            if (!presentTuples.isEmpty()){
+            if (!presentTuples.isEmpty()) {
                 waitAck.invalidateAll(presentTuples.keySet());
             }
             estimatedSize = waitAck.estimatedSize();
             // Only if we have to.
-            if (LOG.isDebugEnabled() && estimatedSize > 0L){
+            if (LOG.isDebugEnabled() && estimatedSize > 0L) {
                 debugInfo = new HashSet<>(waitAck.asMap().keySet());
             }
         } finally {
@@ -315,36 +315,62 @@ public class IndexerBolt extends AbstractIndexerBolt
         int ackCount = 0;
         int failureCount = 0;
 
-        for (var bulkItemWithFailedFlag: idsToBulkItemsWithFailedFlag.values()) {
-            var associatedTuple = presentTuples.get(bulkItemWithFailedFlag.id);
+        for (var entry : presentTuples.entrySet()) {
+            final var id = entry.getKey();
+            final var associatedTuple = entry.getValue();
+            final var bulkItemsWithFailedFlag = idsToBulkItemsWithFailedFlag.get(id);
+
+            BulkItemResponseToFailedFlag selected;
+
+            if (bulkItemsWithFailedFlag.size() == 1) {
+                selected = bulkItemsWithFailedFlag.get(0);
+            } else {
+                // Fallback if there are multiple responses for the same id
+                BulkItemResponseToFailedFlag tmp = null;
+                var ctFailed = 0;
+                for (var buwff : bulkItemsWithFailedFlag) {
+                    if (tmp == null) {
+                        tmp = buwff;
+                    }
+                    if (buwff.failed) ctFailed++;
+                    else tmp = buwff;
+                }
+                if (ctFailed != bulkItemsWithFailedFlag.size()) {
+                    LOG.warn(
+                            "The id {} would result in an ack and a failure. Using only the ack for processing.",
+                            id);
+                }
+                selected = Objects.requireNonNull(tmp);
+            }
+
             if (associatedTuple != null) {
-                LOG.debug("Found {} tuple(s) for ID {}", associatedTuple.size(), bulkItemWithFailedFlag.id);
+                LOG.debug("Found {} tuple(s) for ID {}", associatedTuple.size(), id);
                 for (Tuple t : associatedTuple) {
                     String url = (String) t.getValueByField("url");
 
                     Metadata metadata = (Metadata) t.getValueByField("metadata");
 
-                    if (!bulkItemWithFailedFlag.failed) {
+                    if (!selected.failed) {
                         ackCount++;
                         _collector.emit(
                                 StatusStreamName, t, new Values(url, metadata, Status.FETCHED));
                         _collector.ack(t);
                     } else {
                         failureCount++;
-                        var failure = bulkItemWithFailedFlag.getFailure();
-                        LOG.error("update ID {}, URL {}, failure: {}", bulkItemWithFailedFlag.id, url, failure);
+                        var failure = selected.getFailure();
+                        LOG.error("update ID {}, URL {}, failure: {}", id, url, failure);
                         // there is something wrong with the content we should
                         // treat
                         // it as an ERROR
-                        if (bulkItemWithFailedFlag.getFailure().getStatus().equals(RestStatus.BAD_REQUEST)) {
+                        if (selected.getFailure().getStatus().equals(RestStatus.BAD_REQUEST)) {
                             metadata.setValue(Constants.STATUS_ERROR_SOURCE, "ES indexing");
                             metadata.setValue(Constants.STATUS_ERROR_MESSAGE, "invalid content");
                             _collector.emit(
                                     StatusStreamName, t, new Values(url, metadata, Status.ERROR));
                             _collector.ack(t);
-                            LOG.debug("Acked {} with ID {}", url, bulkItemWithFailedFlag.id);
+                            LOG.debug("Acked {} with ID {}", url, id);
                         } else {
-                            LOG.error("update ID {}, URL {}, failure: {}", bulkItemWithFailedFlag.id, url, failure);
+                            LOG.error("update ID {}, URL {}, failure: {}", id, url, failure);
                             // there is something wrong with the content we
                             // should
                             // treat
@@ -354,7 +380,9 @@ public class IndexerBolt extends AbstractIndexerBolt
                                 metadata.setValue(
                                         Constants.STATUS_ERROR_MESSAGE, "invalid content");
                                 _collector.emit(
-                                        StatusStreamName, t, new Values(url, metadata, Status.ERROR));
+                                        StatusStreamName,
+                                        t,
+                                        new Values(url, metadata, Status.ERROR));
                                 _collector.ack(t);
                             }
                             // otherwise just fail it
@@ -365,7 +393,7 @@ public class IndexerBolt extends AbstractIndexerBolt
                     }
                 }
             } else {
-                LOG.warn("Could not find unacked tuples for {}", bulkItemWithFailedFlag.id);
+                LOG.warn("Could not find unacked tuples for {}", entry.getKey());
             }
         }
 
@@ -378,8 +406,7 @@ public class IndexerBolt extends AbstractIndexerBolt
                 failureCount);
         if (debugInfo != null) {
             for (String kinaw : debugInfo) {
-                LOG.debug(
-                        "Still in wait ack after bulk response [{}] => {}", executionId, kinaw);
+                LOG.debug("Still in wait ack after bulk response [{}] => {}", executionId, kinaw);
             }
         }
     }
@@ -389,12 +416,15 @@ public class IndexerBolt extends AbstractIndexerBolt
         eventCounter.scope("bulks_received").incrBy(1);
         LOG.error("Exception with bulk {} - failing the whole lot ", executionId, failure);
 
-        final var failedIds = request.requests().stream().map(DocWriteRequest::id).collect(Collectors.toUnmodifiableSet());
+        final var failedIds =
+                request.requests().stream()
+                        .map(DocWriteRequest::id)
+                        .collect(Collectors.toUnmodifiableSet());
         waitAckLock.lock();
         Map<String, List<Tuple>> failedTupleLists;
         try {
             failedTupleLists = waitAck.getAllPresent(failedIds);
-            if (!failedTupleLists.isEmpty()){
+            if (!failedTupleLists.isEmpty()) {
                 waitAck.invalidateAll(failedTupleLists.keySet());
             }
         } finally {

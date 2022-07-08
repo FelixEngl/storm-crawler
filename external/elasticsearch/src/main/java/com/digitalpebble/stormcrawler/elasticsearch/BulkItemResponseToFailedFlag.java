@@ -1,5 +1,6 @@
 package com.digitalpebble.stormcrawler.elasticsearch;
 
+import java.io.IOException;
 import org.elasticsearch.action.DocWriteRequest;
 import org.elasticsearch.action.DocWriteResponse;
 import org.elasticsearch.action.bulk.BulkItemResponse;
@@ -9,14 +10,11 @@ import org.elasticsearch.xcontent.ToXContent;
 import org.elasticsearch.xcontent.XContentBuilder;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
-
 public final class BulkItemResponseToFailedFlag {
-    @NotNull
-    public final BulkItemResponse response;
+    @NotNull public final BulkItemResponse response;
     public final boolean failed;
-    @NotNull
-    public final String id;
+    @NotNull public final String id;
+
     public BulkItemResponseToFailedFlag(@NotNull BulkItemResponse response, boolean failed) {
         this.response = response;
         this.failed = failed;
@@ -45,18 +43,23 @@ public final class BulkItemResponseToFailedFlag {
 
     @Override
     public String toString() {
-        return "BulkItemResponseToFailedFlag{" +
-                "response=" + response +
-                ", failed=" + failed +
-                ", id='" + id + '\'' +
-                '}';
+        return "BulkItemResponseToFailedFlag{"
+                + "response="
+                + response
+                + ", failed="
+                + failed
+                + ", id='"
+                + id
+                + '\''
+                + '}';
     }
 
     public RestStatus status() {
         return response.status();
     }
 
-    public XContentBuilder toXContent(XContentBuilder builder, ToXContent.Params params) throws IOException {
+    public XContentBuilder toXContent(XContentBuilder builder, ToXContent.Params params)
+            throws IOException {
         return response.toXContent(builder, params);
     }
 
