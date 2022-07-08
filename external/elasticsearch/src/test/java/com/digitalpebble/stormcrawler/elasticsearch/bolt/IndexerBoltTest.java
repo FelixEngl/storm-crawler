@@ -29,12 +29,17 @@ import org.apache.storm.task.OutputCollector;
 import org.apache.storm.tuple.Tuple;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.Timeout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.elasticsearch.ElasticsearchContainer;
 
 public class IndexerBoltTest {
+
+    @Rule
+    public Timeout globalTimeout = Timeout.seconds(60);
 
     private ElasticsearchContainer container;
     private IndexerBolt bolt;
