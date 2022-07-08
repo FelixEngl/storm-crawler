@@ -268,6 +268,7 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
             @NotNull Optional<Date> nextFetch,
             @NotNull Tuple t) {
 
+
         // First get processing permit. Otherwise, starvation possible.
         var hasPermit = false;
         var timeSpent = 0L;
@@ -328,8 +329,7 @@ public class StatusUpdaterBolt extends AbstractStatusUpdaterBolt
         }
 
         if (urlIsNotBeingSentToTheFrontier) {
-            // Release permit, because we will ACK fast if this url is already known and in the ack
-            // process.
+            // Release permit, because we will ACK fast if this url is already known and in the ack process.
             inFlightSemaphore.release();
             // if this object is discovered - adding another version of it
             // won't make any difference
